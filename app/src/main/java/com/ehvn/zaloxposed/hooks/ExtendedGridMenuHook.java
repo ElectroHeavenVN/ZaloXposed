@@ -1,75 +1,87 @@
 package com.ehvn.zaloxposed.hooks;
 
 import android.util.SparseArray;
-import de.robv.android.xposed.*;
-import org.luckypray.dexkit.result.MethodData;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.luckypray.dexkit.query.FindMethod;
+import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
+import org.luckypray.dexkit.result.MethodData;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.luckypray.dexkit.query.enums.StringMatchType;
-import org.json.*;
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedBridge;
 
 @SuppressWarnings("unused")
-public class ExtendedGridMenuHook extends BaseHook {
+public class ExtendedGridMenuHook extends BaseHook
+{
     @Override
-    public void hook() throws Throwable {
-        List<MethodData> methods = bridge.findMethod(
-        FindMethod.create()
+    public void hook() throws Throwable
+    {
+        List<MethodData> methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(8)
                 .addUsingString("CHAT_TYPO_FEATURE_ENABLE", StringMatchType.Equals)
-            )
-        );
+            ));
         Class<?> clazz = methods.get(0).getMethodInstance(lpparam.classLoader).getDeclaringClass();
-        List<MethodData> sparseArrayMethods = bridge.findMethod(
-        FindMethod.create()
+        List<MethodData> sparseArrayMethods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
                 .returnType("android.util.SparseArray")
                 .declaredClass(clazz)
-            )
-        );
-        for (MethodData md : methods) {
+            ));
+        for (MethodData md : methods)
+        {
             Method method = md.getMethodInstance(lpparam.classLoader);
-            log("Hooking: " + method.toString());
-            XposedBridge.hookMethod(method, new XC_MethodHook() {
+            log("Hooking: " + method);
+            XposedBridge.hookMethod(method, new XC_MethodHook()
+            {
                 @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    if (param.getResult() == null)
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable
+                {
+                    if (param.getResult() != null)
+                        return;
+                    ArrayList<SparseArray<?>> arrays = new ArrayList<>();
+                    for (MethodData sparseArr : sparseArrayMethods)
                     {
-                        ArrayList<SparseArray> arrays = new ArrayList<>();
-                        for (MethodData sparseArr : sparseArrayMethods)
-                            arrays.add((SparseArray)sparseArr.getMethodInstance(lpparam.classLoader).invoke(param.thisObject));
-                        int num = (int)param.args[0];
-                        for (SparseArray arr : arrays)
-                        {
-                            Object elem = arr.get(num, null);
-                            if (elem != null)
-                                param.setResult(elem);
-                        }
+                        Method spareArrM = sparseArr.getMethodInstance(lpparam.classLoader);
+                        SparseArray<?> arr = (SparseArray<?>)spareArrM.invoke(param.thisObject);
+                        arrays.add(arr);
+                    }
+                    int num = (int) param.args[0];
+                    for (SparseArray<?> arr : arrays)
+                    {
+                        Object elem = arr.get(num, null);
+                        if (elem != null)
+                            param.setResult(elem);
                     }
                 }
             });
         }
         Method method = JSONObject.class.getMethod("optJSONObject", String.class);
         log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook() {
+        XposedBridge.hookMethod(method, new XC_MethodHook()
+        {
             @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                String key = (String)param.args[0];
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable
+            {
+                String key = (String) param.args[0];
                 if (key.equals("chat_1_1") || key.equals("chat_group") || key.equals("community"))
                 {
                     StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
                     boolean calledFromClazz = false;
-                    for (StackTraceElement element : stackTrace) {
+                    for (StackTraceElement element : stackTrace)
+                    {
                         String className = element.getClassName();
-                        if (className.equals(clazz.getName())) {
+                        if (className.equals(clazz.getName()))
+                        {
                             calledFromClazz = true;
                             break;
                         }
@@ -90,12 +102,11 @@ public class ExtendedGridMenuHook extends BaseHook {
                     boolean isChatDirect = key.equals("chat_1_1");
                     boolean isChatGroup = key.equals("chat_group");
                     boolean isChatCommunityGroup = key.equals("community");
-                    if (isChatDirect) {
-                        sectionMore.put(101);
-                        sectionMore.put(102);                    
-                    }
-                    else {
-                        sectionMore.put(101);
+                    sectionMore.put(101);
+                    if (isChatDirect)
+                        sectionMore.put(102);
+                    else
+                    {
                         sectionMore.put(104);
                         sectionMore.put(105);
                     }

@@ -1,20 +1,27 @@
 package com.ehvn.zaloxposed.hooks;
 
-import de.robv.android.xposed.*;
-import java.lang.reflect.*;
 import com.ehvn.zaloxposed.utilities.Utils;
-import org.json.*;
+
+import org.json.JSONObject;
+
+import java.lang.reflect.Constructor;
+
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedBridge;
 
 @SuppressWarnings("unused")
-public class FakeOwnerHook extends BaseHook {
+public class FakeOwnerHook extends BaseHook
+{
     @Override
-    public void hook() throws Throwable {
+    public void hook() throws Throwable
+    {
         Constructor<?> constructor = JSONObject.class.getConstructor(String.class);
-        log("Hooking: " + constructor.toString());
-        XposedBridge.hookMethod(constructor, new XC_MethodHook() {
+        log("Hooking: " + constructor);
+        XposedBridge.hookMethod(constructor, new XC_MethodHook()
+        {
             @Override
-            protected void beforeHookedMethod(MethodHookParam param) {
-                // ... "creatorId":209048372,"ts":0, ...
+            protected void beforeHookedMethod(MethodHookParam param)
+            {
                 String jsonString = (String) param.args[0];
                 if (!jsonString.contains("\"creatorId\":"))
                     return;

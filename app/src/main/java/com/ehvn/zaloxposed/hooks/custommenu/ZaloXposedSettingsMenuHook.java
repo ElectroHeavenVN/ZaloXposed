@@ -1,0 +1,562 @@
+package com.ehvn.zaloxposed.hooks.custommenu;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.Color;
+import android.text.InputType;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+
+import com.ehvn.zaloxposed.hooks.BaseHook;
+import com.ehvn.zaloxposed.utilities.Utils;
+
+import org.luckypray.dexkit.query.FindClass;
+import org.luckypray.dexkit.query.FindField;
+import org.luckypray.dexkit.query.FindMethod;
+import org.luckypray.dexkit.query.enums.StringMatchType;
+import org.luckypray.dexkit.query.matchers.ClassMatcher;
+import org.luckypray.dexkit.query.matchers.FieldMatcher;
+import org.luckypray.dexkit.query.matchers.MethodMatcher;
+import org.luckypray.dexkit.result.ClassData;
+import org.luckypray.dexkit.result.MethodData;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.XposedHelpers;
+
+@SuppressWarnings("unused")
+public class ZaloXposedSettingsMenuHook extends BaseHook
+{
+    private static final String CUSTOM_ITEM_MARKER = "zalo_xposed_settings";
+
+    private static Class<?> resourceClass = null;
+    private static Class<?> tabMeItemClass = null;
+    private static Field tabMeItemTrackingField = null;
+    private static Field tabMeItemTitleField = null;
+    private static Field tabMeItemDescriptionField = null;
+    private static Field tabMeItemIconField = null;
+    private static boolean tabMeItemInfoLoaded = false;
+    private static boolean isOpenZaloXposedSettings = false;
+    private static LinearLayout rootLayout = null;
+    private static boolean isEnglish = true;
+    private static Class<?> headerTextViewClass = null;
+
+    @Override
+    public void hook() throws Throwable
+    {
+        ListItemSettingHelper.Init(lpparam.classLoader);
+        hookTabMeView();
+        hookSettingPrivateView();
+    }
+
+    private void hookTabMeView() throws Exception
+    {
+        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .declaredClass("com.zing.zalo.ui.maintab.me.TabMeView")
+                .modifiers(Modifier.STATIC)
+                .returnType("java.util.ArrayList")
+                .addUsingString("tab_me_privacy", StringMatchType.Equals)
+                .addUsingString("tab_me_tool_storage", StringMatchType.Equals)
+                .addUsingString("tab_me_account_and_security", StringMatchType.Equals)
+                .addUsingString("tab_me_business_tools", StringMatchType.Equals)));
+        if (methods.isEmpty())
+        {
+            log("Target method not found");
+            return;
+        }
+        Method method = methods.get(0).getMethodInstance(lpparam.classLoader);
+        log("Hooking: " + method);
+        XposedBridge.hookMethod(method, new XC_MethodHook()
+        {
+            @Override
+            @SuppressWarnings("unchecked")
+            protected void afterHookedMethod(MethodHookParam param)
+            {
+                try
+                {
+                    Object result = param.getResult();
+                    if (!(result instanceof ArrayList))
+                        return;
+                    ArrayList<Object> items = (ArrayList<Object>) result;
+                    loadTabMeItemInfo(items);
+                    Object customItem = buildCustomTabMeMenuItem(items);
+                    if (customItem == null)
+                        return;
+                    Object separatorItem = null;
+                    for (int i = items.size() - 1; i >= 0; i--)
+                    {
+                        Object item = items.get(i);
+                        if (!item.toString().contains("SettingData(id="))
+                        {
+                            separatorItem = item;
+                            break;
+                        }
+                    }
+                    items.add(2, customItem);
+                    items.add(3, separatorItem);
+                }
+                catch (Throwable t)
+                {
+                    log(t.toString());
+                }
+            }
+        });
+
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC)
+                .paramCount(1)
+                .returnType("void")
+                .addUsingString("settingData", StringMatchType.Equals)
+                .addUsingString("STR_SOURCE_START_VIEW", StringMatchType.Equals)
+                .addUsingString("EXTRA_FEATURE_ID", StringMatchType.Equals)
+                .addUsingString("features@business_account@zinstant@business_tool@enable", StringMatchType.Equals)
+                .addUsingString("EXTRA_SOURCE_OPEN_MA", StringMatchType.Equals)
+                .addUsingString("features@business_account@item_promotion@open_action@action_name", StringMatchType.Equals)
+                .addUsingString("tab_me_open_item", StringMatchType.Equals)
+                // .addUsingString("https://h5.zdn.vn/zapps/220259427665569271/", StringMatchType.Equals)
+            ));
+        if (methods.isEmpty())
+        {
+            log("Target onClick method not found");
+            return;
+        }
+        method = methods.get(0).getMethodInstance(lpparam.classLoader);
+        log("Hooking: " + method);
+        XposedBridge.hookMethod(method, new XC_MethodHook()
+        {
+            @SuppressLint("PrivateApi")
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param)
+            {
+                Object tabMeItem = param.args[0];
+                if (tabMeItem == null)
+                    return;
+                if (tabMeItem.getClass() != tabMeItemClass)
+                    return;
+                try
+                {
+                    tabMeItemTrackingField.setAccessible(true);
+                    String trackingValue = (String) tabMeItemTrackingField.get(tabMeItem);
+                    isOpenZaloXposedSettings = CUSTOM_ITEM_MARKER.equals(trackingValue);
+                }
+                catch (Throwable t)
+                {
+                    log(t.toString());
+                }
+            }
+        });  
+    }
+
+    private synchronized void loadTabMeItemInfo(ArrayList<Object> tabMeItems)
+    {
+        if (tabMeItemInfoLoaded)
+            return;
+        int iconValue = getResourceIdByName("zds_ic_storage_line_24");
+        for (Object item : tabMeItems)
+        {
+            Field field = Utils.FindFieldByValue(item, "tab_me_tool_storage");
+            if (field == null)
+                continue;
+            tabMeItemClass = item.getClass();
+            tabMeItemTrackingField = field;
+            for (Field f : tabMeItemClass.getDeclaredFields())
+            {
+                try
+                {
+                    if (f.getType() == String.class)
+                    {
+                        f.setAccessible(true);
+                        String value = (String) f.get(item);
+                        if (value == null)
+                            continue;
+                        if (value.equals("Dữ liệu trên máy") || value.equals("Data on device"))
+                            tabMeItemTitleField = f;
+                        else if (value.equals("Quản lý dữ liệu Zalo của bạn") || value.equals("Manage your Zalo data"))
+                            tabMeItemDescriptionField = f;
+                    }
+                    else if (f.getType() == int.class && tabMeItemIconField == null)
+                    {
+                        int value = f.getInt(item);
+                        if (value == iconValue)
+                            tabMeItemIconField = f;
+                    }
+                }
+                catch (Throwable ignored) { }
+            }
+            break;
+        }
+        tabMeItemInfoLoaded = true;
+    }
+
+    private Object buildCustomTabMeMenuItem(ArrayList<Object> items)
+    {
+        try
+        {
+            Object template = null;
+            for (Object item : items)
+            {
+                if (!item.toString().contains("SettingData(id="))
+                    continue;
+                String title = (String) tabMeItemTitleField.get(item);
+                if (title == null)
+                    continue;
+                if (title.equals("Privacy") || title.equals("Quyền riêng tư"))
+                {
+                    template = item;
+                    isEnglish = title.equals("Privacy");
+                    break;
+                }
+            }
+            if (template == null)
+            {
+                log("Template item not found, cannot create custom menu item");
+                return null;
+            }
+            Object newItem = Utils.UnsafeAllocate(tabMeItemClass);
+            for (Field field : Utils.GetAllFields(tabMeItemClass))
+            {
+                field.setAccessible(true);
+                field.set(newItem, field.get(template));
+            }
+            tabMeItemTrackingField.setAccessible(true);
+            tabMeItemTrackingField.set(newItem, CUSTOM_ITEM_MARKER);
+            tabMeItemTitleField.setAccessible(true);
+            tabMeItemTitleField.set(newItem, "ZaloXposed");
+            tabMeItemDescriptionField.setAccessible(true);
+            if (isEnglish)
+                tabMeItemDescriptionField.set(newItem, "ZaloXposed settings");
+            else
+                tabMeItemDescriptionField.set(newItem, "Cài đặt ZaloXposed");
+            tabMeItemIconField.setAccessible(true);
+            tabMeItemIconField.setInt(newItem, getResourceIdByName("zds_oic_premium_crown_color_24"));
+            return newItem;
+        }
+        catch (Throwable t)
+        {
+            log(t.toString());
+            return null;
+        }
+    }
+
+    private int getResourceIdByName(String resourceName)
+    {
+        try
+        {
+            if (resourceClass == null)
+            {
+                List<ClassData> classes = bridge.findClass(FindClass.create()
+                    .matcher(ClassMatcher.create()
+                        .addFieldForName("zds_ic_storage_line_24")
+                    ));
+                for (ClassData classData : classes)
+                {
+                    try
+                    {
+                        Class<?> clazz = classData.getInstance(lpparam.classLoader);
+                        if (clazz.getName().equals("com.zing.zalo.R.drawable"))
+                            continue;
+                        resourceClass = clazz;
+                        break;
+                    }
+                    catch (Throwable ignored) { }
+                }
+            }
+            if (resourceClass == null)
+            {
+                log("Resource class not found");
+                return 0;
+            }
+            Field field = resourceClass.getField(resourceName);
+            return field.getInt(null);
+        }
+        catch (Exception e)
+        {
+            log("Error getting resource ID for " + resourceName + ": " + e.getMessage());
+        }
+        return 0;
+    }
+
+    private TextView templateHeader = null;
+    private View templateSeparator = null;
+
+    private void hookSettingPrivateView() throws Exception
+    {
+        headerTextViewClass = Class.forName("com.zing.zalo.ui.widget.RobotoTextView", false, lpparam.classLoader);
+
+        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .declaredClass("com.zing.zalo.ui.settings.SettingPrivateV2View")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("android.view.View")
+                .paramCount(3)
+                .paramTypes("android.view.LayoutInflater", "android.widget.LinearLayout", "android.os.Bundle")
+                .addUsingString("inflater", StringMatchType.Equals)
+                .addUsingString("EXTRA_CURRENT_SEEN_SETTING", StringMatchType.Equals)));
+        if (methods.isEmpty())
+        {
+            log("Target method not found");
+            return;
+        }
+        Method method = methods.get(0).getMethodInstance(lpparam.classLoader);
+        log("Hooking: " + method);
+        XposedBridge.hookMethod(method, new XC_MethodHook()
+        {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param)
+            {
+                if (!isOpenZaloXposedSettings) 
+                {
+                    rootLayout = null;
+                    return;
+                }
+                rootLayout = (LinearLayout) param.args[1];
+            }
+        });
+
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .declaredClass("com.zing.zalo.ui.settings.SettingPrivateV2View")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("void")
+                .paramCount(0)
+                .addUsingString("view_birthday", StringMatchType.Equals)
+                .addUsingString("recently_online_status", StringMatchType.Equals)
+                .addUsingString("display_seen_status", StringMatchType.Equals)
+                .addUsingString("accept_stranger_call", StringMatchType.Equals)
+                .addUsingString("allow_auto_friend_click", StringMatchType.Equals)
+                .addUsingString("SETTING_PRIVACY_APP", StringMatchType.Equals)
+            ));
+        if (methods.isEmpty())
+        {
+            log("Target method not found");
+            return;
+        }
+        method = methods.get(0).getMethodInstance(lpparam.classLoader);
+        log("Hooking: " + method);
+        XposedBridge.hookMethod(method, new XC_MethodHook()  
+        {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param)
+            {
+                if (!isOpenZaloXposedSettings)
+                    return;
+                if (rootLayout == null)
+                    return;
+                templateHeader = null;
+                templateSeparator = null;
+                try
+                {
+                    loadTemplates();
+                    createCustomMenu();
+                }
+                catch (Exception e)
+                {
+                    log(Utils.GetStackTrace(e));
+                }
+            }
+        });
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .declaredClass("com.zing.zalo.ui.settings.SettingPrivateV2View")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("void")
+                .paramCount(0)
+                .addUsingString("getString(...)", StringMatchType.Equals)
+                .addUsingField(FieldMatcher.create().name("str_title_setting_private"))
+            ));
+        if (methods.isEmpty())
+        {
+            log("Target method not found");
+            return;
+        }
+        method = methods.get(0).getMethodInstance(lpparam.classLoader);
+        Field actionBarField = Utils.FindFieldByType(Class.forName("com.zing.zalo.ui.settings.SettingPrivateV2View", false, lpparam.classLoader), "com.zing.zalo.zdesign.component.header.ZdsActionBar");
+        log("Hooking: " + method);
+        XposedBridge.hookMethod(method, new XC_MethodHook()  
+        {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) {
+                try {
+                    if (!isOpenZaloXposedSettings)
+                        return;
+                    Object actionBar = actionBarField.get(param.thisObject);
+                    if (actionBar == null)
+                        return;
+                    Method getMiddleTitle = actionBar.getClass().getMethod("getMiddleTitle");
+                    String title = (String) getMiddleTitle.invoke(actionBar);
+                    if (title.equals("Privacy"))
+                        isEnglish = true;
+                    else if (title.equals("Quyền riêng tư"))
+                        isEnglish = false;
+                    Method setMiddleTitle = actionBar.getClass().getMethod("setMiddleTitle", String.class);
+                    setMiddleTitle.invoke(actionBar, isEnglish ? "ZaloXposed Settings" : "Cài đặt ZaloXposed");
+                } catch (Exception t) {
+                    log(t.toString());
+                }
+            }
+        });
+    }
+
+    private void createCustomMenu() throws Exception
+    {
+        Context context = rootLayout.getContext();
+        View separator = createSeparator(context);
+        rootLayout.addView(separator);
+
+        TextView headerTitle = createHeaderTitle(context);
+        headerTitle.setText("Cài đặt chung");
+        rootLayout.addView(headerTitle);
+
+        View rowA = ListItemSettingHelper.CreateNew(context);
+        View rowB = ListItemSettingHelper.CreateNew(context);
+        View rowC = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(rowA);
+        rootLayout.addView(rowB);
+        rootLayout.addView(rowC);
+        ListItemSettingHelper.SetTitle(rowA, "Bật tính năng A");
+        ListItemSettingHelper.SetSwitch(rowA, false);
+        ListItemSettingHelper.SetCheckedChangeListener(rowA, checked ->
+        {
+            log("Tinh nang A checked change = " + checked);
+        });
+        ListItemSettingHelper.SetTitle(rowB, "Bật tính năng B");
+        ListItemSettingHelper.SetSwitch(rowB, true);
+        ListItemSettingHelper.SetCheckedChangeListener(rowB, checked ->
+        {
+            log("Tinh nang B checked change = " + checked);
+        });
+        ListItemSettingHelper.SetTitle(rowC, "Mục C");
+        rowC.setOnClickListener(v ->
+        {
+            Context ctx = v.getContext();
+            Toast.makeText(ctx, "Đã nhấn mục C", Toast.LENGTH_SHORT).show();
+        });
+
+        // Add more rows to test scrolling
+        for (int i = 1; i <= 50; i++)
+        {
+            View testRow = ListItemSettingHelper.CreateNew(context);
+            ListItemSettingHelper.SetTitle(testRow, "Mục test cuộn " + i);
+            final int index = i;
+            testRow.setOnClickListener(v ->
+            {
+                Toast.makeText(v.getContext(), "Click mục " + index, Toast.LENGTH_SHORT).show();
+            });
+            rootLayout.addView(testRow);
+         }
+    }
+
+    @NonNull
+    private TextView createHeaderTitle(Context context) throws Exception
+    {
+        TextView headerTitle = (TextView) headerTextViewClass.getConstructor(Context.class).newInstance(context);
+        headerTitle.setVisibility(View.VISIBLE);
+        if (templateHeader != null)
+        {
+            headerTitle.setTextColor(templateHeader.getTextColors());
+            headerTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, templateHeader.getTextSize());
+            headerTitle.setTypeface(templateHeader.getTypeface());
+            headerTitle.setPadding(templateHeader.getPaddingLeft(), templateHeader.getPaddingTop(), templateHeader.getPaddingRight(), templateHeader.getPaddingBottom());
+            try
+            {
+                headerTitle.setBackground(templateHeader.getBackground()
+                    .getConstantState()
+                    .newDrawable()
+                    .mutate()
+                );
+            }
+            catch (Exception ignored)
+            {
+                headerTitle.setBackgroundColor(Color.TRANSPARENT);
+            }
+            if (templateHeader.getLayoutParams() instanceof LinearLayout.LayoutParams)
+            {
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams((LinearLayout.LayoutParams) templateHeader.getLayoutParams());
+                headerTitle.setLayoutParams(lp);
+            }
+        }
+        else
+        {
+            headerTitle.setTextColor(0xFF808080);
+            headerTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            headerTitle.setBackgroundColor(Color.TRANSPARENT);
+            int pad16 = dp(context, 16);
+            int pad8 = dp(context, 8);
+            headerTitle.setPadding(pad16, pad16, pad16, pad8);
+        }
+        return headerTitle;
+    }
+
+    @NonNull
+    private View createSeparator(Context context)
+    {
+        View separator = new View(context);
+        if (templateSeparator != null)
+        {
+            try
+            {
+                separator.setBackground(templateSeparator.getBackground()
+                    .getConstantState()
+                    .newDrawable()
+                    .mutate()
+                );
+            }
+            catch (Exception ignored) { }
+            if (templateSeparator.getLayoutParams() instanceof LinearLayout.LayoutParams)
+            {
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams((LinearLayout.LayoutParams) templateSeparator.getLayoutParams());
+                separator.setLayoutParams(lp);
+            }
+        }
+        else
+        {
+            separator.setBackgroundColor(Color.TRANSPARENT);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(context, 8));
+            separator.setLayoutParams(lp);
+        }
+        return separator;
+    }
+
+    private void loadTemplates()
+    {
+        // Find templates, then hide all existing children
+        int count = rootLayout.getChildCount();
+        for (int i = 0; i < count; i++)
+        {
+            View child = rootLayout.getChildAt(i);
+            if (child.getVisibility() != View.VISIBLE)
+                continue;
+            if (templateHeader == null && child.getClass() == headerTextViewClass)
+                templateHeader = (TextView) child;
+            else if (templateSeparator == null && child.getClass() == View.class)
+                templateSeparator = child;
+        }
+        for (int i = 0; i < count; i++)
+        {
+            View child = rootLayout.getChildAt(i);
+            child.setVisibility(View.GONE);
+        }
+    }
+
+    private int dp(Context context, int value)
+    {
+        return (int) (value * context.getResources().getDisplayMetrics().density);
+    }
+}
