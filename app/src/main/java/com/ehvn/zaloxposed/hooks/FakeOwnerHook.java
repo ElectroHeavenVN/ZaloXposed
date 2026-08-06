@@ -1,5 +1,6 @@
 package com.ehvn.zaloxposed.hooks;
 
+import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.json.JSONObject;
@@ -22,6 +23,10 @@ public class FakeOwnerHook extends BaseHook
             @Override
             protected void beforeHookedMethod(MethodHookParam param)
             {
+                if (!Config.getEnableFakeGroupRole())
+                    return;
+                if (Config.getFakeGroupRoleLevel() != 1)
+                    return;
                 String jsonString = (String) param.args[0];
                 if (!jsonString.contains("\"creatorId\":"))
                     return;

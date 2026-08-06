@@ -1,7 +1,9 @@
-package com.ehvn.zaloxposed.hooks;
+package com.ehvn.zaloxposed.hooks.permanent;
 
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.ehvn.zaloxposed.hooks.BaseHook;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;

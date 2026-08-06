@@ -80,7 +80,7 @@ public class XposedLoader implements IXposedHookLoadPackage, IXposedHookZygoteIn
     @Override
     public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable
     {
-        if (!lpparam.packageName.equals("com.zing.zalo"))
+        if (!lpparam.packageName.startsWith("com.zing.zalo"))
             return;
         XposedBridge.log("[ZaloXposed] Loading ZaloXposed");
         if (bridge == null)

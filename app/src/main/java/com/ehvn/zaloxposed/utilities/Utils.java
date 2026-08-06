@@ -37,6 +37,8 @@ import de.robv.android.xposed.XposedHelpers;
 
 public final class Utils
 {
+    private Utils() { }
+
     private static final Map<Class<?>, String> PRIMITIVE_MAP = new HashMap<>();
     private static final String TAG = "ZaloXposed";
     private static ClassLoader sClassLoader;
@@ -326,29 +328,34 @@ public final class Utils
 
     public static String GetExternalFilesDir()
     {
-        loadExternalFilesDir();
+        if (externalFilesDir.isEmpty())
+        {
+            try
+            {
+                Object app = XposedHelpers.callStaticMethod(Class.forName("android.app.ActivityThread"), "currentApplication");
+                if (app != null)
+                {
+                    File dir = ((Context) app).getExternalFilesDir(null);
+                    if (dir != null)
+                        externalFilesDir = dir.getAbsolutePath();
+                }
+            }
+            catch (Exception e)
+            {
+                XposedBridge.log("[ZaloXposed] Cannot get externalFilesDir:\n" + e);
+            }
+        }
         return externalFilesDir;
     }
 
-    private static void loadExternalFilesDir()
+    public static String GetZaloXposedDir()
     {
-        if (!externalFilesDir.isEmpty())
-            return;
-        try
-        {
-            Object app = XposedHelpers.callStaticMethod(Class.forName("android.app.ActivityThread"), "currentApplication");
-            if (app != null)
-            {
-                File dir = ((Context) app).getExternalFilesDir(null);
-                if (dir != null)
-                    externalFilesDir = dir.getAbsolutePath();
-            }
-        }
-        catch (Exception e)
-        {
-            XposedBridge.log("[ZaloXposed] Cannot get externalFilesDir: " + e.getMessage());
-        }
-        if (!externalFilesDir.isEmpty())
-            XposedBridge.log("[ZaloXposed] externalFilesDir: " + externalFilesDir);
+        String externalFilesDir = GetExternalFilesDir();
+        if (externalFilesDir.isEmpty())
+            return "";
+        File dir = new File(externalFilesDir, "ZaloXposed");
+        if (!dir.exists())
+            dir.mkdirs();
+        return dir.getAbsolutePath();
     }
 }

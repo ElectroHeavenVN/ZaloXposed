@@ -3,19 +3,24 @@ package com.ehvn.zaloxposed.hooks.custommenu;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.text.InputType;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.ehvn.zaloxposed.hooks.BaseHook;
+import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindClass;
@@ -34,6 +39,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
@@ -417,50 +423,162 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     private void createCustomMenu() throws Exception
     {
         Context context = rootLayout.getContext();
+
         View separator = createSeparator(context);
         rootLayout.addView(separator);
-
         TextView headerTitle = createHeaderTitle(context);
-        headerTitle.setText("Cài đặt chung");
+        headerTitle.setText("Mini Chat (Chat Head)");
         rootLayout.addView(headerTitle);
+        RelativeLayout listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable" : "Kích hoạt");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableChatHead());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableChatHead);
+        listItemSetting.setEnabled(Build.VERSION.SDK_INT > Build.VERSION_CODES.Q);
 
-        View rowA = ListItemSettingHelper.CreateNew(context);
-        View rowB = ListItemSettingHelper.CreateNew(context);
-        View rowC = ListItemSettingHelper.CreateNew(context);
-        rootLayout.addView(rowA);
-        rootLayout.addView(rowB);
-        rootLayout.addView(rowC);
-        ListItemSettingHelper.SetTitle(rowA, "Bật tính năng A");
-        ListItemSettingHelper.SetSwitch(rowA, false);
-        ListItemSettingHelper.SetCheckedChangeListener(rowA, checked ->
-        {
-            log("Tinh nang A checked change = " + checked);
-        });
-        ListItemSettingHelper.SetTitle(rowB, "Bật tính năng B");
-        ListItemSettingHelper.SetSwitch(rowB, true);
-        ListItemSettingHelper.SetCheckedChangeListener(rowB, checked ->
-        {
-            log("Tinh nang B checked change = " + checked);
-        });
-        ListItemSettingHelper.SetTitle(rowC, "Mục C");
-        rowC.setOnClickListener(v ->
-        {
-            Context ctx = v.getContext();
-            Toast.makeText(ctx, "Đã nhấn mục C", Toast.LENGTH_SHORT).show();
-        });
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Extended grid menu" : "Chat menu mở rộng");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable" : "Kích hoạt");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGridMenu());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGridMenu);
 
-        // Add more rows to test scrolling
-        for (int i = 1; i <= 50; i++)
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText("ZCloud");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Unlock ZCloud" : "Mở khoá ZCloud");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getUnlockZCloud());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setUnlockZCloud);
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Group role" : "Vai trò trong nhóm");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Fake my role in groups" : "Giả mạo vai trò trong nhóm");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableFakeGroupRole());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableFakeGroupRole);
+        RelativeLayout listItemSettingFakeRole = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSettingFakeRole);
+        ListItemSettingHelper.SetIDTracking(listItemSettingFakeRole, "");
+        ListItemSettingHelper.HideDivider(listItemSettingFakeRole);
+        ListItemSettingHelper.SetTitle(listItemSettingFakeRole, isEnglish ? "Fake role" : "Vai trò giả mạo");
+        String fakeRole = getFakeRoleName(Config.getFakeGroupRoleLevel());
+        ListItemSettingHelper.SetStateSetting(listItemSettingFakeRole, fakeRole);
+        ListItemSettingHelper.SetOnClickListener(listItemSettingFakeRole, v ->
         {
-            View testRow = ListItemSettingHelper.CreateNew(context);
-            ListItemSettingHelper.SetTitle(testRow, "Mục test cuộn " + i);
-            final int index = i;
-            testRow.setOnClickListener(v ->
+            int roleLevel = Config.getFakeGroupRoleLevel();
+            roleLevel = (roleLevel + 1) % 2;
+            Config.setFakeGroupRoleLevel(roleLevel);
+            String newFakeRole = getFakeRoleName(roleLevel);
+            try
             {
-                Toast.makeText(v.getContext(), "Click mục " + index, Toast.LENGTH_SHORT).show();
-            });
-            rootLayout.addView(testRow);
-         }
+                ListItemSettingHelper.SetStateSetting(listItemSettingFakeRole, newFakeRole);
+            }
+            catch (Exception e)
+            {
+                log(e.toString());
+            }
+        });
+
+        //TODO: TTL
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Disappearing messages" : "Tin nhắn tự xoá");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Override disappearing messages config" : "Ghi đè cấu hình tin nhắn tự xoá");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableTTLOverride());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableTTLOverride);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Disappearing message time" : "Thời gian tin nhắn tự xoá");
+        TextView titleView = findTitleTextView(headerTitle);
+        if (titleView != null)
+        { 
+            TextView listItemSettingTitle = findTitleTextView(listItemSetting);
+            if (listItemSettingTitle != null)
+                titleView.setTextColor(listItemSettingTitle.getTextColors());  
+        }
+        rootLayout.addView(headerTitle);
+        EditText input = new EditText(context);
+        rootLayout.addView(input);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        input.setText(Config.getTTL() + "");
+        input.setHint(isEnglish ? "Enter value (milliseconds)" : "Nhập giá trị (mili giây)");
+        styleEditText(input, context, listItemSetting);
+        input.setOnEditorActionListener(new TextView.OnEditorActionListener()
+        {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent)
+            {
+                try
+                {
+                    if (actionId != EditorInfo.IME_ACTION_DONE)
+                        return false;
+                    long ttlValue = Long.parseLong(textView.getText().toString());
+                    Config.setTTL(ttlValue);
+                }
+                catch (Exception e)
+                {
+                    log(e.toString());
+                }
+                return false;
+            }
+        });
+        input.setOnFocusChangeListener(new View.OnFocusChangeListener()
+        {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus)
+            {
+                if (!hasFocus)
+                {
+                    try
+                    {
+                        EditText editText = (EditText)view;
+                        long ttlValue = Long.parseLong(editText.getText().toString());
+                        Config.setTTL(ttlValue);
+                    }
+                    catch (Exception e)
+                    {
+                        log(e.toString());
+                    }
+                }
+            }
+        });
+    }
+
+    @NonNull
+    private static String getFakeRoleName(int roleLevel)
+    {
+        return switch (roleLevel)
+        {
+            case 0 -> isEnglish ? "Admin" : "Phó nhóm";
+            case 1 -> isEnglish ? "Owner" : "Trưởng nhóm";
+            default -> "";
+        };
     }
 
     @NonNull
@@ -558,5 +676,44 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     private int dp(Context context, int value)
     {
         return (int) (value * context.getResources().getDisplayMetrics().density);
+    }
+
+    private void styleEditText(EditText editText, Context context, RelativeLayout templateItem)
+    {
+        int pad16 = dp(context, 16);
+        int pad12 = dp(context, 12);
+        editText.setPadding(pad16, pad12, pad16, pad12);
+        editText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        try
+        {
+            TextView titleView = findTitleTextView(templateItem);
+            if (titleView != null)
+            {
+                editText.setTextColor(titleView.getTextColors());
+                editText.setHintTextColor(titleView.getTextColors());
+            }
+            editText.setBackground(Objects.requireNonNull(templateItem.getBackground().getConstantState())
+                .newDrawable()
+                .mutate());
+        }
+        catch (Exception ignored) { } 
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        editText.setLayoutParams(lp);
+    }
+
+    private TextView findTitleTextView(View view)
+    {
+        if (view instanceof TextView)
+            return (TextView)view;
+        if (view instanceof ViewGroup group)
+        {
+            for (int i = 0; i < group.getChildCount(); i++)
+            {
+                TextView found = findTitleTextView(group.getChildAt(i));
+                if (found != null)
+                    return found;
+            }
+        }
+        return null;
     }
 }

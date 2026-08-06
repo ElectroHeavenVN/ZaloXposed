@@ -1,5 +1,7 @@
 package com.ehvn.zaloxposed.hooks;
 
+import com.ehvn.zaloxposed.utilities.Config;
+
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.FieldMatcher;
@@ -10,6 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedBridge;
 
@@ -29,7 +32,16 @@ public class UnlockZCloudHook extends BaseHook
         Method method = methods.get(0).getMethodInstance(lpparam.classLoader);
         Class<?> clazz = method.getDeclaringClass();
         log("Hooking: " + method);
-        XposedBridge.hookMethod(method, XC_MethodReplacement.returnConstant(0));
+        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param)
+            {    
+                if (!Config.getUnlockZCloud())
+                    return;
+                param.setResult(0);
+            }
+        });
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -41,7 +53,16 @@ public class UnlockZCloudHook extends BaseHook
             ));
         method = methods.get(0).getMethodInstance(lpparam.classLoader);
         log("Hooking: " + method);
-        XposedBridge.hookMethod(method, XC_MethodReplacement.returnConstant(Integer.MAX_VALUE));
+        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param)
+            {    
+                if (!Config.getUnlockZCloud())
+                    return;
+                param.setResult(Integer.MAX_VALUE);
+            }
+        });
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
@@ -54,7 +75,16 @@ public class UnlockZCloudHook extends BaseHook
             ));
         method = methods.get(0).getMethodInstance(lpparam.classLoader);
         log("Hooking: " + method);
-        XposedBridge.hookMethod(method, XC_MethodReplacement.returnConstant(Integer.MAX_VALUE));
+        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param)
+            {    
+                if (!Config.getUnlockZCloud())
+                    return;
+                param.setResult(Integer.MAX_VALUE);
+            }
+        });
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -66,7 +96,16 @@ public class UnlockZCloudHook extends BaseHook
         MethodData methodData = methods.get(0);
         method = methodData.getMethodInstance(lpparam.classLoader);
         log("Hooking: " + method);
-        XposedBridge.hookMethod(method, XC_MethodReplacement.returnConstant(true));
+        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param)
+            {    
+                if (!Config.getUnlockZCloud())
+                    return;
+                param.setResult(true);
+            }
+        });
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -77,6 +116,15 @@ public class UnlockZCloudHook extends BaseHook
             ));
         method = methods.get(0).getMethodInstance(lpparam.classLoader);
         log("Hooking: " + method);
-        XposedBridge.hookMethod(method, XC_MethodReplacement.returnConstant(true));
+        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param)
+            {    
+                if (!Config.getUnlockZCloud())
+                    return;
+                param.setResult(true);
+            }
+        });
     }
 }

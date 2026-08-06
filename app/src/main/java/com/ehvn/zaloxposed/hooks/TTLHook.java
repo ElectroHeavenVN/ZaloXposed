@@ -1,22 +1,19 @@
 package com.ehvn.zaloxposed.hooks;
 
-import com.ehvn.zaloxposed.utilities.Utils;
+import com.ehvn.zaloxposed.utilities.Config;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
 import org.luckypray.dexkit.result.MethodData;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedBridge;
 
@@ -72,49 +69,16 @@ public class TTLHook extends BaseHook
         {
             Method method = md.getMethodInstance(lpparam.classLoader);
             log("Hooking: " + method);
-            XposedBridge.hookMethod(method, new XC_MethodReplacement()
+            XposedBridge.hookMethod(method, new XC_MethodHook()
             {
                 @Override
-                protected Object replaceHookedMethod(MethodHookParam param)
-                {
-                    return readTTLFromFile();
+                protected void beforeHookedMethod(MethodHookParam param)
+                {    
+                    if (!Config.getEnableTTLOverride())
+                        return;
+                    param.setResult(Config.getTTL());
                 }
             });
         }
-    }
-
-    private long readTTLFromFile()
-    {
-        try
-        {
-            String externalFilesDir = Utils.GetExternalFilesDir();
-            if (externalFilesDir.isEmpty())
-            {
-                log("externalFilesDir not initialized");
-                return 1000L * 60L * 5L;
-            }
-            File dir = new File(externalFilesDir, "zaloxposed");
-            if (!dir.exists())
-                dir.mkdirs();
-            File file = new File(dir, "ttl.txt");
-            if (!file.exists())
-            {
-                FileWriter fw = new FileWriter(file);
-                fw.write("300000");
-                fw.close();
-                log("Created " + file.getAbsolutePath());
-                return 1000L * 60L * 5L;
-            }
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line = br.readLine();
-            br.close();
-            if (line != null && !line.trim().isEmpty())
-                return Long.parseLong(line.trim());
-        }
-        catch (Exception e)
-        {
-            log("Read config error: " + e.getMessage());
-        }
-        return 1000L * 60L * 5L;
     }
 }

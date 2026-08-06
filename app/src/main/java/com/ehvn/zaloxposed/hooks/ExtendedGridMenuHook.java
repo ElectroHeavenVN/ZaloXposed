@@ -2,6 +2,8 @@ package com.ehvn.zaloxposed.hooks;
 
 import android.util.SparseArray;
 
+import com.ehvn.zaloxposed.utilities.Config;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.luckypray.dexkit.query.FindMethod;
@@ -46,6 +48,8 @@ public class ExtendedGridMenuHook extends BaseHook
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable
                 {
+                    if (!Config.getEnableExtendedGridMenu())
+                        return;
                     if (param.getResult() != null)
                         return;
                     ArrayList<SparseArray<?>> arrays = new ArrayList<>();
@@ -72,6 +76,8 @@ public class ExtendedGridMenuHook extends BaseHook
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable
             {
+                if (!Config.getEnableExtendedGridMenu())
+                    return;
                 String key = (String) param.args[0];
                 if (key.equals("chat_1_1") || key.equals("chat_group") || key.equals("community"))
                 {

@@ -1,4 +1,6 @@
-package com.ehvn.zaloxposed.hooks;
+package com.ehvn.zaloxposed.hooks.permanent;
+
+import com.ehvn.zaloxposed.hooks.BaseHook;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
@@ -11,7 +13,6 @@ import java.util.List;
 
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
 
 @SuppressWarnings("unused")
 public class EnableE2EEHook extends BaseHook

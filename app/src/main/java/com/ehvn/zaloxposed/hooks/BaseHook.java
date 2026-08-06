@@ -4,10 +4,8 @@ import android.util.Log;
 
 import org.luckypray.dexkit.DexKitBridge;
 
+import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class BaseHook
 {

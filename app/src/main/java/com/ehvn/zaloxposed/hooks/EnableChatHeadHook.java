@@ -15,7 +15,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction;
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction;
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference;
-import com.android.tools.smali.dexlib2.iface.reference.Reference;
+import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindMethod;
@@ -154,6 +154,8 @@ public class EnableChatHeadHook extends BaseHook
             @Override
             protected void afterHookedMethod(MethodHookParam param)
             {
+                if (!Config.getEnableExtendedGridMenu())
+                    return;
                 try
                 {
                     chatHeadUnavailable.set(null, false);
@@ -559,6 +561,8 @@ public class EnableChatHeadHook extends BaseHook
         @Override
         protected void beforeHookedMethod(MethodHookParam param)
         {
+            if (!Config.getEnableChatHead())
+                return;
             try
             {
                 if (!originalValues.isEmpty())
@@ -582,6 +586,8 @@ public class EnableChatHeadHook extends BaseHook
         @Override
         protected void afterHookedMethod(MethodHookParam param)
         {
+            if (!Config.getEnableChatHead())
+                return;
             try
             {
                 for (Field f : originalValues.keySet())
