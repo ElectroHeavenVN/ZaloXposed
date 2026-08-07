@@ -1,6 +1,7 @@
 package com.ehvn.zaloxposed.hooks;
 
 import com.ehvn.zaloxposed.utilities.Config;
+import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
@@ -15,6 +16,7 @@ import java.util.List;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.XposedHelpers;
 
 @SuppressWarnings("unused")
 public class UnlockZCloudHook extends BaseHook
@@ -126,5 +128,50 @@ public class UnlockZCloudHook extends BaseHook
                 param.setResult(true);
             }
         });
+        
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                .returnType("void")
+                .paramCount(3)
+                .paramTypes(null, "int", "int")
+                .addUsingString("ZALO_CLOUD_SUBSCRIPTION_PLAN_", StringMatchType.Equals)
+                .declaredClass(clazz)
+            ));
+        method = methods.get(0).getMethodInstance(lpparam.classLoader);
+        log("Hooking: " + method);
+        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param)
+            {    
+                if (!Config.getUnlockZCloud())
+                    return;
+                param.args[1] = 0;
+            }
+        });
+
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("java.lang.Object")
+                .paramCount(1)
+                .declaredClass(clazz)
+            ));
+        for (MethodData methodData2 : methods)
+        {
+            Method method2 = methodData2.getMethodInstance(lpparam.classLoader);
+            log("Hooking: " + method2);
+            XposedBridge.hookMethod(method2, new XC_MethodHook() 
+            {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param)
+                {    
+                    if (!Config.getUnlockZCloud())
+                        return;
+                    param.setResult(Boolean.TRUE);
+                }
+            });
+        }
     }
 }
