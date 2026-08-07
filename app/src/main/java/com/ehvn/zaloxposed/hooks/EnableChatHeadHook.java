@@ -43,6 +43,7 @@ public class EnableChatHeadHook extends BaseHook
     static Field isAndroid10FullOrOlder = null;
     static Field isAndroid11OrNewerFull = null;
     static Field chatHeadUnavailable = null;
+    static boolean chatHeadUnavailableOriginalValue = false;
 
     @Override
     public void hook() throws Throwable
@@ -154,10 +155,34 @@ public class EnableChatHeadHook extends BaseHook
             @Override
             protected void afterHookedMethod(MethodHookParam param)
             {
-                if (!Config.getEnableExtendedGridMenu())
+                Config.addOnConfigChangedListener(new Config.OnConfigChangedListener() 
+                {
+                    @Override
+                    public void onConfigChanged(String key, Object oldValue, Object newValue) 
+                    {
+                        if (!"enable_chat_head".equals(key))
+                            return;
+                        if (chatHeadUnavailable == null)
+                            return;
+                        boolean enabled = (Boolean) newValue;
+                        try
+                        {
+                            if (enabled)
+                            {
+                                chatHeadUnavailableOriginalValue = chatHeadUnavailable.getBoolean(null);
+                                chatHeadUnavailable.set(null, false);
+                            }
+                            else
+                                chatHeadUnavailable.set(null, chatHeadUnavailableOriginalValue);
+                        }
+                        catch (Exception ignored) { }
+                    }
+                });
+                if (!Config.getEnableChatHead())
                     return;
                 try
                 {
+                    chatHeadUnavailableOriginalValue = chatHeadUnavailable.getBoolean(null);
                     chatHeadUnavailable.set(null, false);
                 }
                 catch (Exception ignored) { }
@@ -439,6 +464,30 @@ public class EnableChatHeadHook extends BaseHook
                 XposedBridge.hookMethod(method, spoofHook);
             }
         }
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .returnType("boolean")
+                .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                .paramCount(0)
+                .addUsingString("SETTING_ENABLE_CHAT_HEAD_SERVER", StringMatchType.Equals)));
+        if (methods.isEmpty())
+            log("Target method not found 14");
+        for (MethodData m : methods)
+        {
+            Method method = m.getMethodInstance(lpparam.classLoader);
+            log("Hooking [14]: " + method);
+            XposedBridge.hookMethod(method, new XC_MethodHook() 
+            {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param)
+                {    
+                    if (!Config.getEnableChatHead())
+                        return;
+                    param.setResult(true);
+                }
+            });
+        }
+
         // clazz = null;
         // methods = bridge.findMethod(FindMethod.create()
         //     .matcher(MethodMatcher.create()
@@ -448,7 +497,7 @@ public class EnableChatHeadHook extends BaseHook
         //         .addUsingString("UPDATE workspec SET period_count = 1 WHERE last_enqueue_time <> 0 AND interval_duration <> 0", StringMatchType.Equals)
         //     ));
         // if (methods.isEmpty())
-        //     log("Target method not found 14");
+        //     log("Target method not found 15");
         // if (!methods.isEmpty())
         // {
         //     clazz = Objects.requireNonNull(methods.get(0).getDeclaredClass()).getInstance(lpparam.classLoader);
@@ -460,11 +509,11 @@ public class EnableChatHeadHook extends BaseHook
         //             .paramCount(0)
         //         ));
         //     if (methods.isEmpty())
-        //         log("Target method not found 15");
+        //         log("Target method not found 15_2");
         //     for (MethodData m : methods)
         //     {
         //         Method method = m.getMethodInstance(lpparam.classLoader);
-        //         log("Hooking [14]: " + method);
+        //         log("Hooking [15]: " + method);
         //         XposedBridge.hookMethod(method, spoofHook);
         //     }
         // }
@@ -485,7 +534,7 @@ public class EnableChatHeadHook extends BaseHook
         // for (MethodData m : methods)
         // {
         //     Method method = m.getMethodInstance(lpparam.classLoader);
-        //     log("Hooking [15]: " + method);
+        //     log("Hooking [16]: " + method);
         //     XposedBridge.hookMethod(method, spoofHook);
         // }
         XposedHelpers.findAndHookMethod("com.zing.zalo.ui.maintab.group.GroupTabView", lpparam.classLoader, "onActivityResult", int.class, int.class, Intent.class, spoofHook);

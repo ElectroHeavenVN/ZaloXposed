@@ -6,12 +6,21 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.robv.android.xposed.XposedBridge;
 
 public final class Config 
 {
     private Config() { }
+
+    public interface OnConfigChangedListener 
+    {
+        void onConfigChanged(String key, Object oldValue, Object newValue);
+    }
+
+    private static final List<OnConfigChangedListener> listeners = new ArrayList<>();
 
     private static final File file = new File(Utils.GetZaloXposedDir(), "config.json");
 
@@ -20,6 +29,31 @@ public final class Config
     static 
     {
         load();
+    }
+
+    public static void addOnConfigChangedListener(OnConfigChangedListener listener)
+    {
+        listeners.add(listener);
+    }
+
+    public static void removeOnConfigChangedListener(OnConfigChangedListener listener)
+    {
+        listeners.remove(listener);
+    }
+
+    private static void notifyConfigChanged(String key, Object oldValue, Object newValue)
+    {
+        for (OnConfigChangedListener listener : listeners)
+        {
+            try
+            {
+                listener.onConfigChanged(key, oldValue, newValue);
+            }
+            catch (Exception e)
+            {
+                XposedBridge.log(e);
+            }
+        }
     }
 
     private static void load() 
@@ -79,8 +113,10 @@ public final class Config
     {
         try
         {
+            Object oldValue = config.opt(key);
             config.putOpt(key, value);
             save();
+            notifyConfigChanged(key, oldValue, value);
         }
         catch (Exception e)
         {

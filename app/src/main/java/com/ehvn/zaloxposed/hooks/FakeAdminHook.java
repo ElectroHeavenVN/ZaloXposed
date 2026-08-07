@@ -77,7 +77,6 @@ public class FakeAdminHook extends BaseHook
                             return;
                     }
                     arr.put(Long.parseLong(userId));
-                    log("Added " + userId + " to adminIds");
                 }
                 else
                 {
@@ -89,10 +88,7 @@ public class FakeAdminHook extends BaseHook
                     }
                     JSONObject admin = buildAdminObject();
                     if (admin != null)
-                    {
                         arr.put(admin);
-                        log("Added " + userId + " to admins");
-                    }
                 }
             }
         });
