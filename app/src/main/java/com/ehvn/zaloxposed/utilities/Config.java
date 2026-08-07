@@ -26,11 +26,6 @@ public final class Config
 
     private static JSONObject config = new JSONObject();
 
-    static 
-    {
-        load();
-    }
-
     public static void addOnConfigChangedListener(OnConfigChangedListener listener)
     {
         listeners.add(listener);
@@ -56,7 +51,7 @@ public final class Config
         }
     }
 
-    private static void load() 
+    public static void Load() 
     {
         try 
         {

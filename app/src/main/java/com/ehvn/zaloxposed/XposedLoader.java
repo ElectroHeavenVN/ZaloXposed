@@ -3,6 +3,7 @@ package com.ehvn.zaloxposed;
 import android.util.Log;
 
 import com.ehvn.zaloxposed.hooks.BaseHook;
+import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.DexKitBridge;
@@ -30,6 +31,50 @@ public class XposedLoader implements IXposedHookLoadPackage, IXposedHookZygoteIn
     private String modulePath = null;
 
     private static final String HOOKS_PACKAGE = "com.ehvn.zaloxposed.hooks.";
+
+    @Override
+    public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable
+    {
+        if (!lpparam.packageName.startsWith("com.zing.zalo"))
+            return;
+        XposedBridge.log("[ZaloXposed] Loading ZaloXposed");
+        if (bridge == null)
+        {
+            try
+            {
+                bridge = DexKitBridge.create(lpparam.appInfo.sourceDir);
+            }
+            catch (Exception e)
+            {
+                XposedBridge.log(e);
+            }
+        }
+        Utils.Init(lpparam.appInfo, lpparam.classLoader, bridge, modulePath);
+        Config.Load();
+        if (bridge == null)
+            return;
+        for (Class<? extends BaseHook> clazz : discoverHookClasses(modulePath))
+        {
+            try
+            {
+                BaseHook instance = clazz.getDeclaredConstructor().newInstance();
+                instance.init(bridge, lpparam);
+                instance.hook();
+            }
+            catch (Exception e)
+            {
+                XposedBridge.log("[ZaloXposed] Error in " + clazz.getSimpleName());
+                XposedBridge.log(e);
+                Log.e("ZaloXposed", "Error in " + clazz.getSimpleName(), e);
+            }
+        }
+    }
+
+    @Override
+    public void initZygote(StartupParam startupParam) throws Throwable
+    {
+        modulePath = startupParam.modulePath;
+    }
 
     private List<Class<? extends BaseHook>> discoverHookClasses(String apkPath)
     {
@@ -75,48 +120,5 @@ public class XposedLoader implements IXposedHookLoadPackage, IXposedHookZygoteIn
             XposedBridge.log("[ZaloXposed] Failed to scan dex: " + e.getMessage());
         }
         return hooks;
-    }
-
-    @Override
-    public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable
-    {
-        if (!lpparam.packageName.startsWith("com.zing.zalo"))
-            return;
-        XposedBridge.log("[ZaloXposed] Loading ZaloXposed");
-        if (bridge == null)
-        {
-            try
-            {
-                bridge = DexKitBridge.create(lpparam.appInfo.sourceDir);
-            }
-            catch (Exception e)
-            {
-                XposedBridge.log(e);
-            }
-        }
-        Utils.Init(lpparam.appInfo, lpparam.classLoader, bridge, modulePath);
-        if (bridge == null)
-            return;
-        for (Class<? extends BaseHook> clazz : discoverHookClasses(modulePath))
-        {
-            try
-            {
-                BaseHook instance = clazz.getDeclaredConstructor().newInstance();
-                instance.init(bridge, lpparam);
-                instance.hook();
-            }
-            catch (Exception e)
-            {
-                XposedBridge.log("[ZaloXposed] Error in " + clazz.getSimpleName());
-                XposedBridge.log(e);
-                Log.e("ZaloXposed", "Error in " + clazz.getSimpleName(), e);
-            }
-        }
-    }
-
-    @Override
-    public void initZygote(StartupParam startupParam) throws Throwable
-    {
-        modulePath = startupParam.modulePath;
     }
 }

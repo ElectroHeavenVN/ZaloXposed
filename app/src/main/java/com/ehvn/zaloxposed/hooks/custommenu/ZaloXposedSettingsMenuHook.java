@@ -498,8 +498,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 log(e.toString());
             }
         });
-
-        //TODO: TTL
+ 
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);

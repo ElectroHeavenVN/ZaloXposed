@@ -43,6 +43,7 @@ public final class Utils
     private static final String TAG = "ZaloXposed";
     private static ClassLoader sClassLoader;
     private static String externalFilesDir = "";
+    private static String packageName = "";
     private static Class<?> cfgClass;
     private static Method getCurrentUserInfoMethod;
     private static String mdPath = "";
@@ -65,6 +66,7 @@ public final class Utils
     {
         sClassLoader = classLoader;
         mdPath = modulePath;
+        packageName = appInfo.packageName;
         File apkFile = new File(appInfo.sourceDir);
         dexContainer = DexFileFactory.loadDexContainer(apkFile, Opcodes.getDefault());
         List<MethodData> methods = bridge.findMethod(FindMethod.create()
@@ -285,6 +287,54 @@ public final class Utils
     }
 
     @NonNull
+    public static ArrayList<Instruction> Disassemble(Method method) throws IOException
+    {
+        Class<?> clazz = method.getDeclaringClass();
+        for (String entryName : dexContainer.getDexEntryNames())
+        {
+            if (!entryName.endsWith(".dex"))
+                continue;
+            var entry = dexContainer.getEntry(entryName);
+            if (entry == null)
+                continue;
+            DexBackedDexFile dexFile = entry.getDexFile();
+            for (ClassDef classDef : dexFile.getClasses())
+            {
+                if (!classDef.getType().equals(GetDescriptor(clazz)))
+                    continue;
+                for (com.android.tools.smali.dexlib2.iface.Method m : classDef.getMethods())
+                {
+                    if (!m.getName().equals(method.getName()))
+                        continue;
+                    boolean paramsMatch = true;
+                    var parameters = method.getParameterTypes();
+                    if (m.getParameters().size() != parameters.length)
+                        paramsMatch = false;
+                    else
+                    {
+                        for (int i = 0; i < m.getParameters().size(); i++)
+                        {
+                            if (m.getParameters().get(i).getType().equals(GetDescriptor(parameters[i])))
+                                continue;
+                            paramsMatch = false;
+                            break;
+                        }
+                    }
+                    if (!paramsMatch)
+                        continue;
+                    MethodImplementation impl = m.getImplementation();
+                    if (impl == null)
+                        continue;
+                    ArrayList<Instruction> result = new ArrayList<>();
+                    impl.getInstructions().forEach(result::add);
+                    return result;
+                }
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    @NonNull
     public static ArrayList<Instruction> Disassemble(Class<?> clazz, String methodName) throws IOException
     {
         for (String entryName : dexContainer.getDexEntryNames())
@@ -332,13 +382,12 @@ public final class Utils
         {
             try
             {
-                Object app = XposedHelpers.callStaticMethod(Class.forName("android.app.ActivityThread"), "currentApplication");
-                if (app != null)
-                {
-                    File dir = ((Context) app).getExternalFilesDir(null);
-                    if (dir != null)
-                        externalFilesDir = dir.getAbsolutePath();
-                }
+                if (packageName.isEmpty())
+                    return "";
+                String path = "/storage/emulated/0/Android/data/" + packageName + "/files";
+                File dir = new File(path);
+                if (dir.exists() || dir.mkdirs())
+                    externalFilesDir = dir.getAbsolutePath();
             }
             catch (Exception e)
             {
