@@ -9,8 +9,6 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.robv.android.xposed.XposedBridge;
-
 public final class Config 
 {
     private Config() { }
@@ -46,7 +44,7 @@ public final class Config
             }
             catch (Exception e)
             {
-                XposedBridge.log(e);
+                Logger.e(e);
             }
         }
     }
@@ -71,7 +69,7 @@ public final class Config
         } 
         catch (Exception e)
         {
-            XposedBridge.log(e);
+            Logger.e(e);
         }
     }
 
@@ -85,7 +83,7 @@ public final class Config
         }
         catch (Exception e) 
         {
-            XposedBridge.log(e);
+            Logger.e(e);
         }
     }
 
@@ -99,7 +97,7 @@ public final class Config
         }
         catch (Exception e)
         {
-            XposedBridge.log(e);
+            Logger.e(e);
         }
         return defaultValue;
     }
@@ -115,7 +113,7 @@ public final class Config
         }
         catch (Exception e)
         {
-            XposedBridge.log(e);
+            Logger.e(e);
         }
     }
 
@@ -187,5 +185,15 @@ public final class Config
     public static void setFakeGroupRoleLevel(int value)
     {
         set("fake_group_role_level", value);
+    }
+
+    public static boolean getEnableShareHiddenStickerPack()
+    {
+        return (boolean)get("enable_share_hidden_sticker_pack", false);
+    }
+
+    public static void setEnableShareHiddenStickerPack(boolean value)
+    {
+        set("enable_share_hidden_sticker_pack", value);
     }
 }

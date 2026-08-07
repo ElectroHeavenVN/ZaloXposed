@@ -1,14 +1,12 @@
 package com.ehvn.zaloxposed.hooks;
 
 import com.ehvn.zaloxposed.utilities.Config;
+import com.ehvn.zaloxposed.utilities.Logger;
 import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
-
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
 
 @SuppressWarnings("unused")
 public class FakeOwnerHook extends BaseHook
@@ -17,27 +15,23 @@ public class FakeOwnerHook extends BaseHook
     public void hook() throws Throwable
     {
         Constructor<?> constructor = JSONObject.class.getConstructor(String.class);
-        log("Hooking: " + constructor);
-        XposedBridge.hookMethod(constructor, new XC_MethodHook()
+        Logger.i("Hooking: " + constructor);
+        module.hook(constructor).intercept(chain ->
         {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param)
-            {
-                if (!Config.getEnableFakeGroupRole())
-                    return;
-                if (Config.getFakeGroupRoleLevel() != 1)
-                    return;
-                String jsonString = (String) param.args[0];
-                if (!jsonString.contains("\"creatorId\":"))
-                    return;
-                if (!jsonString.contains(",\"ts\":"))
-                    return;
-                String userId = Utils.GetCurrentUserID();
-                if (userId.isEmpty() || "0".equals(userId))
-                    return;
-                String modifiedJsonString = jsonString.replaceAll("\"creatorId\":\\d+", "\"creatorId\":" + userId);
-                param.args[0] = modifiedJsonString;
-            }
+            if (!Config.getEnableFakeGroupRole())
+                return chain.proceed();
+            if (Config.getFakeGroupRoleLevel() != 1)
+                return chain.proceed();
+            String jsonString = (String) chain.getArg(0);
+            if (!jsonString.contains("\"creatorId\":"))
+                return chain.proceed();
+            if (!jsonString.contains(",\"ts\":"))
+                return chain.proceed();
+            String userId = Utils.GetCurrentUserID();
+            if (userId.isEmpty() || "0".equals(userId))
+                return chain.proceed();
+            String modifiedJsonString = jsonString.replaceAll("\"creatorId\":\\d+", "\"creatorId\":" + userId);
+            return chain.proceed(new Object[] { modifiedJsonString });
         });
     }
 }

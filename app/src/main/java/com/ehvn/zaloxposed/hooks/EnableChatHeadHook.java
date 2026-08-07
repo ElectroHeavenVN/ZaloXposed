@@ -10,12 +10,15 @@ import android.os.Build;
 import android.view.Display;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
+
 import com.android.tools.smali.dexlib2.Opcode;
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction;
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction;
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference;
 import com.ehvn.zaloxposed.utilities.Config;
+import com.ehvn.zaloxposed.utilities.Logger;
 import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindMethod;
@@ -32,9 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
+import io.github.libxposed.api.XposedInterface;
 
 // It would be great if we can patch dex...
 @SuppressWarnings("unused")
@@ -63,10 +64,10 @@ public class EnableChatHeadHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            log("Target method not found 1");
+            Logger.e("Target method not found 1");
             return;
         }
-        Method targetMethod = methods.get(0).getMethodInstance(lpparam.classLoader);
+        Method targetMethod = methods.get(0).getMethodInstance(classLoader);
         Class<?> classContainsChatHeadUnavailableConfig = targetMethod.getDeclaringClass();
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -79,13 +80,13 @@ public class EnableChatHeadHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            log("Target method not found 2");
+            Logger.e("Target method not found 2");
             return;
         }
         Class<?> androidVersionCheckClass = null;
         for (MethodData m : methods)
         {
-            Class<?> tempandroidVersionCheckClass = Objects.requireNonNull(m.getDeclaredClass()).getInstance(lpparam.classLoader);
+            Class<?> tempandroidVersionCheckClass = Objects.requireNonNull(m.getDeclaredClass()).getInstance(classLoader);
             if (!Modifier.isAbstract(tempandroidVersionCheckClass.getModifiers()))
                 continue;
             androidVersionCheckClass = tempandroidVersionCheckClass;
@@ -93,7 +94,7 @@ public class EnableChatHeadHook extends BaseHook
         }
         if (androidVersionCheckClass == null)
         {
-            log("Target class not found 3");
+            Logger.e("Target class not found 3");
             return;
         }
         ArrayList<Instruction> instructions = Utils.Disassemble(androidVersionCheckClass, "<clinit>");
@@ -114,12 +115,12 @@ public class EnableChatHeadHook extends BaseHook
         }
         if (isAndroid10FullOrOlder == null)
         {
-            log("Target field not found 1");
+            Logger.e("Target field not found 1");
             return;
         }
         if (isAndroid11OrNewerFull == null)
         {
-            log("Target field not found 2");
+            Logger.e("Target field not found 2");
             return;
         }
         instructions = Utils.Disassemble(classContainsChatHeadUnavailableConfig, "<clinit>");
@@ -142,51 +143,45 @@ public class EnableChatHeadHook extends BaseHook
         }
         if (chatHeadUnavailable == null)
         {
-            log("Target field not found 3");
+            Logger.e("Target field not found 3");
             return;
         }
         isAndroid10FullOrOlder.setAccessible(true);
         isAndroid11OrNewerFull.setAccessible(true);
         chatHeadUnavailable.setAccessible(true);
         SpoofAndroidVersionCheckFields spoofHook = new SpoofAndroidVersionCheckFields();
-        log("Hooking [0]: " + targetMethod);
-        XposedBridge.hookMethod(targetMethod, new XC_MethodHook()
+        Logger.i("Hooking [0]: " + targetMethod);
+        module.hook(targetMethod).intercept(chain ->
         {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param)
+            Object result = chain.proceed();
+            Config.addOnConfigChangedListener((key, oldValue, newValue) ->
             {
-                Config.addOnConfigChangedListener(new Config.OnConfigChangedListener() 
-                {
-                    @Override
-                    public void onConfigChanged(String key, Object oldValue, Object newValue) 
-                    {
-                        if (!"enable_chat_head".equals(key))
-                            return;
-                        if (chatHeadUnavailable == null)
-                            return;
-                        boolean enabled = (Boolean) newValue;
-                        try
-                        {
-                            if (enabled)
-                            {
-                                chatHeadUnavailableOriginalValue = chatHeadUnavailable.getBoolean(null);
-                                chatHeadUnavailable.set(null, false);
-                            }
-                            else
-                                chatHeadUnavailable.set(null, chatHeadUnavailableOriginalValue);
-                        }
-                        catch (Exception ignored) { }
-                    }
-                });
-                if (!Config.getEnableChatHead())
+                if (!"enable_chat_head".equals(key))
                     return;
+                if (chatHeadUnavailable == null)
+                    return;
+                boolean enabled = (Boolean) newValue;
                 try
                 {
-                    chatHeadUnavailableOriginalValue = chatHeadUnavailable.getBoolean(null);
-                    chatHeadUnavailable.set(null, false);
+                    if (enabled)
+                    {
+                        chatHeadUnavailableOriginalValue = chatHeadUnavailable.getBoolean(null);
+                        chatHeadUnavailable.set(null, false);
+                    }
+                    else
+                        chatHeadUnavailable.set(null, chatHeadUnavailableOriginalValue);
                 }
                 catch (Exception ignored) { }
+            });
+            if (!Config.getEnableChatHead())
+                return result;
+            try
+            {
+                chatHeadUnavailableOriginalValue = chatHeadUnavailable.getBoolean(null);
+                chatHeadUnavailable.set(null, false);
             }
+            catch (Exception ignored) { }
+            return result;
         });
         doHook(spoofHook);
     }
@@ -202,12 +197,12 @@ public class EnableChatHeadHook extends BaseHook
                 .paramCount(0)
                 .addUsingString("QUICK_MESSAGE_FEATURE_ENABLE", StringMatchType.Equals)));
         if (methods.isEmpty())
-            log("Target method not found 1");
+            Logger.e("Target method not found 1");
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
-            log("Hooking [1]: " + method);
-            XposedBridge.hookMethod(method, spoofHook);
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [1]: " + method);
+            module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -221,12 +216,12 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("SHOULD_REMIND_UPDATE_MINI_CHAT_PERMISSION", StringMatchType.Equals)
                 .addUsingString("LAST_TIME_SHOW_REMIND_UPDATE_MINI_CHAT_PERMISSION", StringMatchType.Equals)));
         if (methods.isEmpty())
-            log("Target method not found 2");
+            Logger.e("Target method not found 2");
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
-            log("Hooking [2]: " + method);
-            XposedBridge.hookMethod(method, spoofHook);
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [2]: " + method);
+            module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -246,12 +241,12 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingField(FieldMatcher.create().name("str_open_bubble_chat"))
                 .addUsingField(FieldMatcher.create().name("str_open_chat_head"))));
         if (methods.isEmpty())
-            log("Target method not found 3");
+            Logger.e("Target method not found 3");
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
-            log("Hooking [3]: " + method);
-            XposedBridge.hookMethod(method, spoofHook);
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [3]: " + method);
+            module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -266,12 +261,12 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingField(FieldMatcher.create().name("Companion"))
             ));
         if (methods.isEmpty())
-            log("Target method not found 4");
+            Logger.e("Target method not found 4");
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
-            log("Hooking [4]: " + method);
-            XposedBridge.hookMethod(method, spoofHook);
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [4]: " + method);
+            module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -289,12 +284,12 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingField(FieldMatcher.create().name("Companion"))
             ));
         if (methods.isEmpty())
-            log("Target method not found 5");
+            Logger.e("Target method not found 5");
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
-            log("Hooking [5]: " + method);
-            XposedBridge.hookMethod(method, spoofHook);
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [5]: " + method);
+            module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -305,12 +300,12 @@ public class EnableChatHeadHook extends BaseHook
                 .paramTypes("java.util.ArrayList")
             ));
         if (methods.isEmpty())
-            log("Target method not found 6");
+            Logger.e("Target method not found 6");
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
-            log("Hooking [6]: " + method);
-            XposedBridge.hookMethod(method, spoofHook);
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [6]: " + method);
+            module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -325,12 +320,12 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("ENABLE_BLOCK_HIDE_PRIVACY_SETTING_${UserID}", StringMatchType.Equals)
             ));
         if (methods.isEmpty())
-            log("Target method not found 7");
+            Logger.e("Target method not found 7");
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
-            log("Hooking [7]: " + method);
-            XposedBridge.hookMethod(method, spoofHook);
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [7]: " + method);
+            module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -345,12 +340,12 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("ChatView: Open Bubble Chat ", StringMatchType.Equals)
             ));
         if (methods.isEmpty())
-            log("Target method not found 8");
+            Logger.e("Target method not found 8");
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
-            log("Hooking [8]: " + method);
-            XposedBridge.hookMethod(method, spoofHook);
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [8]: " + method);
+            module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -365,12 +360,12 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("KILL_CHAT_HEAD_START_TIME", StringMatchType.Equals)
             ));
         if (methods.isEmpty())
-            log("Target method not found 9");
+            Logger.e("Target method not found 9");
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
-            log("Hooking [9]: " + method);
-            XposedBridge.hookMethod(method, spoofHook);
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [9]: " + method);
+            module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -383,12 +378,12 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingField(FieldMatcher.create().name("logo_zalo_chathead"))
             ));
         if (methods.isEmpty())
-            log("Target method not found 10");
+            Logger.e("Target method not found 10");
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
-            log("Hooking [10]: " + method);
-            XposedBridge.hookMethod(method, spoofHook);
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [10]: " + method);
+            module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -403,11 +398,11 @@ public class EnableChatHeadHook extends BaseHook
                     .declaredClass("com.zing.zalo.MainApplication"))
                 ));
         if (methods.isEmpty())
-            log("Target method not found 11");
+            Logger.e("Target method not found 11");
         Class<?> clazz = null;
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
+            Method method = m.getMethodInstance(classLoader);
             if (clazz == null)
             {
                 Class<?> maybe_DclrClass = method.getDeclaringClass();
@@ -425,8 +420,8 @@ public class EnableChatHeadHook extends BaseHook
                 else
                     continue;
             }
-            log("Hooking [11]: " + method);
-            XposedBridge.hookMethod(method, spoofHook);
+            Logger.i("Hooking [11]: " + method);
+            module.hook(method).intercept(spoofHook);
         }
         // more than 1
         if (clazz != null)
@@ -440,12 +435,12 @@ public class EnableChatHeadHook extends BaseHook
                     .paramTypes("java.lang.String")
                 ));
             if (methods.isEmpty())
-                log("Target method not found 12");
+                Logger.e("Target method not found 12");
             for (MethodData m : methods)
             {
-                Method method = m.getMethodInstance(lpparam.classLoader);
-                log("Hooking [12]: " + method);
-                XposedBridge.hookMethod(method, spoofHook);
+                Method method = m.getMethodInstance(classLoader);
+                Logger.i("Hooking [12]: " + method);
+                module.hook(method).intercept(spoofHook);
             }
             methods = bridge.findMethod(FindMethod.create()
                 .matcher(MethodMatcher.create()
@@ -456,12 +451,12 @@ public class EnableChatHeadHook extends BaseHook
                     .paramTypes("int", "java.lang.String")
                 ));
             if (methods.isEmpty())
-                log("Target method not found 13");
+                Logger.e("Target method not found 13");
             for (MethodData m : methods)
             {
-                Method method = m.getMethodInstance(lpparam.classLoader);
-                log("Hooking [13]: " + method);
-                XposedBridge.hookMethod(method, spoofHook);
+                Method method = m.getMethodInstance(classLoader);
+                Logger.i("Hooking [13]: " + method);
+                module.hook(method).intercept(spoofHook);
             }
         }
         methods = bridge.findMethod(FindMethod.create()
@@ -471,23 +466,24 @@ public class EnableChatHeadHook extends BaseHook
                 .paramCount(0)
                 .addUsingString("SETTING_ENABLE_CHAT_HEAD_SERVER", StringMatchType.Equals)));
         if (methods.isEmpty())
-            log("Target method not found 14");
+            Logger.e("Target method not found 14");
         for (MethodData m : methods)
         {
-            Method method = m.getMethodInstance(lpparam.classLoader);
-            log("Hooking [14]: " + method);
-            XposedBridge.hookMethod(method, new XC_MethodHook() 
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [14]: " + method);
+            module.hook(method).intercept(chain ->
             {
-                @Override
-                protected void beforeHookedMethod(MethodHookParam param)
-                {    
-                    if (!Config.getEnableChatHead())
-                        return;
-                    param.setResult(true);
-                }
+                if (!Config.getEnableChatHead())
+                    return chain.proceed();
+                return true;
             });
         }
-
+        Method method = Class.forName("com.zing.zalo.ui.maintab.group.GroupTabView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
+        Logger.i("Hooking [15]: " + method);
+        module.hook(method).intercept(spoofHook);
+        method = Class.forName("com.zing.zalo.ui.maintab.msg.MessagesView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
+        Logger.i("Hooking [16]: " + method);
+        module.hook(method).intercept(spoofHook);
         // clazz = null;
         // methods = bridge.findMethod(FindMethod.create()
         //     .matcher(MethodMatcher.create()
@@ -497,10 +493,10 @@ public class EnableChatHeadHook extends BaseHook
         //         .addUsingString("UPDATE workspec SET period_count = 1 WHERE last_enqueue_time <> 0 AND interval_duration <> 0", StringMatchType.Equals)
         //     ));
         // if (methods.isEmpty())
-        //     log("Target method not found 15");
+        //     Logger.e("Target method not found 17");
         // if (!methods.isEmpty())
         // {
-        //     clazz = Objects.requireNonNull(methods.get(0).getDeclaredClass()).getInstance(lpparam.classLoader);
+        //     clazz = Objects.requireNonNull(methods.get(0).getDeclaredClass()).getInstance(classLoader);
         //     methods = bridge.findMethod(FindMethod.create()
         //         .matcher(MethodMatcher.create()
         //             .declaredClass(clazz)
@@ -509,12 +505,12 @@ public class EnableChatHeadHook extends BaseHook
         //             .paramCount(0)
         //         ));
         //     if (methods.isEmpty())
-        //         log("Target method not found 15_2");
+        //         Logger.e("Target method not found 17_2");
         //     for (MethodData m : methods)
         //     {
-        //         Method method = m.getMethodInstance(lpparam.classLoader);
-        //         log("Hooking [15]: " + method);
-        //         XposedBridge.hookMethod(method, spoofHook);
+        //         Method method = m.getMethodInstance(classLoader);
+        //         Logger.i("Hooking [17]: " + method);
+        //         module.hook(method).intercept(chain ->
         //     }
         // }
         // methods = bridge.findMethod(FindMethod.create()
@@ -530,126 +526,101 @@ public class EnableChatHeadHook extends BaseHook
         //         .addUsingString("features@qr@bank_card@feedback@timeout", StringMatchType.Equals)
         //         .addUsingString("DatabaseHelper", StringMatchType.Equals)));
         // if (methods.isEmpty())
-        //     log("Target method not found 16");
+        //     Logger.e("Target method not found 18");
         // for (MethodData m : methods)
         // {
-        //     Method method = m.getMethodInstance(lpparam.classLoader);
-        //     log("Hooking [16]: " + method);
-        //     XposedBridge.hookMethod(method, spoofHook);
+        //     Method method = m.getMethodInstance(classLoader);
+        //     Logger.i("Hooking [18]: " + method);
+        //     module.hook(method).intercept(spoofHook);
         // }
-        XposedHelpers.findAndHookMethod("com.zing.zalo.ui.maintab.group.GroupTabView", lpparam.classLoader, "onActivityResult", int.class, int.class, Intent.class, spoofHook);
-        XposedHelpers.findAndHookMethod("com.zing.zalo.ui.maintab.msg.MessagesView", lpparam.classLoader, "onActivityResult", int.class, int.class, Intent.class, spoofHook);
     }
 
-    private void fixMiniChatAndroid13()
+    private void fixMiniChatAndroid13() throws ClassNotFoundException, NoSuchMethodException
     {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU)
             return;
-        XposedHelpers.findAndHookMethod("android.content.ContextWrapper", lpparam.classLoader, "registerReceiver", BroadcastReceiver.class, IntentFilter.class, new XC_MethodHook()
+        Method method = Class.forName("android.content.ContextWrapper", false, classLoader).getDeclaredMethod("registerReceiver", BroadcastReceiver.class, IntentFilter.class);
+        module.hook(method).intercept(chain ->
         {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) throws Throwable
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            for (StackTraceElement e : stack)
             {
-                StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-                for (StackTraceElement e : stack)
-                {
-                    if (!e.getClassName().equals("com.zing.zalo.comm.chathead.minichat.ui.service.MiniChatService"))
-                        continue;
-                    if (!e.getMethodName().equals("onCreate"))
-                        continue;
-                    Method registerReceiver3Args = Context.class.getDeclaredMethod("registerReceiver", BroadcastReceiver.class, IntentFilter.class, int.class);
-                    registerReceiver3Args.setAccessible(true);
-                    registerReceiver3Args.invoke(param.thisObject, (BroadcastReceiver) param.args[0], (IntentFilter) param.args[1], Context.RECEIVER_NOT_EXPORTED);
-                    param.setResult(null);
-                    break;
-                }
+                if (!e.getClassName().equals("com.zing.zalo.comm.chathead.minichat.ui.service.MiniChatService"))
+                    continue;
+                if (!e.getMethodName().equals("onCreate"))
+                    continue;
+                Method registerReceiver3Args = Context.class.getDeclaredMethod("registerReceiver", BroadcastReceiver.class, IntentFilter.class, int.class);
+                registerReceiver3Args.setAccessible(true);
+                registerReceiver3Args.invoke(chain.getThisObject(), (BroadcastReceiver) chain.getArg(0), (IntentFilter) chain.getArg(1), Context.RECEIVER_NOT_EXPORTED);
+                return null;
             }
+            return chain.proceed();
         });
-        Context windowContext = null;
-        XposedHelpers.findAndHookMethod(
-            "androidx.window.extensions.layout.WindowLayoutComponentImpl", 
-            lpparam.classLoader, 
-            "addWindowLayoutInfoListener", 
-            "android.content.Context", "androidx.window.extensions.core.util.function.Consumer", 
-            new FixWindowLayoutComponentImpl()
-        );
+        method = Class.forName("androidx.window.extensions.layout.WindowLayoutComponentImpl", false, classLoader).getDeclaredMethod("addWindowLayoutInfoListener", Context.class, Class.forName("androidx.window.extensions.core.util.function.Consumer", false, classLoader));
+        module.hook(method).intercept(new FixWindowLayoutComponentImpl());
     }
 
-    class FixWindowLayoutComponentImpl extends XC_MethodHook
+    static class FixWindowLayoutComponentImpl implements XposedInterface.Hooker
     {
-        static Context windowContext = null;
-
-        @Override
-        protected void beforeHookedMethod(MethodHookParam param)  
+        public Object intercept(@NonNull XposedInterface.Chain chain) throws Throwable
         {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-            {
-                param.setResult(null);
-                return;
-            }
-            Context ctx = (Context) param.args[0];
+                return chain.proceed();
+            Context ctx = (Context) chain.getArg(0);
             boolean validUiContext = ctx instanceof Activity;
             if (validUiContext)
-                return;
-            if (windowContext == null) 
+                return chain.proceed();
+            try
             {
-                log("Invalid context, creating new...");
+                Logger.i("Invalid context, creating new...");
                 Context appCtx = ctx.getApplicationContext();
                 DisplayManager dm = (DisplayManager) appCtx.getSystemService(Context.DISPLAY_SERVICE);
                 Display defaultDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
-                windowContext = appCtx.createWindowContext(defaultDisplay, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, null);
+                Context windowContext = appCtx.createWindowContext(defaultDisplay, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, null);
+                return chain.proceed(new Object[]{windowContext, chain.getArg(1)});
             }
-            param.args[0] = windowContext;
+            catch (Exception e)
+            {
+                Logger.e(e);
+            }
+            return chain.proceed();
         }
     }
 
-    class SpoofAndroidVersionCheckFields extends XC_MethodHook
+    static class SpoofAndroidVersionCheckFields implements XposedInterface.Hooker
     {
         private static final HashMap<Field, Boolean> originalValues = new HashMap<>();
 
-        @Override
-        protected void beforeHookedMethod(MethodHookParam param)
+        public Object intercept(@NonNull XposedInterface.Chain chain) throws Throwable
         {
             if (!Config.getEnableChatHead())
-                return;
+                return chain.proceed();
             try
             {
                 if (!originalValues.isEmpty())
-                    return;
-                Boolean originalValue = (Boolean) isAndroid10FullOrOlder.get(null);
-                Boolean originalValue2 = (Boolean) isAndroid11OrNewerFull.get(null);
+                    return chain.proceed();
+                Boolean originalValue = (Boolean)isAndroid10FullOrOlder.get(null);
+                Boolean originalValue2 = (Boolean)isAndroid11OrNewerFull.get(null);
                 if (originalValue == null || originalValue2 == null)
-                    return;
+                    return chain.proceed();
                 originalValues.put(isAndroid10FullOrOlder, originalValue);
                 originalValues.put(isAndroid11OrNewerFull, originalValue2);
                 isAndroid10FullOrOlder.set(null, !originalValue);
                 isAndroid11OrNewerFull.set(null, !originalValue2);
-
-            }
-            catch (Exception e)
-            {
-                log(Utils.GetStackTrace(e));
-            }
-        }
-
-        @Override
-        protected void afterHookedMethod(MethodHookParam param)
-        {
-            if (!Config.getEnableChatHead())
-                return;
-            try
-            {
+                Object result = chain.proceed();
                 for (Field f : originalValues.keySet())
                 { 
                     f.setAccessible(true);
                     f.set(null, originalValues.get(f));
                 }
                 originalValues.clear();
+                return result;
             }
             catch (Exception e)
             {
-                log(Utils.GetStackTrace(e));
+                Logger.e(Utils.GetStackTrace(e));
             }
+            return chain.proceed();
         }
     }
 }

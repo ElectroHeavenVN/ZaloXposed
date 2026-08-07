@@ -4,6 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ehvn.zaloxposed.hooks.BaseHook;
+import com.ehvn.zaloxposed.utilities.Logger;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
@@ -15,9 +16,6 @@ import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
 
 @SuppressWarnings("unused")
 public class RestoreDevToolsMenuHook extends BaseHook
@@ -50,11 +48,12 @@ public class RestoreDevToolsMenuHook extends BaseHook
         Class<?> aboutViewClass;
         try
         {
-            aboutViewClass = Class.forName("com.zing.zalo.ui.settings.AboutView", false, lpparam.classLoader);
+            aboutViewClass = Class.forName("com.zing.zalo.ui.settings.AboutView", false, classLoader);
         }
         catch (Throwable t)
         {
-            log("AboutView not found: " + t);
+            Logger.e("AboutView not found");
+            Logger.e(t);
             return;
         }
         List<MethodData> methods = bridge.findMethod(FindMethod.create()
@@ -67,19 +66,16 @@ public class RestoreDevToolsMenuHook extends BaseHook
             ));
         for (MethodData md : methods)
         {
-            Method method = md.getMethodInstance(lpparam.classLoader);
-            log("Hooking: " + method);
-            XposedBridge.hookMethod(method, new XC_MethodHook()
+            Method method = md.getMethodInstance(classLoader);
+            Logger.i("Hooking: " + method);
+            module.hook(method).intercept(chain ->
             {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param)
-                {
-                    Object thisObj = param.thisObject;
-                    View.OnClickListener listener = (thisObj instanceof View.OnClickListener) ? (View.OnClickListener)thisObj : null;
-                    Object result = param.getResult();
-                    if (result instanceof View)
-                        unlockTree((View)result, listener);
-                }
+                Object result = chain.proceed();
+                Object thisObj = chain.getThisObject();
+                View.OnClickListener listener = (thisObj instanceof View.OnClickListener) ? (View.OnClickListener)thisObj : null;
+                if (result instanceof View)
+                    unlockTree((View)result, listener);
+                return result;
             });
         }
     }

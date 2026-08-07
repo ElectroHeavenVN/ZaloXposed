@@ -10,21 +10,19 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.ehvn.zaloxposed.hooks.BaseHook;
 import com.ehvn.zaloxposed.utilities.Config;
+import com.ehvn.zaloxposed.utilities.Logger;
 import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindClass;
-import org.luckypray.dexkit.query.FindField;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
@@ -34,18 +32,14 @@ import org.luckypray.dexkit.result.ClassData;
 import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
-
 @SuppressWarnings("unused")
+@SuppressLint("SetTextI18n")
 public class ZaloXposedSettingsMenuHook extends BaseHook
 {
     private static final String CUSTOM_ITEM_MARKER = "zalo_xposed_settings";
@@ -65,11 +59,13 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     @Override
     public void hook() throws Throwable
     {
-        ListItemSettingHelper.Init(lpparam.classLoader);
+        ListItemSettingHelper.Init(classLoader);
         hookTabMeView();
         hookSettingPrivateView();
     }
 
+    @SuppressLint("PrivateApi")
+    @SuppressWarnings("unchecked")
     private void hookTabMeView() throws Exception
     {
         List<MethodData> methods = bridge.findMethod(FindMethod.create()
@@ -83,45 +79,42 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .addUsingString("tab_me_business_tools", StringMatchType.Equals)));
         if (methods.isEmpty())
         {
-            log("Target method not found");
+            Logger.e("Target method not found");
             return;
         }
-        Method method = methods.get(0).getMethodInstance(lpparam.classLoader);
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook()
+        Method method = methods.get(0).getMethodInstance(classLoader);
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain ->
         {
-            @Override
-            @SuppressWarnings("unchecked")
-            protected void afterHookedMethod(MethodHookParam param)
+            Object result = chain.proceed();
+            if (!(result instanceof ArrayList))
+                return result;
+            try
             {
-                try
+                ArrayList<Object> items = (ArrayList<Object>) result;
+                loadTabMeItemInfo(items);
+                Object customItem = buildCustomTabMeMenuItem(items);
+                if (customItem == null)
+                    return result;
+                Object separatorItem = null;
+                for (int i = items.size() - 1; i >= 0; i--)
                 {
-                    Object result = param.getResult();
-                    if (!(result instanceof ArrayList))
-                        return;
-                    ArrayList<Object> items = (ArrayList<Object>) result;
-                    loadTabMeItemInfo(items);
-                    Object customItem = buildCustomTabMeMenuItem(items);
-                    if (customItem == null)
-                        return;
-                    Object separatorItem = null;
-                    for (int i = items.size() - 1; i >= 0; i--)
+                    Object item = items.get(i);
+                    if (!item.toString().contains("SettingData(id="))
                     {
-                        Object item = items.get(i);
-                        if (!item.toString().contains("SettingData(id="))
-                        {
-                            separatorItem = item;
-                            break;
-                        }
+                        separatorItem = item;
+                        break;
                     }
-                    items.add(2, customItem);
-                    items.add(3, separatorItem);
                 }
-                catch (Throwable t)
-                {
-                    log(t.toString());
-                }
+                items.add(2, customItem);
+                items.add(3, separatorItem);
+                return items;
             }
+            catch (Throwable t)
+            {
+                Logger.e(t);
+            }
+            return result;
         });
 
         methods = bridge.findMethod(FindMethod.create()
@@ -140,34 +133,30 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            log("Target onClick method not found");
+            Logger.e("Target onClick method not found");
             return;
         }
-        method = methods.get(0).getMethodInstance(lpparam.classLoader);
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook()
+        method = methods.get(0).getMethodInstance(classLoader);
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain ->
         {
-            @SuppressLint("PrivateApi")
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param)
+            Object tabMeItem = chain.getArg(0);
+            if (tabMeItem == null)
+                return chain.proceed();
+            if (tabMeItem.getClass() != tabMeItemClass)
+                return chain.proceed();
+            try
             {
-                Object tabMeItem = param.args[0];
-                if (tabMeItem == null)
-                    return;
-                if (tabMeItem.getClass() != tabMeItemClass)
-                    return;
-                try
-                {
-                    tabMeItemTrackingField.setAccessible(true);
-                    String trackingValue = (String) tabMeItemTrackingField.get(tabMeItem);
-                    isOpenZaloXposedSettings = CUSTOM_ITEM_MARKER.equals(trackingValue);
-                }
-                catch (Throwable t)
-                {
-                    log(t.toString());
-                }
+                tabMeItemTrackingField.setAccessible(true);
+                String trackingValue = (String) tabMeItemTrackingField.get(tabMeItem);
+                isOpenZaloXposedSettings = CUSTOM_ITEM_MARKER.equals(trackingValue);
             }
-        });  
+            catch (Throwable t)
+            {
+                Logger.e(t);
+            }
+            return chain.proceed();
+        });
     }
 
     private synchronized void loadTabMeItemInfo(ArrayList<Object> tabMeItems)
@@ -232,7 +221,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             }
             if (template == null)
             {
-                log("Template item not found, cannot create custom menu item");
+                Logger.e("Template item not found, cannot create custom menu item");
                 return null;
             }
             Object newItem = Utils.UnsafeAllocate(tabMeItemClass);
@@ -256,7 +245,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         catch (Throwable t)
         {
-            log(t.toString());
+            Logger.e(t);
             return null;
         }
     }
@@ -275,7 +264,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 {
                     try
                     {
-                        Class<?> clazz = classData.getInstance(lpparam.classLoader);
+                        Class<?> clazz = classData.getInstance(classLoader);
                         if (clazz.getName().equals("com.zing.zalo.R.drawable"))
                             continue;
                         resourceClass = clazz;
@@ -286,7 +275,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             }
             if (resourceClass == null)
             {
-                log("Resource class not found");
+                Logger.e("Resource class not found");
                 return 0;
             }
             Field field = resourceClass.getField(resourceName);
@@ -294,7 +283,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         catch (Exception e)
         {
-            log("Error getting resource ID for " + resourceName + ": " + e.getMessage());
+            Logger.e("Error getting resource ID for " + resourceName);
+            Logger.e(e);
         }
         return 0;
     }
@@ -304,7 +294,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
 
     private void hookSettingPrivateView() throws Exception
     {
-        headerTextViewClass = Class.forName("com.zing.zalo.ui.widget.RobotoTextView", false, lpparam.classLoader);
+        headerTextViewClass = Class.forName("com.zing.zalo.ui.widget.RobotoTextView", false, classLoader);
 
         List<MethodData> methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -317,25 +307,22 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .addUsingString("EXTRA_CURRENT_SEEN_SETTING", StringMatchType.Equals)));
         if (methods.isEmpty())
         {
-            log("Target method not found");
+            Logger.e("Target method not found");
             return;
         }
-        Method method = methods.get(0).getMethodInstance(lpparam.classLoader);
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook()
+        Method method = methods.get(0).getMethodInstance(classLoader);
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain ->
         {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param)
+            Object result = chain.proceed();
+            if (!isOpenZaloXposedSettings)
             {
-                if (!isOpenZaloXposedSettings) 
-                {
-                    rootLayout = null;
-                    return;
-                }
-                rootLayout = (LinearLayout) param.args[1];
+                rootLayout = null;
+                return result;
             }
+            rootLayout = (LinearLayout)chain.getArg(1);
+            return result;
         });
-
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.settings.SettingPrivateV2View")
@@ -351,32 +338,30 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            log("Target method not found");
+            Logger.e("Target method not found");
             return;
         }
-        method = methods.get(0).getMethodInstance(lpparam.classLoader);
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook()  
+        method = methods.get(0).getMethodInstance(classLoader);
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain ->  
         {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param)
+            Object result = chain.proceed();
+            if (!isOpenZaloXposedSettings)
+                return result;
+            if (rootLayout == null)
+                return result;
+            templateHeader = null;
+            templateSeparator = null;
+            try
             {
-                if (!isOpenZaloXposedSettings)
-                    return;
-                if (rootLayout == null)
-                    return;
-                templateHeader = null;
-                templateSeparator = null;
-                try
-                {
-                    loadTemplates();
-                    createCustomMenu();
-                }
-                catch (Exception e)
-                {
-                    log(Utils.GetStackTrace(e));
-                }
+                loadTemplates();
+                createCustomMenu();
             }
+            catch (Exception e)
+            {
+                Logger.e(e);
+            }
+            return result;
         });
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -389,34 +374,38 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            log("Target method not found");
+            Logger.e("Target method not found");
             return;
         }
-        method = methods.get(0).getMethodInstance(lpparam.classLoader);
-        Field actionBarField = Utils.FindFieldByType(Class.forName("com.zing.zalo.ui.settings.SettingPrivateV2View", false, lpparam.classLoader), "com.zing.zalo.zdesign.component.header.ZdsActionBar");
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook()  
+        method = methods.get(0).getMethodInstance(classLoader);
+        Field actionBarField = Utils.FindFieldByType(Class.forName("com.zing.zalo.ui.settings.SettingPrivateV2View", false, classLoader), "com.zing.zalo.zdesign.component.header.ZdsActionBar");
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain ->  
         {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) {
-                try {
-                    if (!isOpenZaloXposedSettings)
-                        return;
-                    Object actionBar = actionBarField.get(param.thisObject);
-                    if (actionBar == null)
-                        return;
-                    Method getMiddleTitle = actionBar.getClass().getMethod("getMiddleTitle");
-                    String title = (String) getMiddleTitle.invoke(actionBar);
-                    if (title.equals("Privacy"))
-                        isEnglish = true;
-                    else if (title.equals("Quyền riêng tư"))
-                        isEnglish = false;
-                    Method setMiddleTitle = actionBar.getClass().getMethod("setMiddleTitle", String.class);
-                    setMiddleTitle.invoke(actionBar, isEnglish ? "ZaloXposed Settings" : "Cài đặt ZaloXposed");
-                } catch (Exception t) {
-                    log(t.toString());
-                }
+            Object result = chain.proceed();
+            if (!isOpenZaloXposedSettings)
+                return result;
+            if (actionBarField == null)
+                return result;
+            try
+            {
+                Object actionBar = actionBarField.get(chain.getThisObject());
+                if (actionBar == null)
+                    return result;
+                Method getMiddleTitle = actionBar.getClass().getMethod("getMiddleTitle");
+                String title = (String) getMiddleTitle.invoke(actionBar);
+                if ("Privacy".equals(title))
+                    isEnglish = true;
+                else if ("Quyền riêng tư".equals(title))
+                    isEnglish = false;
+                Method setMiddleTitle = actionBar.getClass().getMethod("setMiddleTitle", String.class);
+                setMiddleTitle.invoke(actionBar, isEnglish ? "ZaloXposed Settings" : "Cài đặt ZaloXposed");
             }
+            catch (Exception t)
+            {
+                Logger.e(t);
+            }
+            return result;
         });
     }
 
@@ -495,7 +484,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             }
             catch (Exception e)
             {
-                log(e.toString());
+                Logger.e(e);
             }
         });
  
@@ -542,7 +531,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 }
                 catch (Exception e)
                 {
-                    log(e.toString());
+                    Logger.e(e);
                 }
                 return false;
             }
@@ -562,11 +551,24 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                     }
                     catch (Exception e)
                     {
-                        log(e.toString());
+                        Logger.e(e);
                     }
                 }
             }
         });
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Sticker pack" : "Bộ sticker");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Allow sharing hidden sticker packs" : "Cho phép chia sẻ bộ sticker ẩn");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableShareHiddenStickerPack());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableShareHiddenStickerPack);
     }
 
     @NonNull
@@ -593,8 +595,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             headerTitle.setPadding(templateHeader.getPaddingLeft(), templateHeader.getPaddingTop(), templateHeader.getPaddingRight(), templateHeader.getPaddingBottom());
             try
             {
-                headerTitle.setBackground(templateHeader.getBackground()
-                    .getConstantState()
+                headerTitle.setBackground(Objects.requireNonNull(templateHeader.getBackground()
+                    .getConstantState())
                     .newDrawable()
                     .mutate()
                 );
@@ -629,8 +631,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         {
             try
             {
-                separator.setBackground(templateSeparator.getBackground()
-                    .getConstantState()
+                separator.setBackground(Objects.requireNonNull(templateSeparator.getBackground()
+                    .getConstantState())
                     .newDrawable()
                     .mutate()
                 );

@@ -1,7 +1,7 @@
 package com.ehvn.zaloxposed.hooks;
 
 import com.ehvn.zaloxposed.utilities.Config;
-import com.ehvn.zaloxposed.utilities.Utils;
+import com.ehvn.zaloxposed.utilities.Logger;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
@@ -12,11 +12,6 @@ import org.luckypray.dexkit.result.MethodData;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
-
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XC_MethodReplacement;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
 
 @SuppressWarnings("unused")
 public class UnlockZCloudHook extends BaseHook
@@ -31,18 +26,14 @@ public class UnlockZCloudHook extends BaseHook
                 .paramCount(0)
                 .addUsingString("ZALO_CLOUD_SUBSCRIPTION_PLAN_", StringMatchType.Equals)
             ));
-        Method method = methods.get(0).getMethodInstance(lpparam.classLoader);
+        Method method = methods.get(0).getMethodInstance(classLoader);
         Class<?> clazz = method.getDeclaringClass();
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain -> 
         {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param)
-            {    
-                if (!Config.getUnlockZCloud())
-                    return;
-                param.setResult(0);
-            }
+            if (!Config.getUnlockZCloud())
+                return chain.proceed();
+            return 0;
         });
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -53,17 +44,13 @@ public class UnlockZCloudHook extends BaseHook
                 .addInvoke(MethodMatcher.create().name("toDays"))
                 .declaredClass(clazz)
             ));
-        method = methods.get(0).getMethodInstance(lpparam.classLoader);
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        method = methods.get(0).getMethodInstance(classLoader);
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain -> 
         {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param)
-            {    
-                if (!Config.getUnlockZCloud())
-                    return;
-                param.setResult(Integer.MAX_VALUE);
-            }
+            if (!Config.getUnlockZCloud())
+                return chain.proceed();
+            return Integer.MAX_VALUE;
         });
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -75,17 +62,13 @@ public class UnlockZCloudHook extends BaseHook
                 .addInvoke(MethodMatcher.create().name("toDays"))
                 .declaredClass(clazz)
             ));
-        method = methods.get(0).getMethodInstance(lpparam.classLoader);
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        method = methods.get(0).getMethodInstance(classLoader);
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain -> 
         {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param)
-            {    
-                if (!Config.getUnlockZCloud())
-                    return;
-                param.setResult(Integer.MAX_VALUE);
-            }
+            if (!Config.getUnlockZCloud())
+                return chain.proceed();
+            return Integer.MAX_VALUE;
         });
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -96,17 +79,13 @@ public class UnlockZCloudHook extends BaseHook
                 .declaredClass(clazz)
             ));
         MethodData methodData = methods.get(0);
-        method = methodData.getMethodInstance(lpparam.classLoader);
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        method = methodData.getMethodInstance(classLoader);
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain -> 
         {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param)
-            {    
-                if (!Config.getUnlockZCloud())
-                    return;
-                param.setResult(true);
-            }
+            if (!Config.getUnlockZCloud())
+                return chain.proceed();
+            return true;
         });
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -116,19 +95,14 @@ public class UnlockZCloudHook extends BaseHook
                 .addCaller(methodData.getDescriptor())
                 .declaredClass(clazz)
             ));
-        method = methods.get(0).getMethodInstance(lpparam.classLoader);
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        method = methods.get(0).getMethodInstance(classLoader);
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain -> 
         {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param)
-            {    
-                if (!Config.getUnlockZCloud())
-                    return;
-                param.setResult(true);
-            }
+            if (!Config.getUnlockZCloud())
+                return chain.proceed();
+            return true;
         });
-        
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
@@ -138,17 +112,13 @@ public class UnlockZCloudHook extends BaseHook
                 .addUsingString("ZALO_CLOUD_SUBSCRIPTION_PLAN_", StringMatchType.Equals)
                 .declaredClass(clazz)
             ));
-        method = methods.get(0).getMethodInstance(lpparam.classLoader);
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook() 
+        method = methods.get(0).getMethodInstance(classLoader);
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain -> 
         {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param)
-            {    
-                if (!Config.getUnlockZCloud())
-                    return;
-                param.args[1] = 0;
-            }
+            if (!Config.getUnlockZCloud())
+                return chain.proceed();
+            return 0;
         });
 
         methods = bridge.findMethod(FindMethod.create()
@@ -160,17 +130,13 @@ public class UnlockZCloudHook extends BaseHook
             ));
         for (MethodData methodData2 : methods)
         {
-            Method method2 = methodData2.getMethodInstance(lpparam.classLoader);
-            log("Hooking: " + method2);
-            XposedBridge.hookMethod(method2, new XC_MethodHook() 
+            Method method2 = methodData2.getMethodInstance(classLoader);
+            Logger.i("Hooking: " + method2);
+            module.hook(method2).intercept(chain ->
             {
-                @Override
-                protected void beforeHookedMethod(MethodHookParam param)
-                {    
-                    if (!Config.getUnlockZCloud())
-                        return;
-                    param.setResult(Boolean.TRUE);
-                }
+                if (!Config.getUnlockZCloud())
+                    return chain.proceed();
+                return Integer.MAX_VALUE;
             });
         }
     }

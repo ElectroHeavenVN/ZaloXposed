@@ -1,6 +1,7 @@
 package com.ehvn.zaloxposed.hooks;
 
 import com.ehvn.zaloxposed.utilities.Config;
+import com.ehvn.zaloxposed.utilities.Logger;
 import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.json.JSONArray;
@@ -12,9 +13,6 @@ import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Method;
 import java.util.List;
-
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
 
 @SuppressWarnings("unused")
 public class FakeAdminHook extends BaseHook
@@ -31,66 +29,62 @@ public class FakeAdminHook extends BaseHook
                 .addUsingString("getGroupListFromServer decrypt data fail.", StringMatchType.Equals)));
         if (methods.isEmpty())
         {
-            log("Target method not found");
+            Logger.e("Target method not found");
             return;
         }
-        Class<?> clazz = methods.get(0).getMethodInstance(lpparam.classLoader).getDeclaringClass();
-        log("Found target class: " + clazz.getName());
+        Class<?> clazz = methods.get(0).getMethodInstance(classLoader).getDeclaringClass();
         Method method = JSONObject.class.getMethod("optJSONArray", String.class);
-        log("Hooking: " + method);
-        XposedBridge.hookMethod(method, new XC_MethodHook()
+        Logger.i("Hooking: " + method);
+        module.hook(method).intercept(chain ->
         {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param)
+            if (!Config.getEnableFakeGroupRole())
+                return chain.proceed();
+            if (Config.getFakeGroupRoleLevel() != 0)
+                return chain.proceed();
+            String key = (String) chain.getArg(0);
+            if (!"adminIds".equals(key) && !"admins".equals(key))
+                return chain.proceed();
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            boolean calledFromClazz = false;
+            for (StackTraceElement element : stackTrace)
             {
-                if (!Config.getEnableFakeGroupRole())
-                    return;
-                if (Config.getFakeGroupRoleLevel() != 0)
-                    return;
-                String key = (String) param.args[0];
-                if (!"adminIds".equals(key) && !"admins".equals(key))
-                    return;
-                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-                boolean calledFromClazz = false;
-                for (StackTraceElement element : stackTrace)
+                String className = element.getClassName();
+                if (className.equals(clazz.getName()))
                 {
-                    String className = element.getClassName();
-                    if (className.equals(clazz.getName()))
-                    {
-                        calledFromClazz = true;
-                        break;
-                    }
-                }
-                if (!calledFromClazz)
-                    return;
-                String userId = Utils.GetCurrentUserID();
-                if (userId.isEmpty() || "0".equals(userId))
-                    return;
-                JSONArray arr = (JSONArray) param.getResult();
-                if (arr == null)
-                    return;
-                if ("adminIds".equals(key))
-                {
-                    for (int i = 0; i < arr.length(); i++)
-                    {
-                        if (String.valueOf(arr.optLong(i)).equals(userId))
-                            return;
-                    }
-                    arr.put(Long.parseLong(userId));
-                }
-                else
-                {
-                    for (int i = 0; i < arr.length(); i++)
-                    {
-                        JSONObject o = arr.optJSONObject(i);
-                        if (o != null && String.valueOf(o.optLong("id")).equals(userId))
-                            return;
-                    }
-                    JSONObject admin = buildAdminObject();
-                    if (admin != null)
-                        arr.put(admin);
+                    calledFromClazz = true;
+                    break;
                 }
             }
+            if (!calledFromClazz)
+                return chain.proceed();
+            String userId = Utils.GetCurrentUserID();
+            if (userId.isEmpty() || "0".equals(userId))
+                return chain.proceed();
+            JSONArray arr = (JSONArray)chain.proceed();
+            if (arr == null)
+                return null;
+            if ("adminIds".equals(key))
+            {
+                for (int i = 0; i < arr.length(); i++)
+                {
+                    if (String.valueOf(arr.optLong(i)).equals(userId))
+                        return arr;
+                }
+                arr.put(Long.parseLong(userId));
+            }
+            else
+            {
+                for (int i = 0; i < arr.length(); i++)
+                {
+                    JSONObject o = arr.optJSONObject(i);
+                    if (o != null && String.valueOf(o.optLong("id")).equals(userId))
+                        return arr;
+                }
+                JSONObject admin = buildAdminObject();
+                if (admin != null)
+                    arr.put(admin);
+            }
+            return arr;
         });
     }
 
@@ -115,7 +109,7 @@ public class FakeAdminHook extends BaseHook
         }
         catch (Exception e)
         {
-            log("buildAdminObject error: " + e.getMessage());
+            Logger.e("buildAdminObject error", e);
             return null;
         }
     }

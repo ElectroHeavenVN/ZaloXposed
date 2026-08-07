@@ -1,31 +1,22 @@
 package com.ehvn.zaloxposed.hooks;
 
-import android.util.Log;
-
 import org.luckypray.dexkit.DexKitBridge;
 
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+import io.github.libxposed.api.XposedModule;
+import io.github.libxposed.api.XposedModuleInterface;
 
 public abstract class BaseHook
 {
+    protected XposedModule module;
     protected DexKitBridge bridge;
-    protected LoadPackageParam lpparam;
+    protected ClassLoader classLoader;
 
-    public void init(DexKitBridge bridge, LoadPackageParam lpparam)
+    public void init(XposedModule module, DexKitBridge bridge, XposedModuleInterface.PackageReadyParam param)
     {
+        this.module = module;
         this.bridge = bridge;
-        this.lpparam = lpparam;
+        this.classLoader = param.getClassLoader();
     }
 
     public abstract void hook() throws Throwable;
-
-    public void log(String message)
-    {
-        if (message != null)
-        {
-            XposedBridge.log("[ZaloXposed] [" + getClass().getSimpleName() + "]: " + message);
-            Log.i("ZaloXposed", "[" + getClass().getSimpleName() + "]: " + message);
-        }
-    }
 }

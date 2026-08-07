@@ -1,6 +1,7 @@
 package com.ehvn.zaloxposed.hooks.permanent;
 
 import com.ehvn.zaloxposed.hooks.BaseHook;
+import com.ehvn.zaloxposed.utilities.Logger;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
@@ -10,9 +11,6 @@ import org.luckypray.dexkit.result.MethodData;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
-
-import de.robv.android.xposed.XC_MethodReplacement;
-import de.robv.android.xposed.XposedBridge;
 
 @SuppressWarnings("unused")
 public class EnableE2EEHook extends BaseHook
@@ -29,9 +27,9 @@ public class EnableE2EEHook extends BaseHook
             ));
         for (MethodData md : methods)
         {
-            Method method = md.getMethodInstance(lpparam.classLoader);
-            log("Hooking: " + method);
-            XposedBridge.hookMethod(method, XC_MethodReplacement.returnConstant(true));
+            Method method = md.getMethodInstance(classLoader);
+            Logger.i("Hooking: " + method);
+            module.hook(method).intercept(chain -> true);
         }
     }
 }

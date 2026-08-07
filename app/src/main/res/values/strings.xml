@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ZaloXposed</string>
+    <string name="module_description">Xposed module for Zalo</string>
 </resources>

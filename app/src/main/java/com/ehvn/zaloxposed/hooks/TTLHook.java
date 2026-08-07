@@ -1,6 +1,7 @@
 package com.ehvn.zaloxposed.hooks;
 
 import com.ehvn.zaloxposed.utilities.Config;
+import com.ehvn.zaloxposed.utilities.Logger;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
@@ -13,9 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XC_MethodReplacement;
-import de.robv.android.xposed.XposedBridge;
+import io.github.libxposed.api.XposedInterface;
 
 @SuppressWarnings("unused")
 public class TTLHook extends BaseHook
@@ -54,10 +53,9 @@ public class TTLHook extends BaseHook
         }
         if (targetClassName == null)
         {
-            log("Target class not found");
+            Logger.e("Target class not found");
             return;
         }
-        log("Found target class: " + targetClassName);
         List<MethodData> ttlMethods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass(targetClassName)
@@ -67,17 +65,13 @@ public class TTLHook extends BaseHook
             ));
         for (MethodData md : ttlMethods)
         {
-            Method method = md.getMethodInstance(lpparam.classLoader);
-            log("Hooking: " + method);
-            XposedBridge.hookMethod(method, new XC_MethodHook()
+            Method method = md.getMethodInstance(classLoader);
+            Logger.i("Hooking: " + method);
+            module.hook(method).intercept(chain ->
             {
-                @Override
-                protected void beforeHookedMethod(MethodHookParam param)
-                {    
-                    if (!Config.getEnableTTLOverride())
-                        return;
-                    param.setResult(Config.getTTL());
-                }
+                if (Config.getEnableTTLOverride())
+                    return Config.getTTL();
+                return chain.proceed();
             });
         }
     }

@@ -3,12 +3,10 @@ package com.ehvn.zaloxposed.hooks.permanent;
 import android.widget.TextView;
 
 import com.ehvn.zaloxposed.hooks.BaseHook;
+import com.ehvn.zaloxposed.utilities.Logger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
 
 @SuppressWarnings("unused")
 public class ChatInputBarTitleHook extends BaseHook
@@ -18,8 +16,8 @@ public class ChatInputBarTitleHook extends BaseHook
     @Override
     public void hook() throws Throwable
     {
-        Class<?> chatInputBar = Class.forName("com.zing.zalo.ui.chat.widget.inputbar.ChatInputBar", false, lpparam.classLoader);
-        Class<?> actionEditText = Class.forName("com.zing.zalo.uicontrol.ActionEditText", false, lpparam.classLoader);
+        Class<?> chatInputBar = Class.forName("com.zing.zalo.ui.chat.widget.inputbar.ChatInputBar", false, classLoader);
+        Class<?> actionEditText = Class.forName("com.zing.zalo.uicontrol.ActionEditText", false, classLoader);
         Method setupEditTextState = chatInputBar.getDeclaredMethod("setupEditTextState", int.class);
         for (Field f : chatInputBar.getDeclaredFields())
         {
@@ -30,22 +28,20 @@ public class ChatInputBarTitleHook extends BaseHook
         }
         if (actionEditTextField == null)
         {
-            log("Target field not found");
+            Logger.e("Target field not found");
             return;
         }
-        log("Hooking: " + setupEditTextState);
-        XposedBridge.hookMethod(setupEditTextState, new XC_MethodHook()
+        Logger.i("Hooking: " + setupEditTextState);
+        module.hook(setupEditTextState).intercept(chain ->
         {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable
-            {
-                TextView actionEditTextView = (TextView)actionEditTextField.get(param.thisObject);
-                if (actionEditTextView == null)
-                    return;
-                if (actionEditTextView.getHint().length() <= 0)
-                    return;
-                actionEditTextView.setHint("ZaloXposed by ElectroHeavenVN");
-            }
+            Object result = chain.proceed();
+            TextView actionEditTextView = (TextView)actionEditTextField.get(chain.getThisObject());
+            if (actionEditTextView == null)
+                return result;
+            if (actionEditTextView.getHint().length() <= 0)
+                return result;
+            actionEditTextView.setHint("ZaloXposed by ElectroHeavenVN");
+            return result;
         });
     }
 }

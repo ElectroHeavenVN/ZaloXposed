@@ -32,9 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
-
 public final class Utils
 {
     private Utils() { }
@@ -62,10 +59,9 @@ public final class Utils
         PRIMITIVE_MAP.put(void.class, "V");
     }
 
-    public static void Init(ApplicationInfo appInfo, ClassLoader classLoader, DexKitBridge bridge, String modulePath) throws NoSuchMethodException, IOException
+    public static void Init(ApplicationInfo appInfo, ClassLoader classLoader, DexKitBridge bridge) throws NoSuchMethodException, IOException
     {
         sClassLoader = classLoader;
-        mdPath = modulePath;
         packageName = appInfo.packageName;
         File apkFile = new File(appInfo.sourceDir);
         dexContainer = DexFileFactory.loadDexContainer(apkFile, Opcodes.getDefault());
@@ -83,11 +79,6 @@ public final class Utils
                 .addUsingString("UserInfo", StringMatchType.Equals)
             ));
         getCurrentUserInfoMethod = methods.isEmpty() ? null : methods.get(0).getMethodInstance(sClassLoader);
-    }
-
-    public static String GetModulePath()
-    {
-        return mdPath;
     }
 
     public static String GetCurrentUserID()
@@ -391,7 +382,8 @@ public final class Utils
             }
             catch (Exception e)
             {
-                XposedBridge.log("[ZaloXposed] Cannot get externalFilesDir:\n" + e);
+                Logger.e("[ZaloXposed] Cannot get externalFilesDir:");
+                Logger.e(e);
             }
         }
         return externalFilesDir;
