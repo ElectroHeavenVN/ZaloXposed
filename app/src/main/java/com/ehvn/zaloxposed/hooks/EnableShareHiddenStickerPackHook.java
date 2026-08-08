@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,10 +28,32 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
 {
     Field isHidden = null;
     Object stickerInstance = null;
+    Map<Object, Integer> stickerMap = new HashMap<>();
 
     @Override
     public void hook() throws Throwable
     {  
+        Config.addOnConfigChangedListener((key, oldValue, newValue) ->
+        {
+            if (!"enable_share_hidden_sticker_pack".equals(key))
+                return;
+            if ((Boolean)newValue)
+                return;
+            for (Map.Entry<Object, Integer> entry : stickerMap.entrySet())
+            {
+                Object sticker = entry.getKey();
+                Integer originalIsHiddenValue = entry.getValue();
+                try
+                {
+                    isHidden.set(sticker, originalIsHiddenValue);
+                }
+                catch (Exception e)
+                {
+                    Logger.e("Error restoring isHidden value for sticker: " + sticker, e);
+                }
+            }
+        });
+
         List<MethodData> methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -124,6 +147,7 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
             Object result = chain.proceed();
             if (result != null)
             {
+                stickerMap.put(result, (Integer)isHidden.get(result));
                 isHidden.set(result, 0);
                 return result;
             }
