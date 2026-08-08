@@ -13,7 +13,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-@SuppressWarnings("unused")
 public class UnlockZCloudHook extends BaseHook
 {
     @Override

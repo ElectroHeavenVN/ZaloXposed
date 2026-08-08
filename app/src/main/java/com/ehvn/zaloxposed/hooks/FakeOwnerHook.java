@@ -8,7 +8,6 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
 
-@SuppressWarnings("unused")
 public class FakeOwnerHook extends BaseHook
 {
     @Override

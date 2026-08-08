@@ -14,7 +14,6 @@ import org.luckypray.dexkit.result.MethodData;
 import java.lang.reflect.Method;
 import java.util.List;
 
-@SuppressWarnings("unused")
 public class FakeAdminHook extends BaseHook
 {
     @Override

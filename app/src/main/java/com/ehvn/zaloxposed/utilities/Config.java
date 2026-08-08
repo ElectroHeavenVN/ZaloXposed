@@ -91,6 +91,8 @@ public final class Config
     {
         try
         {
+            if (!config.has(key))
+                config.putOpt(key, defaultValue);
             if (defaultValue instanceof Long)
                 return config.getLong(key);
             return config.get(key);
@@ -195,5 +197,15 @@ public final class Config
     public static void setEnableShareHiddenStickerPack(boolean value)
     {
         set("enable_share_hidden_sticker_pack", value);
+    }
+
+    public static boolean getHideMediaBox()
+    {
+        return (boolean)get("ads_hide_media_box", false);
+    }
+
+    public static void setHideMediaBox(boolean value)
+    {
+        set("ads_hide_media_box", value);
     }
 }

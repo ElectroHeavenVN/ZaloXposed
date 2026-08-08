@@ -38,7 +38,6 @@ import java.util.Objects;
 import io.github.libxposed.api.XposedInterface;
 
 // It would be great if we can patch dex...
-@SuppressWarnings("unused")
 public class EnableChatHeadHook extends BaseHook
 {
     static Field isAndroid10FullOrOlder = null;

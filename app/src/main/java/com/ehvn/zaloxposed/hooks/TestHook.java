@@ -8,7 +8,6 @@ import org.json.JSONObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-@SuppressWarnings("unused")
 public class TestHook extends BaseHook
 {
     @Override

@@ -14,9 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import io.github.libxposed.api.XposedInterface;
-
-@SuppressWarnings("unused")
 public class TTLHook extends BaseHook
 {
     @Override
