@@ -35,6 +35,12 @@ public final class ListItemSettingHelper
         listItemSetting.getClass().getMethod("setTitle", CharSequence.class).invoke(listItemSetting, title);
     }
 
+    public static void SetSubtitle(RelativeLayout listItemSetting, String title) throws Exception
+    {
+        CheckType(listItemSetting);
+        listItemSetting.getClass().getMethod("setSubtitle", CharSequence.class).invoke(listItemSetting, title);
+    }
+
     public static void SetSwitch(RelativeLayout listItemSetting, boolean checked) throws Exception
     {
         CheckType(listItemSetting);

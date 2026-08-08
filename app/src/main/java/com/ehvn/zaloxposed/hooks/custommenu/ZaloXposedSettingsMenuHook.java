@@ -76,6 +76,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Media Box" : "Ẩn Media Box");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideMediaBox());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideMediaBox);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide promoted ads" : "Ẩn quảng cáo được tài trợ");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Hide ads in Messages tab" : "Ẩn quảng cáo trong tab danh sách tin nhắn");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHidePromotedAds());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHidePromotedAds);
 
         separator = createSeparator(context);
         rootLayout.addView(separator);
@@ -114,6 +122,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Unlock ZCloud" : "Mở khoá ZCloud");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Does not increase My Documents capacity" :
+        "Không tăng dung lượng bộ nhớ My Documents");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getUnlockZCloud());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setUnlockZCloud);
 

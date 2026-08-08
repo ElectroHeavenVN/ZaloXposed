@@ -208,4 +208,14 @@ public final class Config
     {
         set("ads_hide_media_box", value);
     }
+
+    public static boolean getHidePromotedAds()
+    {
+        return (boolean)get("ads_hide_promoted_chat", false);
+    }
+
+    public static void setHidePromotedAds(boolean value)
+    {
+        set("ads_hide_promoted_chat", value);
+    }
 }
