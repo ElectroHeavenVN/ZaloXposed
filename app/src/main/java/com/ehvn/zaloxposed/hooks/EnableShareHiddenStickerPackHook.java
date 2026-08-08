@@ -103,6 +103,8 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
         Method synchronizedMapClassGet = Class.forName("java.util.Collections$SynchronizedMap", false, classLoader).getDeclaredMethod("get", Object.class);
         module.hook(synchronizedMapClassGet).intercept(chain ->
         {
+            if (!Config.getEnableShareHiddenStickerPack())
+                return chain.proceed();
             Object key = chain.getArg(0);
             if (!(key instanceof Integer stickerId))
                 return chain.proceed();
@@ -138,7 +140,7 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
             {
                 Logger.e("Error creating sticker instance", e);
             }
-            return result;
+            return null;
         }); 
     }
 }
