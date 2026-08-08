@@ -72,7 +72,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Media Box" : "Ẩn Media Box");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideMediaBox());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideMediaBox);
