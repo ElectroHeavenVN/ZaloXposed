@@ -30,6 +30,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new EnableE2EEHook());
         hooks.add(new RestoreDevToolsMenuHook());
         hooks.add(new EnableChatHeadHook());
+        hooks.add(new EnableShareHiddenStickerPackHook());
         hooks.add(new ExtendedGridMenuHook());
         hooks.add(new FakeAdminHook());
         hooks.add(new FakeOwnerHook());

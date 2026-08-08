@@ -17,45 +17,68 @@ public final class Logger
         module = xposedModule;
     }
 
+    private static String getCallerInfo()
+    {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        for (int i = 3; i < stackTrace.length; i++)
+        {
+            StackTraceElement element = stackTrace[i];
+            String className = element.getClassName();
+            if (!className.equals(Logger.class.getName())) 
+            {
+                String simpleName = className.substring(className.lastIndexOf('.') + 1);
+                return "[" + simpleName + "] ";
+            }
+        }
+        return "";
+    }
+
     public static void v(String msg)
     {
-        Log.v(TAG, msg);
-        module.log(Log.VERBOSE, TAG, msg);
+        String callerInfo = getCallerInfo();
+        Log.v(TAG, callerInfo + msg);
+        module.log(Log.VERBOSE, TAG, callerInfo + msg);
     }
 
     public static void d(String msg)
     {
-        Log.d(TAG, msg);
-        module.log(Log.DEBUG, TAG, msg);
+        String callerInfo = getCallerInfo();
+        Log.d(TAG, callerInfo + msg);
+        module.log(Log.DEBUG, TAG, callerInfo + msg);
     }
 
     public static void i(String msg)
     {
-        Log.i(TAG, msg);
-        module.log(Log.INFO, TAG, msg);
+        String callerInfo = getCallerInfo();
+        Log.i(TAG, callerInfo + msg);
+        module.log(Log.INFO, TAG, callerInfo + msg);
     }
 
     public static void w(String msg)
     {
-        Log.w(TAG, msg);
-        module.log(Log.WARN, TAG, msg);
+        String callerInfo = getCallerInfo();
+        Log.w(TAG, callerInfo + msg);
+        module.log(Log.WARN, TAG, callerInfo + msg);
     }
 
     public static void e(String msg)
     {
-        Log.e(TAG, msg);
-        module.log(Log.ERROR, TAG, msg);
-    } 
-    
+        String callerInfo = getCallerInfo();
+        Log.e(TAG, callerInfo + msg);
+        module.log(Log.ERROR, TAG, callerInfo + msg);
+    }
+
     public static void e(String msg, Throwable t)
     {
-        Log.e(TAG, msg, t);
-        module.log(Log.ERROR, TAG, msg, t);
+        String callerInfo = getCallerInfo();
+        Log.e(TAG, callerInfo + msg, t);
+        module.log(Log.ERROR, TAG, callerInfo + msg, t);
     }
 
     public static void e(Throwable t)
     {
-        Log.e(TAG, "", t);
-        module.log(Log.ERROR, TAG, "", t);
+        String callerInfo = getCallerInfo();
+        Log.e(TAG, callerInfo, t);
+        module.log(Log.ERROR, TAG, callerInfo, t);
     }
 }
