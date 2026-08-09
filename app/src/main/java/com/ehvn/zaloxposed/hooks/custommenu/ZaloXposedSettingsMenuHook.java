@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.Build;
 import android.text.InputType;
 import android.util.TypedValue;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -22,13 +21,10 @@ import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Logger;
 import com.ehvn.zaloxposed.utilities.Utils;
 
-import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
-import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.ClassData;
 import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Field;
@@ -43,7 +39,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
 {
     private static final String CUSTOM_ITEM_MARKER = "zalo_xposed_settings";
 
-    private static Class<?> resourceClass = null;
     private static Class<?> tabMeItemClass = null;
     private static Field tabMeItemTrackingField = null;
     private static Field tabMeItemTitleField = null;
@@ -64,6 +59,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         TextView headerTitle;
         RelativeLayout listItemSetting;
 
+
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
@@ -79,11 +75,18 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Business Box" : "Ẩn Business Box");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideBizBox());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideBizBox);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide promoted ads" : "Ẩn quảng cáo được tài trợ");
-        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Hide ads in Messages tab" : "Ẩn quảng cáo trong tab danh sách tin nhắn");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHidePromotedAds());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHidePromotedAds);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide ZInstant Ads" : "Ẩn quảng cáo ZInstant");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Hide ads in Messages tab" : "Ẩn quảng cáo trong tab Tin nhắn");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideZInstantAds());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideZInstantAds);
 
         separator = createSeparator(context);
         rootLayout.addView(separator);
@@ -99,6 +102,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableChatHead);
         listItemSetting.setEnabled(Build.VERSION.SDK_INT > Build.VERSION_CODES.Q);
 
+   
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
@@ -112,6 +116,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGridMenu());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGridMenu);
 
+   
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
@@ -122,11 +127,11 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Unlock ZCloud" : "Mở khoá ZCloud");
-        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Does not increase My Documents capacity" :
-        "Không tăng dung lượng bộ nhớ My Documents");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Does not increase My Documents capacity" : "Không tăng dung lượng bộ nhớ My Documents");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getUnlockZCloud());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setUnlockZCloud);
 
+    
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
@@ -162,6 +167,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             }
         });
 
+ 
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
@@ -223,6 +229,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             }
         });
 
+    
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
@@ -344,7 +351,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     {
         if (tabMeItemInfoLoaded)
             return;
-        int iconValue = getResourceIdByName("zds_ic_storage_line_24");
+        int iconValue = Utils.GetDrawableResourceIdByName("zds_ic_storage_line_24");
         for (Object item : tabMeItems)
         {
             Field field = Utils.FindFieldByValue(item, "tab_me_tool_storage");
@@ -421,7 +428,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             else
                 tabMeItemDescriptionField.set(newItem, "Cài đặt ZaloXposed");
             tabMeItemIconField.setAccessible(true);
-            tabMeItemIconField.setInt(newItem, getResourceIdByName("zds_oic_premium_crown_color_24"));
+            tabMeItemIconField.setInt(newItem, Utils.GetDrawableResourceIdByName("zds_oic_premium_crown_color_24"));
             return newItem;
         }
         catch (Throwable t)
@@ -429,45 +436,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             Logger.e(t);
             return null;
         }
-    }
-
-    private int getResourceIdByName(String resourceName)
-    {
-        try
-        {
-            if (resourceClass == null)
-            {
-                List<ClassData> classes = bridge.findClass(FindClass.create()
-                    .matcher(ClassMatcher.create()
-                        .addFieldForName("zds_ic_storage_line_24")
-                    ));
-                for (ClassData classData : classes)
-                {
-                    try
-                    {
-                        Class<?> clazz = classData.getInstance(classLoader);
-                        if (clazz.getName().equals("com.zing.zalo.R.drawable"))
-                            continue;
-                        resourceClass = clazz;
-                        break;
-                    }
-                    catch (Throwable ignored) { }
-                }
-            }
-            if (resourceClass == null)
-            {
-                Logger.e("Resource class not found");
-                return 0;
-            }
-            Field field = resourceClass.getField(resourceName);
-            return field.getInt(null);
-        }
-        catch (Exception e)
-        {
-            Logger.e("Error getting resource ID for " + resourceName);
-            Logger.e(e);
-        }
-        return 0;
     }
 
     private void hookSettingPrivateView() throws Exception

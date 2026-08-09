@@ -209,13 +209,23 @@ public final class Config
         set("ads_hide_media_box", value);
     }
 
-    public static boolean getHidePromotedAds()
+    public static boolean getHideBizBox()
     {
-        return (boolean)get("ads_hide_promoted_chat", false);
+        return (boolean)get("ads_hide_business_box", false);
     }
 
-    public static void setHidePromotedAds(boolean value)
+    public static void setHideBizBox(boolean value)
     {
-        set("ads_hide_promoted_chat", value);
+        set("ads_hide_business_box", value);
+    }
+
+    public static boolean getHideZInstantAds()
+    {
+        return (boolean)get("ads_hide_z_instant", false);
+    }
+
+    public static void setHideZInstantAds(boolean value)
+    {
+        set("ads_hide_z_instant", value);
     }
 }

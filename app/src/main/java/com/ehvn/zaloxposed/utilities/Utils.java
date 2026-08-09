@@ -1,6 +1,5 @@
 package com.ehvn.zaloxposed.utilities;
 
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.util.Log;
 
@@ -15,9 +14,12 @@ import com.android.tools.smali.dexlib2.iface.MultiDexContainer;
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction;
 
 import org.luckypray.dexkit.DexKitBridge;
+import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
+import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
+import org.luckypray.dexkit.result.ClassData;
 import org.luckypray.dexkit.result.MethodData;
 
 import java.io.File;
@@ -45,6 +47,8 @@ public final class Utils
     private static Method getCurrentUserInfoMethod;
     private static String mdPath = "";
     private static MultiDexContainer<? extends DexBackedDexFile> dexContainer;
+    private static Class<?> drawableResourceClass = null;
+    private static Class<?> resourceClass = null;
 
     static
     {
@@ -79,6 +83,32 @@ public final class Utils
                 .addUsingString("UserInfo", StringMatchType.Equals)
             ));
         getCurrentUserInfoMethod = methods.isEmpty() ? null : methods.get(0).getMethodInstance(sClassLoader);
+        List<ClassData> classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("zds_ic_storage_line_24")));
+        for (ClassData classData : classes)
+        {
+            try
+            {
+                Class<?> clazz = classData.getInstance(classLoader);
+                if (clazz.getName().equals("com.zing.zalo.R.drawable"))
+                    continue;
+                drawableResourceClass = clazz;
+                break;
+            }
+            catch (Throwable ignored) { }
+        }
+        classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("signup_gender_female")));
+        for (ClassData classData : classes)
+        {
+            try
+            {
+                Class<?> clazz = classData.getInstance(classLoader);
+                if (clazz.getName().equals("com.zing.zalo.R"))
+                    continue;
+                resourceClass = clazz;
+                break;
+            }
+            catch (Throwable ignored) { }
+        }
     }
 
     public static String GetCurrentUserID()
@@ -98,7 +128,7 @@ public final class Utils
         }
         catch (Exception e)
         {
-            Log.e(TAG, "GetCurrentUserID error: " + e.getMessage());
+            Log.e(TAG, "GetCurrentUserID error: " + e);
         }
         return "0";
     }
@@ -123,7 +153,7 @@ public final class Utils
         }
         catch (Exception e)
         {
-            Log.e(TAG, "GetCurrentUserToken error: " + e.getMessage());
+            Log.e(TAG, "GetCurrentUserToken error: " + e);
         }
         return "";
     }
@@ -145,7 +175,7 @@ public final class Utils
         }
         catch (Exception e)
         {
-            Log.e(TAG, "GetAppVersion error: " + e.getMessage());
+            Log.e(TAG, "GetAppVersion error: " + e);
         }
         return "";
     }
@@ -179,7 +209,7 @@ public final class Utils
         }
         catch (Exception e)
         {
-            Log.e(TAG, "GetCurrentUserInfo error: " + e.getMessage());
+            Log.e(TAG, "GetCurrentUserInfo error: " + e);
         }
         return "";
     }
@@ -398,5 +428,43 @@ public final class Utils
         if (!dir.exists())
             dir.mkdirs();
         return dir.getAbsolutePath();
+    }
+
+    public static int GetDrawableResourceIdByName(String resourceName)
+    {
+        try
+        { 
+            if (drawableResourceClass == null)
+            {
+                Logger.e("Drawable resource class not found");
+                return 0;
+            }
+            Field field = drawableResourceClass.getField(resourceName);
+            return field.getInt(null);
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, "GetDrawableResourceIdByName error: " + e);
+        }
+        return 0;
+    }
+
+    public static int GetResourceIdByName(String resourceName)
+    {
+        try
+        { 
+            if (resourceClass == null)
+            {
+                Logger.e("Resource class not found");
+                return 0;
+            }
+            Field field = resourceClass.getField(resourceName);
+            return field.getInt(null);
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, "GetResourceIdByName error: " + e);
+        }
+        return 0;
     }
 }

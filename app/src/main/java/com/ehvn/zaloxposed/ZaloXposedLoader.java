@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 
 import com.ehvn.zaloxposed.hooks.*;
 import com.ehvn.zaloxposed.hooks.ads.HideAdsHook;
-import com.ehvn.zaloxposed.hooks.ads.HideMediaBoxHook;
 import com.ehvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
 import com.ehvn.zaloxposed.hooks.permanent.*;
 import com.ehvn.zaloxposed.utilities.Config;
@@ -39,7 +38,6 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new TTLHook());
         hooks.add(new UnlockZCloudHook());
         hooks.add(new HideAdsHook());
-        hooks.add(new HideMediaBoxHook());
 
         hooks.add(new TestHook());
     }
