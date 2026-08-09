@@ -27,17 +27,21 @@ public class ZaloXposedLoader extends XposedModule
     {
         System.loadLibrary("dexkit");
         hooks.add(new ZaloXposedSettingsMenuHook());
+
         hooks.add(new ChatInputBarTitleHook());
         hooks.add(new EnableE2EEHook());
         hooks.add(new RestoreDevToolsMenuHook());
+        hooks.add(new EnableSetNicknameInGroupHook());
+
+        hooks.add(new HideAdsHook());
         hooks.add(new EnableChatHeadHook());
-        hooks.add(new EnableShareHiddenStickerPackHook());
         hooks.add(new ExtendedGridMenuHook());
+        hooks.add(new ExtendedGroupSettingMenuHook());
         hooks.add(new FakeAdminHook());
         hooks.add(new FakeOwnerHook());
         hooks.add(new TTLHook());
         hooks.add(new UnlockZCloudHook());
-        hooks.add(new HideAdsHook());
+        hooks.add(new EnableShareHiddenStickerPackHook());
 
         hooks.add(new TestHook());
     }

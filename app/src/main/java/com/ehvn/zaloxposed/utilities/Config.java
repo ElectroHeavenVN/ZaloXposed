@@ -199,6 +199,16 @@ public final class Config
         set("enable_share_hidden_sticker_pack", value);
     }
 
+    public static boolean getEnableExtendedGroupSettingMenu()
+    {
+        return (boolean)get("enable_extended_group_setting_menu", false);
+    }
+
+    public static void setEnableExtendedGroupSettingMenu(boolean value)
+    {
+        set("enable_extended_group_setting_menu", value);
+    }
+
     public static boolean getHideMediaBox()
     {
         return (boolean)get("ads_hide_media_box", false);

@@ -75,9 +75,15 @@ public final class Utils
                 .returnType("int")
                 .addUsingString("CHAT_MULTI_SELECTION_MAX_NUMBER_OF_SELECTED_MESSAGES", StringMatchType.Equals)
             ));
-        cfgClass = methods.isEmpty() ? null : methods.get(0).getMethodInstance(sClassLoader).getDeclaringClass();
+        if (methods.isEmpty())
+        {
+            Log.e(TAG, "Config method not found");
+            return;
+        }
+        cfgClass = methods.get(0).getMethodInstance(sClassLoader).getDeclaringClass();
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
+                .declaredClass(cfgClass)
                 .paramCount(0)
                 .returnType("java.lang.String")
                 .addUsingString("UserInfo", StringMatchType.Equals)
@@ -109,6 +115,11 @@ public final class Utils
             }
             catch (Throwable ignored) { }
         }
+    }
+
+    public static Class<?> GetConfigClass()
+    {
+        return cfgClass;
     }
 
     public static String GetCurrentUserID()

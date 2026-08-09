@@ -69,7 +69,6 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
         }
         Method method = methods.get(0).getMethodInstance(classLoader);
         Class<?> stickerClass = method.getDeclaringClass();
-        Logger.i("Sticker class: " + stickerClass.getName());
         ArrayList<Instruction> instructions = Utils.Disassemble(method);
         // /*
         //     const-string v1, ",\"is_hidden\":"
@@ -123,6 +122,7 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
         }
         Method onStickerPackOptionsClicked = methods.get(0).getMethodInstance(classLoader); 
         Method synchronizedMapClassGet = Class.forName("java.util.Collections$SynchronizedMap", false, classLoader).getDeclaredMethod("get", Object.class);
+        Logger.i("Hooking: " + synchronizedMapClassGet);
         module.hook(synchronizedMapClassGet).intercept(chain ->
         {
             if (!Config.getEnableShareHiddenStickerPack())
