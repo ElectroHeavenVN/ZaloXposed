@@ -332,7 +332,7 @@ public class EnableChatHeadHook extends BaseHook
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
-                .addUsingString("action.open.zinstantview", StringMatchType.Equals)
+                .addUsingString("fetchZaloFriendUidSocket", StringMatchType.Equals)
                 .addUsingString("ZPF-PromotionTransferTooltip", StringMatchType.Equals)
                 .addUsingString("getChildZaloViewManager(...)", StringMatchType.Equals)
                 .addUsingString("System Setting not allow to create Bubbles on Screen", StringMatchType.Equals)

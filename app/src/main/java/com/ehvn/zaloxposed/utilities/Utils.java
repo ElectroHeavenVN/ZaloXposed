@@ -73,7 +73,8 @@ public final class Utils
             .matcher(MethodMatcher.create()
                 .paramCount(0)
                 .returnType("int")
-                .addUsingString("CHAT_MULTI_SELECTION_MAX_NUMBER_OF_SELECTED_MESSAGES", StringMatchType.Equals)
+                .addUsingString("PRIVACY_SETTINGS_SETTING_VIEW_DOB_%s", StringMatchType.Equals)
+                .addUsingString("%s", StringMatchType.Equals)
             ));
         if (methods.isEmpty())
         {
@@ -102,6 +103,14 @@ public final class Utils
             }
             catch (Throwable ignored) { }
         }
+        if (drawableResourceClass == null && classes.size() > 0)
+        {
+            try
+            {
+                drawableResourceClass = classes.get(0).getInstance(classLoader);
+            }
+            catch (Throwable ignored) { }
+        }
         classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("signup_gender_female")));
         for (ClassData classData : classes)
         {
@@ -112,6 +121,14 @@ public final class Utils
                     continue;
                 resourceClass = clazz;
                 break;
+            }
+            catch (Throwable ignored) { }
+        }
+        if (resourceClass == null && classes.size() > 0)
+        {
+            try
+            {
+                resourceClass = classes.get(0).getInstance(classLoader);
             }
             catch (Throwable ignored) { }
         }
