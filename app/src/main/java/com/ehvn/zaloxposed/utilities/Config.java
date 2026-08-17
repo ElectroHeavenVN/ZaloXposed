@@ -229,6 +229,56 @@ public final class Config
         set("ads_hide_business_box", value);
     }
 
+    public static boolean getEnableCustomizeBottomRow()
+    {
+        return (boolean)get("enable_customize_bottom_row", false);
+    }
+
+    public static void setEnableCustomizeBottomRow(boolean value)
+    {
+        set("enable_customize_bottom_row", value);
+    }
+
+    public static boolean getHideDiscoveryTab()
+    {
+        return (boolean)get("ads_hide_discovery_tab", false);
+    }
+
+    public static void setHideDiscoveryTab(boolean value)
+    {
+        set("ads_hide_discovery_tab", value);
+    }
+
+    public static boolean getHideNewsFeedTab()
+    {
+        return (boolean)get("ads_hide_news_feed_tab", false);
+    }
+
+    public static void setHideNewsFeedTab(boolean value)
+    {
+        set("ads_hide_news_feed_tab", value);
+    }
+
+    public static boolean getShowMoreTab()
+    {
+        return (boolean)get("ads_show_more_tab", false);
+    }
+
+    public static void setShowMoreTab(boolean value)
+    {
+        set("ads_show_more_tab", value);
+    }
+
+    public static boolean getShowGroupsTab()
+    {
+        return (boolean)get("ads_show_groups_tab", false);
+    }
+
+    public static void setShowGroupsTab(boolean value)
+    {
+        set("ads_show_groups_tab", value);
+    }
+
     public static boolean getHideZInstantAds()
     {
         return (boolean)get("ads_hide_z_instant", false);

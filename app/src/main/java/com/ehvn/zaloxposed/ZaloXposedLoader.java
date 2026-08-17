@@ -34,6 +34,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new EnableSetNicknameInGroupHook());
 
         hooks.add(new HideAdsHook());
+        hooks.add(new CustomizeBottomRowHook());
         hooks.add(new EnableChatHeadHook());
         hooks.add(new ExtendedGridMenuHook());
         hooks.add(new ExtendedGroupSettingMenuHook());

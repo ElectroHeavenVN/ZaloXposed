@@ -258,6 +258,48 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableShareHiddenStickerPack());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableShareHiddenStickerPack);
 
+        
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Bottom row" : "Thanh dưới");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable bottom row customization" : "Kích hoạt tuỳ chỉnh thanh dưới");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableCustomizeBottomRow());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableCustomizeBottomRow);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Discovery tab" : "Ẩn tab Khám Phá");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideDiscoveryTab());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideDiscoveryTab);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Newsfeed tab" : "Ẩn tab Tường Nhà");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideNewsFeedTab());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideNewsFeedTab);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Show Groups tab" : "Hiện tab Nhóm");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getShowGroupsTab());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setShowGroupsTab);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Show More tab" : "Hiện tab Thêm");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getShowMoreTab());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setShowMoreTab);
+
 
         for (int i = 0; i < 5; i++)
         {
