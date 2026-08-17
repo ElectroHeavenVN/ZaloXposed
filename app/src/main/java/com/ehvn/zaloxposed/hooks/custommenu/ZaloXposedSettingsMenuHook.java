@@ -63,6 +63,21 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
+        headerTitle.setText("Mini Chat (Chat Head)");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable" : "Kích hoạt");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableChatHead());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableChatHead);
+        listItemSetting.setEnabled(Build.VERSION.SDK_INT > Build.VERSION_CODES.Q);
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
         headerTitle.setText(isEnglish ? "Ads" : "Quảng cáo");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
@@ -88,21 +103,69 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideZInstantAds());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideZInstantAds);
 
+ 
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText("Mini Chat (Chat Head)");
+        headerTitle.setText(isEnglish ? "Disappearing messages" : "Tin nhắn tự xoá");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable" : "Kích hoạt");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableChatHead());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableChatHead);
-        listItemSetting.setEnabled(Build.VERSION.SDK_INT > Build.VERSION_CODES.Q);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Override disappearing messages config" : "Ghi đè cấu hình tin nhắn tự xoá");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableTTLOverride());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableTTLOverride);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Disappearing message time" : "Thời gian tin nhắn tự xoá");
+        TextView titleView = findTitleTextView(headerTitle);
+        if (titleView != null)
+        {
+            TextView listItemSettingTitle = findTitleTextView(listItemSetting);
+            if (listItemSettingTitle != null)
+                titleView.setTextColor(listItemSettingTitle.getTextColors());
+        }
+        rootLayout.addView(headerTitle);
+        EditText input = new EditText(context);
+        rootLayout.addView(input);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        input.setText(Config.getTTL() + "");
+        input.setHint(isEnglish ? "Enter value (milliseconds)" : "Nhập giá trị (mili giây)");
+        styleEditText(input, context, listItemSetting);
+        input.setOnEditorActionListener((textView, actionId, keyEvent) ->
+        {
+            try
+            {
+                if (actionId != EditorInfo.IME_ACTION_DONE)
+                    return false;
+                long ttlValue = Long.parseLong(textView.getText().toString());
+                Config.setTTL(ttlValue);
+            }
+            catch (Exception e)
+            {
+                Logger.e(e);
+            }
+            return false;
+        });
+        input.setOnFocusChangeListener((view, hasFocus) ->
+        {
+            if (!hasFocus)
+            {
+                try
+                {
+                    EditText editText = (EditText)view;
+                    long ttlValue = Long.parseLong(editText.getText().toString());
+                    Config.setTTL(ttlValue);
+                }
+                catch (Exception e)
+                {
+                    Logger.e(e);
+                }
+            }
+        });
 
-   
+
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
@@ -171,68 +234,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             catch (Exception e)
             {
                 Logger.e(e);
-            }
-        });
-
- 
-        separator = createSeparator(context);
-        rootLayout.addView(separator);
-        headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Disappearing messages" : "Tin nhắn tự xoá");
-        rootLayout.addView(headerTitle);
-        listItemSetting = ListItemSettingHelper.CreateNew(context);
-        rootLayout.addView(listItemSetting);
-        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Override disappearing messages config" : "Ghi đè cấu hình tin nhắn tự xoá");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableTTLOverride());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableTTLOverride);
-        headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Disappearing message time" : "Thời gian tin nhắn tự xoá");
-        TextView titleView = findTitleTextView(headerTitle);
-        if (titleView != null)
-        {
-            TextView listItemSettingTitle = findTitleTextView(listItemSetting);
-            if (listItemSettingTitle != null)
-                titleView.setTextColor(listItemSettingTitle.getTextColors());
-        }
-        rootLayout.addView(headerTitle);
-        EditText input = new EditText(context);
-        rootLayout.addView(input);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        input.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        input.setText(Config.getTTL() + "");
-        input.setHint(isEnglish ? "Enter value (milliseconds)" : "Nhập giá trị (mili giây)");
-        styleEditText(input, context, listItemSetting);
-        input.setOnEditorActionListener((textView, actionId, keyEvent) ->
-        {
-            try
-            {
-                if (actionId != EditorInfo.IME_ACTION_DONE)
-                    return false;
-                long ttlValue = Long.parseLong(textView.getText().toString());
-                Config.setTTL(ttlValue);
-            }
-            catch (Exception e)
-            {
-                Logger.e(e);
-            }
-            return false;
-        });
-        input.setOnFocusChangeListener((view, hasFocus) ->
-        {
-            if (!hasFocus)
-            {
-                try
-                {
-                    EditText editText = (EditText)view;
-                    long ttlValue = Long.parseLong(editText.getText().toString());
-                    Config.setTTL(ttlValue);
-                }
-                catch (Exception e)
-                {
-                    Logger.e(e);
-                }
             }
         });
 
