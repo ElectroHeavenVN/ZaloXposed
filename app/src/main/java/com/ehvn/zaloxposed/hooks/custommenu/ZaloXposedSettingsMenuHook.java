@@ -1,9 +1,13 @@
 package com.ehvn.zaloxposed.hooks.custommenu;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.InputType;
 import android.util.TypedValue;
 import android.view.View;
@@ -301,6 +305,16 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setShowMoreTab);
 
 
+        Object restartButton = ZButtonHelper.CreateNew(context);
+        rootLayout.addView((View) restartButton);
+        ZButtonHelper.SetText(restartButton, isEnglish ? "Restart app" : "Khởi động lại ứng dụng");
+        ZButtonHelper.SetOnClickListener(restartButton, v -> restartApp(context));
+        LinearLayout.LayoutParams restartLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        int pad16 = dp(context, 16);
+        restartLp.setMargins(pad16, pad16, pad16, 0);
+        ((View) restartButton).setLayoutParams(restartLp);
+
+
         for (int i = 0; i < 5; i++)
         {
             separator = createSeparator(context);
@@ -312,8 +326,28 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     public void hook() throws Throwable
     {
         ListItemSettingHelper.Init(classLoader);
+        ZButtonHelper.Init(classLoader);
         hookTabMeView();
         hookSettingPrivateView();
+    }
+
+    private void restartApp(Context context)
+    {
+        try
+        {
+            Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+            if (intent == null)
+                return;
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            context.startActivity(intent);
+            if (Activity.class.isAssignableFrom(context.getClass()))
+                ((Activity) context).finish();
+            new Handler(Looper.getMainLooper()).postDelayed(() -> Runtime.getRuntime().exit(0), 0);
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
     }
 
     @SuppressLint("PrivateApi")
