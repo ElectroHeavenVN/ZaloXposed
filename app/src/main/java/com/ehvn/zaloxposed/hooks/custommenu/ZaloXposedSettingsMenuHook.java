@@ -78,35 +78,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Ads" : "Quảng cáo");
-        rootLayout.addView(headerTitle);
-        listItemSetting = ListItemSettingHelper.CreateNew(context);
-        rootLayout.addView(listItemSetting);
-        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Media Box" : "Ẩn Media Box");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideMediaBox());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideMediaBox);
-        listItemSetting = ListItemSettingHelper.CreateNew(context);
-        rootLayout.addView(listItemSetting);
-        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Business Box" : "Ẩn Business Box");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideBizBox());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideBizBox);
-        listItemSetting = ListItemSettingHelper.CreateNew(context);
-        rootLayout.addView(listItemSetting);
-        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide ZInstant Ads" : "Ẩn quảng cáo ZInstant");
-        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Hide ads in Messages tab" : "Ẩn quảng cáo trong tab Tin nhắn");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideZInstantAds());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideZInstantAds);
-
- 
-        separator = createSeparator(context);
-        rootLayout.addView(separator);
-        headerTitle = createHeaderTitle(context);
         headerTitle.setText(isEnglish ? "Disappearing messages" : "Tin nhắn tự xoá");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
@@ -164,6 +135,42 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 }
             }
         });
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Ads" : "Quảng cáo");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Media Box" : "Ẩn Media Box");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideMediaBox());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideMediaBox);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Business Box" : "Ẩn Business Box");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideBizBox());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideBizBox);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide ZInstant Ads" : "Ẩn quảng cáo ZInstant");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Hide ads in Messages tab" : "Ẩn quảng cáo trong tab Tin nhắn");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideZInstantAds());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideZInstantAds);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Ads in Timeline" : "Ẩn quảng cáo trong Nhật Ký");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideFeedItemZInstantAds());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideFeedItemZInstantAds);
 
 
         separator = createSeparator(context);
@@ -250,6 +257,13 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Allow sharing hidden sticker packs" : "Cho phép chia sẻ bộ sticker ẩn");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableShareHiddenStickerPack());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableShareHiddenStickerPack);
+
+
+        for (int i = 0; i < 5; i++)
+        {
+            separator = createSeparator(context);
+            rootLayout.addView(separator);
+        }
     }
 
     @Override

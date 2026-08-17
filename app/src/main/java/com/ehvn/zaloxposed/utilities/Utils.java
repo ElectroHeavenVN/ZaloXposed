@@ -2,6 +2,8 @@ package com.ehvn.zaloxposed.utilities;
 
 import android.content.pm.ApplicationInfo;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
@@ -494,5 +496,20 @@ public final class Utils
             Log.e(TAG, "GetResourceIdByName error: " + e);
         }
         return 0;
+    }
+
+    public static void HideView(View view) 
+    {
+        if (view == null) 
+            return;
+        view.setVisibility(View.GONE);
+        view.setMinimumHeight(0);
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        if (layoutParams == null) 
+            return;
+        layoutParams.height = 0;
+        if (layoutParams.width <= 0)
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        view.setLayoutParams(layoutParams);
     }
 }

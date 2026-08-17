@@ -238,4 +238,14 @@ public final class Config
     {
         set("ads_hide_z_instant", value);
     }
+
+    public static boolean getHideFeedItemZInstantAds()
+    {
+        return (boolean)get("ads_hide_feed_item_z_instant", false);
+    }
+
+    public static void setHideFeedItemZInstantAds(boolean value)
+    {
+        set("ads_hide_feed_item_z_instant", value);
+    }
 }

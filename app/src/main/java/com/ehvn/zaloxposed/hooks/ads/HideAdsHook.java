@@ -57,14 +57,40 @@ public class HideAdsHook extends BaseHook
                     {
                         if (View.class != field.getType())
                             continue;
-                        View view = (View)field.get(result);
-                        if (view == null)
-                            continue;
-                        ViewGroup.LayoutParams layout = view.getLayoutParams();
-                        layout.height = 0;
-                        view.setVisibility(View.GONE);
+                        Utils.HideView((View)field.get(result));
                     }
-                    return result;
+                }
+                return result;
+            });
+        }
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .declaredClass("com.zing.zalo.social.presentation.timeline.view.TimelineView")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("void")
+                .paramCount(2)
+                .paramTypes(null, "android.view.View")
+            ));
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found");
+            return;
+        }
+        for (MethodData methodData : methods)
+        {
+            Method method = methodData.getMethodInstance(classLoader);
+            Logger.i("Hooking: " + method);
+            module.hook(method).intercept(chain ->
+            {
+                Object result = chain.proceed();
+                if (Config.getHideFeedItemZInstantAds())
+                {
+                    View view = (View)chain.getArg(1);
+                    if (view == null)
+                        return result;
+                    Class<?> viewClass = view.getClass();
+                    if (viewClass.getName().equals("com.zing.zalo.social.presentation.timeline.components.ads.FeedItemZInstantAds"))
+                        Utils.HideView(view);
                 }
                 return result;
             });
