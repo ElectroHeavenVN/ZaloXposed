@@ -119,6 +119,16 @@ public final class Config
         }
     }
 
+    public static boolean getEnableBackground()
+    {
+        return (boolean)get("enable_bg", true);
+    }
+
+    public static void setEnableBackground(boolean value)
+    {
+        set("enable_bg", value);
+    }
+
     public static boolean getEnableExtendedGridMenu()
     {
         return (boolean)get("enable_extended_grid_menu", false);

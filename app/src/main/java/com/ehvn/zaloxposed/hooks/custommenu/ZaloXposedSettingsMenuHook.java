@@ -64,6 +64,15 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         RelativeLayout listItemSetting;
 
 
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Custom background" : "Hình nền tuỳ chỉnh");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableBackground());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableBackground);
+
+
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);

@@ -1,5 +1,6 @@
 package com.ehvn.zaloxposed;
 
+import android.content.res.AssetManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -14,6 +15,7 @@ import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.DexKitBridge;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import io.github.libxposed.api.XposedModule;
@@ -27,6 +29,7 @@ public class ZaloXposedLoader extends XposedModule
     {
         System.loadLibrary("dexkit");
         hooks.add(new ZaloXposedSettingsMenuHook());
+        hooks.add(new CustomBackgroundHook());
 
         hooks.add(new ChatInputBarTitleHook());
         hooks.add(new EnableE2EEHook());
@@ -78,7 +81,10 @@ public class ZaloXposedLoader extends XposedModule
         {
             try
             {
-                hook.init(this, bridge, param);
+                AssetManager assetManager = AssetManager.class.getDeclaredConstructor().newInstance();
+                Method addAssetPath = AssetManager.class.getMethod("addAssetPath", String.class);
+                addAssetPath.invoke(assetManager, getModuleApplicationInfo().sourceDir);
+                hook.init(this, bridge, param, assetManager);
                 hook.hook();
             }
             catch (Throwable e)

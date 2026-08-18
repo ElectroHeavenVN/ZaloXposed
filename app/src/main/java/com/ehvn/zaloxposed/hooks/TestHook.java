@@ -1,30 +1,22 @@
 package com.ehvn.zaloxposed.hooks;
 
-import com.ehvn.zaloxposed.utilities.Logger;
-import com.ehvn.zaloxposed.utilities.Utils;
+import com.ehvn.zaloxposed.utilities.*;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.luckypray.dexkit.query.FindClass;
-import org.luckypray.dexkit.query.FindMethod;
-import org.luckypray.dexkit.query.enums.StringMatchType;
-import org.luckypray.dexkit.query.matchers.ClassMatcher;
-import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.ClassData;
-import org.luckypray.dexkit.result.ClassDataList;
-import org.luckypray.dexkit.result.MethodData;
-import org.luckypray.dexkit.result.UsingFieldData;
+import org.json.*;
+import org.luckypray.dexkit.query.*;
+import org.luckypray.dexkit.query.enums.*;
+import org.luckypray.dexkit.query.matchers.*;
+import org.luckypray.dexkit.result.*;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.InputStream;
+import java.lang.reflect.*;
+import java.nio.charset.*;
+import java.util.*;
 
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
+import android.graphics.*;
+import android.graphics.drawable.*;
+import android.view.*;
+import android.widget.*;
 
 public class TestHook extends BaseHook
 {
