@@ -279,6 +279,46 @@ public final class Config
         set("ads_show_groups_tab", value);
     }
 
+    public static boolean getEnableAntiRecall()
+    {
+        return (boolean)get("enable_anti_recall", false);
+    }
+
+    public static void setEnableAntiRecall(boolean value)
+    {
+        set("enable_anti_recall", value);
+    }
+
+    public static boolean getEnableAntiDelete()
+    {
+        return (boolean)get("enable_anti_delete", false);
+    }
+
+    public static void setEnableAntiDelete(boolean value)
+    {
+        set("enable_anti_delete", value);
+    }
+
+    public static boolean getAntiRecallIncludeMe()
+    {
+        return (boolean)get("anti_recall_include_me", false);
+    }
+
+    public static void setAntiRecallIncludeMe(boolean value)
+    {
+        set("anti_recall_include_me", value);
+    }
+
+    public static boolean getAntiDeleteIncludeMeDeleteMyMessage()
+    {
+        return (boolean)get("anti_delete_include_me_delete_my_message", false);
+    }
+
+    public static void setAntiDeleteIncludeMeDeleteMyMessage(boolean value)
+    {
+        set("anti_delete_include_me_delete_my_message", value);
+    }
+
     public static boolean getHideZInstantAds()
     {
         return (boolean)get("ads_hide_z_instant", false);

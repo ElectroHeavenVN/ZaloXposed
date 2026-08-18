@@ -32,6 +32,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new EnableE2EEHook());
         hooks.add(new RestoreDevToolsMenuHook());
         hooks.add(new EnableSetNicknameInGroupHook());
+        hooks.add(new DisableDohHook());
 
         hooks.add(new HideAdsHook());
         hooks.add(new CustomizeBottomRowHook());
@@ -43,6 +44,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new TTLHook());
         hooks.add(new UnlockZCloudHook());
         hooks.add(new EnableShareHiddenStickerPackHook());
+        hooks.add(new AntiRecallDeleteHook());
 
         hooks.add(new TestHook());
     }
