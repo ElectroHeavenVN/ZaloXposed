@@ -2,6 +2,12 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('local.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace 'com.ehvn.zaloxposed'
     compileSdk {
@@ -16,17 +22,26 @@ android {
         targetSdk 37
         versionCode 1
         versionName "1.0"
+    }
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    signingConfigs {
+        release {
+            storeFile = file(keystoreProperties['signing.storeFile'])
+            storePassword = keystoreProperties['signing.storePassword']
+            keyAlias = keystoreProperties['signing.keyAlias']
+            keyPassword = keystoreProperties['signing.keyPassword']
+        }
     }
 
     buildTypes {
         release {
-            optimization {
-                enable false
-            }
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -34,9 +49,6 @@ android {
 }
 
 dependencies {
-    implementation libs.androidx.core.ktx
-    implementation libs.androidx.lifecycle.runtime.ktx
-    implementation libs.androidx.recyclerview
     implementation libs.dexkit
     implementation libs.smali.dexlib2
     compileOnly("io.github.libxposed:api:102.0.0")

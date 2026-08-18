@@ -18,8 +18,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-
 import com.ehvn.zaloxposed.hooks.BaseHook;
 import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Logger;
@@ -697,7 +695,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         });
     }
 
-    @NonNull
     private static String getFakeRoleName(int roleLevel)
     {
         return switch (roleLevel)
@@ -708,7 +705,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         };
     }
 
-    @NonNull
     private TextView createHeaderTitle(Context context) throws Exception
     {
         TextView headerTitle = (TextView) headerTextViewClass.getConstructor(Context.class).newInstance(context);
@@ -749,7 +745,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         return headerTitle;
     }
 
-    @NonNull
     private View createSeparator(Context context)
     {
         View separator = new View(context);

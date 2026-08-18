@@ -10,8 +10,6 @@ import android.os.Build;
 import android.view.Display;
 import android.view.WindowManager;
 
-import androidx.annotation.NonNull;
-
 import com.android.tools.smali.dexlib2.Opcode;
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction;
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction;
@@ -561,7 +559,7 @@ public class EnableChatHeadHook extends BaseHook
 
     static class FixWindowLayoutComponentImpl implements XposedInterface.Hooker
     {
-        public Object intercept(@NonNull XposedInterface.Chain chain) throws Throwable
+        public Object intercept(XposedInterface.Chain chain) throws Throwable
         {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
                 return chain.proceed();
@@ -590,7 +588,7 @@ public class EnableChatHeadHook extends BaseHook
     {
         private static final HashMap<Field, Boolean> originalValues = new HashMap<>();
 
-        public Object intercept(@NonNull XposedInterface.Chain chain) throws Throwable
+        public Object intercept(XposedInterface.Chain chain) throws Throwable
         {
             if (!Config.getEnableChatHead())
                 return chain.proceed();

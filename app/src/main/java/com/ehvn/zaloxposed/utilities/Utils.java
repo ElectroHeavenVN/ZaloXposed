@@ -5,8 +5,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
-
 import com.android.tools.smali.dexlib2.DexFileFactory;
 import com.android.tools.smali.dexlib2.Opcodes;
 import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile;
@@ -337,7 +335,6 @@ public final class Utils
         return null;
     }
 
-    @NonNull
     public static ArrayList<Instruction> Disassemble(Method method) throws IOException
     {
         Class<?> clazz = method.getDeclaringClass();
@@ -385,7 +382,6 @@ public final class Utils
         return new ArrayList<>();
     }
 
-    @NonNull
     public static ArrayList<Instruction> Disassemble(Class<?> clazz, String methodName) throws IOException
     {
         for (String entryName : dexContainer.getDexEntryNames())

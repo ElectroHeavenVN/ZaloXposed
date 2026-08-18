@@ -1,0 +1,4 @@
+-dontobfuscate
+-dontoptimize
+-keep class com.ehvn.zaloxposed.** { *; }
+-keepattributes *Annotation*, Signature, InnerClasses

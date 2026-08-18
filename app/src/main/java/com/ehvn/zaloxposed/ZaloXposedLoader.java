@@ -3,8 +3,6 @@ package com.ehvn.zaloxposed;
 import android.content.res.AssetManager;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import com.ehvn.zaloxposed.hooks.*;
 import com.ehvn.zaloxposed.hooks.ads.HideAdsHook;
 import com.ehvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
@@ -53,16 +51,16 @@ public class ZaloXposedLoader extends XposedModule
     }
 
     @Override
-    public void onModuleLoaded(@NonNull ModuleLoadedParam param)
+    public void onModuleLoaded(ModuleLoadedParam param)
     {
         log(Log.INFO, "ZaloXposed", "Loaded");
         Logger.Init(this);
     }
 
     @Override
-    public void onPackageReady(@NonNull PackageReadyParam param)
+    public void onPackageReady(PackageReadyParam param)
     {
-        if (!param.getPackageName().startsWith("com.zing.zalo"))
+        if (!param.getPackageName().equals("com.zing.zalo"))
             return;
         Logger.i("Loading ZaloXposed");
         try
