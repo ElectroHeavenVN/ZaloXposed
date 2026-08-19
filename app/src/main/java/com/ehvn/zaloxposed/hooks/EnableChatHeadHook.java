@@ -153,7 +153,7 @@ public class EnableChatHeadHook extends BaseHook
             Object result = chain.proceed();
             Config.addOnConfigChangedListener((key, oldValue, newValue) ->
             {
-                if (!"enable_chat_head".equals(key))
+                if (!Config.KEY_ENABLE_CHAT_HEAD.equals(key))
                     return;
                 if (chatHeadUnavailable == null)
                     return;

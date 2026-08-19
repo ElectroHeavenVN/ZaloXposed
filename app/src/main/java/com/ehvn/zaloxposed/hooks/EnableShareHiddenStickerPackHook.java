@@ -34,7 +34,7 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
     {  
         Config.addOnConfigChangedListener((key, oldValue, newValue) ->
         {
-            if (!"enable_share_hidden_sticker_pack".equals(key))
+            if (!Config.KEY_ENABLE_SHARE_HIDDEN_STICKER_PACK.equals(key))
                 return;
             if ((Boolean)newValue)
                 return;

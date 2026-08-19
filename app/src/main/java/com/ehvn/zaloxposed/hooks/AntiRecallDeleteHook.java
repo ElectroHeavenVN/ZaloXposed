@@ -61,7 +61,7 @@ public class AntiRecallDeleteHook extends BaseHook
                     fakeQuote.put("ts", dataObject.getLong("ts"));
                     fakeQuote.put("msg", "Jump to message");
                     fakeQuote.put("attach", "{\"properties\":{\"color\":0,\"size\":0,\"type\":0,\"subType\":0,\"ext\":\"{\\\"shouldParseLinkOrContact\\\":0}\"},\"msgBubbleLayoutType\":0}");
-                    fakeQuote.put("fromD", dataObject.getString("fromD"));
+                    fakeQuote.put("fromD", "ZaloXposed by ElectroHeavenVN");
                     fakeQuote.put("ttl", 0);
                     dataObject.put("quote", fakeQuote);
                     JSONObject paramsExt = new JSONObject();
@@ -80,13 +80,10 @@ public class AntiRecallDeleteHook extends BaseHook
                     JSONObject attachObj = dataObject.getJSONObject("attach");
                     JSONArray contents = attachObj.getJSONArray("contents");
                     JSONObject content = contents.getJSONObject(contents.length() - 1);
-                    if (!Config.getAntiDeleteIncludeMeDeleteMyMessage()) 
+                    if (!Config.getAntiDeleteIncludeMyDeletion()) 
                     {
-                        long senderId = dataObject.getLong("fromU");
-                        long deleterId = content.getLong("uidFrom");
-                        boolean isMyMessage = (senderId + "").equals(Utils.GetCurrentUserID());
-                        boolean isMyDeletion = (deleterId + "").equals(Utils.GetCurrentUserID());
-                        if (isMyMessage && isMyDeletion)
+                        long deleterId = dataObject.getLong("fromU");
+                        if ((deleterId + "").equals(Utils.GetCurrentUserID()))
                             continue;
                     }
                     msgObject.put("type", "webchat");
@@ -96,18 +93,18 @@ public class AntiRecallDeleteHook extends BaseHook
                         dataObject.put("msg", "Message deleted");
                     dataObject.put("attach", "");
                     JSONObject fakeQuote = new JSONObject();
-                    fakeQuote.put("ownerId", dataObject.getLong("fromU"));
+                    fakeQuote.put("ownerId", content.getLong("uidFrom"));
                     fakeQuote.put("gOwnerId", JSONObject.NULL);
                     fakeQuote.put("cliMsgId", content.getLong("clientDelMsgId"));
                     fakeQuote.put("globalMsgId", content.getLong("globalDelMsgId"));
                     fakeQuote.put("cliMsgType", 1);
-                    fakeQuote.put("ts", dataObject.getLong("ts"));
+                    fakeQuote.put("ts", content.getLong("clientDelMsgId"));
                     if (contents.length() > 1)
                         fakeQuote.put("msg", "Jump to first deleted message");
                     else
                         fakeQuote.put("msg", "Jump to message");
                     fakeQuote.put("attach", "{\"properties\":{\"color\":0,\"size\":0,\"type\":0,\"subType\":0,\"ext\":\"{\\\"shouldParseLinkOrContact\\\":0}\"},\"msgBubbleLayoutType\":0}");
-                    fakeQuote.put("fromD", dataObject.getString("fromD"));
+                    fakeQuote.put("fromD", "ZaloXposed by ElectroHeavenVN");
                     fakeQuote.put("ttl", 0);
                     dataObject.put("quote", fakeQuote);
                     JSONObject paramsExt = new JSONObject();

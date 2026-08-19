@@ -214,9 +214,9 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Includes my own messages that I deleted" : "Bao gồm tin nhắn của tôi mà tôi đã xoá");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getAntiDeleteIncludeMeDeleteMyMessage());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setAntiDeleteIncludeMeDeleteMyMessage);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Include messages deleted by me" : "Bao gồm tin nhắn được tôi xoá");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getAntiDeleteIncludeMyDeletion());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setAntiDeleteIncludeMyDeletion);
 
 
         separator = createSeparator(context);
