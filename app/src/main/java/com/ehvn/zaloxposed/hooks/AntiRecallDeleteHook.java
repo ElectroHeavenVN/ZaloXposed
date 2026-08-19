@@ -11,7 +11,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
-// TODO: change quote notification message appearance: red border, etc.
 public class AntiRecallDeleteHook extends BaseHook
 {
     @Override
@@ -60,7 +59,7 @@ public class AntiRecallDeleteHook extends BaseHook
                     fakeQuote.put("cliMsgType", 1);
                     fakeQuote.put("ts", dataObject.getLong("ts"));
                     fakeQuote.put("msg", "Jump to message");
-                    fakeQuote.put("attach", "{\"properties\":{\"color\":0,\"size\":0,\"type\":0,\"subType\":0,\"ext\":\"{\\\"shouldParseLinkOrContact\\\":0}\"},\"msgBubbleLayoutType\":0}");
+                    fakeQuote.put("attach", "{\"properties\":{\"color\":0,\"size\":0,\"type\":0,\"subType\":0,\"ext\":\"{\\\"shouldParseLinkOrContact\\\":0}\"},\"msgBubbleLayoutType\":0,\"generatedBy\":\"AntiRecallDeleteHook\"}");
                     fakeQuote.put("fromD", "ZaloXposed by ElectroHeavenVN");
                     fakeQuote.put("ttl", 0);
                     dataObject.put("quote", fakeQuote);
@@ -103,7 +102,7 @@ public class AntiRecallDeleteHook extends BaseHook
                         fakeQuote.put("msg", "Jump to first deleted message");
                     else
                         fakeQuote.put("msg", "Jump to message");
-                    fakeQuote.put("attach", "{\"properties\":{\"color\":0,\"size\":0,\"type\":0,\"subType\":0,\"ext\":\"{\\\"shouldParseLinkOrContact\\\":0}\"},\"msgBubbleLayoutType\":0}");
+                    fakeQuote.put("attach", "{\"properties\":{\"color\":0,\"size\":0,\"type\":0,\"subType\":0,\"ext\":\"{\\\"shouldParseLinkOrContact\\\":0}\"},\"msgBubbleLayoutType\":0,\"generatedBy\":\"AntiRecallDeleteHook\"}");
                     fakeQuote.put("fromD", "ZaloXposed by ElectroHeavenVN");
                     fakeQuote.put("ttl", 0);
                     dataObject.put("quote", fakeQuote);
