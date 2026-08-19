@@ -31,7 +31,6 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
     Field msgTypeField = null;
     Field quoteField = null;
     Field quoteDisplayNameField = null;
-    Field quoteMsgField = null;
     Field quoteAttrField = null;
 
     @Override
@@ -113,7 +112,13 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
             if (msgTypeField.get(msg) != Integer.valueOf(0))
                 return chain.proceed();
             String msgStr = msg.toString();
-            if (!msgStr.startsWith("ChatContent{msg='Message recalled', ") && !msgStr.startsWith("ChatContent{msg='Message deleted', "))
+            if (
+                !msgStr.startsWith("ChatContent{msg='Message recalled', ") && 
+                !msgStr.startsWith("ChatContent{msg='Message deleted', ") &&
+                
+                !msgStr.matches("ChatContent\\{msg='[0-9]+ messages dele.*?', .*") &&
+                !msgStr.matches("ChatContent\\{msg='[0-9]+ messages reca.*?', .*") // toString limited msg content to ~18-20 chars
+                )
                 return chain.proceed();
             Object quote = null;
             if (quoteField == null)
@@ -142,7 +147,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
             }
             if (quote == null)
                 return chain.proceed();
-            if (quoteDisplayNameField == null || quoteMsgField == null || quoteAttrField == null)
+            if (quoteDisplayNameField == null || quoteAttrField == null)
             {
                 int count = 0;
                 for (Field f : quote.getClass().getFields())  // public fields
@@ -158,13 +163,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
                         quoteDisplayNameField = f;
                         count++;
                         continue;
-                    }
-                    if (value.equals("Jump to message"))
-                    {
-                        quoteMsgField = f;
-                        count++;
-                        continue;
-                    }
+                    } 
                     if (value.endsWith(",\"generatedBy\":\"AntiRecallDeleteHook\"}"))
                     {
                         try
@@ -176,14 +175,12 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
                         catch (Exception ignored) { }
                     }
                 }
-                if (count != 3)
+                if (count != 2)
                     return chain.proceed();
             }
             else
             {
                 if (!"ZaloXposed by ElectroHeavenVN".equals(quoteDisplayNameField.get(quote)))
-                    return chain.proceed();
-                if (!"Jump to message".equals(quoteMsgField.get(quote)))
                     return chain.proceed();
                 Object attr = quoteAttrField.get(quote);
                 if (attr == null)
