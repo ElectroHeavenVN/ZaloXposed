@@ -3,6 +3,7 @@ package com.ehvn.zaloxposed.hooks.permanent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.RectF;
@@ -115,7 +116,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
             if (
                 !msgStr.startsWith("ChatContent{msg='Message recalled', ") && 
                 !msgStr.startsWith("ChatContent{msg='Message deleted', ") &&
-                
+
                 !msgStr.matches("ChatContent\\{msg='[0-9]+ messages dele.*?', .*") &&
                 !msgStr.matches("ChatContent\\{msg='[0-9]+ messages reca.*?', .*") // toString limited msg content to ~18-20 chars
                 )
@@ -214,6 +215,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
             paint.setStrokeWidth(4f);
             paint.setColor(0xFFE53935);
             paint.setAntiAlias(true);
+            paint.setPathEffect(new DashPathEffect(new float[]{20f, 12f}, 0f));
             canvas.drawRoundRect(rect, 24f, 24f, paint);
             return result;
         });
