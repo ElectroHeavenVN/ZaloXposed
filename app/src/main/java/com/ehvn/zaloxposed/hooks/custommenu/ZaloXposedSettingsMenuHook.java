@@ -194,6 +194,27 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Logging and tracking" : "Ghi nhật ký và theo dõi");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Disable Firebase logging" : "Tắt ghi nhật ký Firebase");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getDisableFirebaseLogging());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setDisableFirebaseLogging);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Disable Zalo tracking" : "Tắt tính năng theo dõi của Zalo");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getDisableZaloTracking());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setDisableZaloTracking);
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
         headerTitle.setText(isEnglish ? "Recalled and deleted messages" : "Thu hồi và xoá tin nhắn");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);

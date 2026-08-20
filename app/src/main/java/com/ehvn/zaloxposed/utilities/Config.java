@@ -36,6 +36,8 @@ public final class Config
     public static final String KEY_ANTI_DELETE_INCLUDE_MY_DELETION = "anti_delete_include_my_deletion";
     public static final String KEY_HIDE_Z_INSTANT_ADS = "ads_hide_z_instant";
     public static final String KEY_HIDE_FEED_ITEM_Z_INSTANT_ADS = "ads_hide_feed_item_z_instant";
+    public static final String KEY_DISABLE_FIREBASE_LOGGING = "logging_disable_firebase";
+    public static final String KEY_DISABLE_ZALO_TRACKING = "logging_disable_zalo_tracking";
 
     public interface OnConfigChangedListener 
     {
@@ -371,5 +373,25 @@ public final class Config
     public static void setHideFeedItemZInstantAds(boolean value)
     {
         set(KEY_HIDE_FEED_ITEM_Z_INSTANT_ADS, value);
+    }
+
+    public static boolean getDisableFirebaseLogging()
+    {
+        return (boolean)get(KEY_DISABLE_FIREBASE_LOGGING, true);
+    }
+
+    public static void setDisableFirebaseLogging(boolean value)
+    {
+        set(KEY_DISABLE_FIREBASE_LOGGING, value);
+    }
+
+    public static boolean getDisableZaloTracking()
+    {
+        return (boolean)get(KEY_DISABLE_ZALO_TRACKING, true);
+    }
+
+    public static void setDisableZaloTracking(boolean value)
+    {
+        set(KEY_DISABLE_ZALO_TRACKING, value);
     }
 }

@@ -7,6 +7,8 @@ import com.ehvn.zaloxposed.hooks.*;
 import com.ehvn.zaloxposed.hooks.ads.HideAdsHook;
 import com.ehvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
 import com.ehvn.zaloxposed.hooks.permanent.*;
+import com.ehvn.zaloxposed.hooks.tracking.DisableFirebaseLoggingHook;
+import com.ehvn.zaloxposed.hooks.tracking.DisableZaloTrackingHook;
 import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Logger;
 import com.ehvn.zaloxposed.utilities.Utils;
@@ -35,6 +37,8 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new EnableSetNicknameInGroupHook());
         hooks.add(new DisableDohHook());
         hooks.add(new AntiRecallDeleteChatRowHook());
+        hooks.add(new DisableFirebaseLoggingHook());
+        hooks.add(new DisableZaloTrackingHook());
 
         hooks.add(new HideAdsHook());
         hooks.add(new CustomizeBottomRowHook());
