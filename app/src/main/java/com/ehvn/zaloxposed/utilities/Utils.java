@@ -265,6 +265,24 @@ public final class Utils
         return fields;
     }
 
+    public static Object Clone(Object obj) throws Exception
+    {
+        if (obj == null)
+            return null;
+        Class<?> clazz = obj.getClass();
+        Object cloned = UnsafeAllocate(clazz);
+        for (Field f : GetAllFields(clazz))
+        {
+            try
+            {
+                f.setAccessible(true);
+                f.set(cloned, f.get(obj));
+            }
+            catch (Throwable ignored) { }
+        }
+        return cloned;
+    }
+
     public static Field FindFieldByValue(Object obj, Object value)
     {
         List<Field> fields = new ArrayList<>();

@@ -13,6 +13,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -80,7 +81,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable" : "Kích hoạt");
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Replace Android Bubble conversations with Mini Chat" : "Thay thế bong bóng hội thoại Android bằng Mini Chat");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Requires Android 11 or higher" : "Yêu cầu Android 11 trở lên");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableChatHead());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableChatHead);
         listItemSetting.setEnabled(Build.VERSION.SDK_INT > Build.VERSION_CODES.Q);
@@ -117,16 +119,19 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         styleEditText(input, context, listItemSetting);
         input.setOnEditorActionListener((textView, actionId, keyEvent) ->
         {
-            try
+            if (actionId == EditorInfo.IME_ACTION_DONE)
             {
-                if (actionId != EditorInfo.IME_ACTION_DONE)
-                    return false;
-                long ttlValue = Long.parseLong(textView.getText().toString());
-                Config.setTTL(ttlValue);
-            }
-            catch (Exception e)
-            {
-                Logger.e(e);
+                try
+                {
+                    long ttlValue = Long.parseLong(textView.getText().toString());
+                    Config.setTTL(ttlValue);
+                }
+                catch (Exception e)
+                {
+                    Logger.e(e);
+                }
+                textView.clearFocus();
+                return true;
             }
             return false;
         });
@@ -139,6 +144,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                     EditText editText = (EditText)view;
                     long ttlValue = Long.parseLong(editText.getText().toString());
                     Config.setTTL(ttlValue);
+                    hideKeyboard(editText);
                 }
                 catch (Exception e)
                 {
@@ -146,6 +152,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 }
             }
         });
+        rootLayout.setOnClickListener(v -> input.clearFocus());
 
 
         separator = createSeparator(context);
@@ -228,7 +235,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable" : "Kích hoạt");
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable extended grid menu" : "Kích hoạt chat menu mở rộng");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGridMenu());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGridMenu);
 
@@ -497,22 +504,32 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             Field field = Utils.FindFieldByValue(item, "tab_me_tool_storage");
             if (field == null)
                 continue;
-            tabMeItemClass = item.getClass();
             tabMeItemTrackingField = field;
+            String itemStr = item.toString();   //SettingData(id=..., icon=..., title=..., desc=..., type=...)
+            String titleValue = itemStr.substring(itemStr.indexOf(", title=") + 8, itemStr.indexOf(", desc="));
+            String descValue = itemStr.substring(itemStr.indexOf(", desc=") + 7, itemStr.indexOf(", type="));
+            tabMeItemClass = item.getClass();
+
             for (Field f : tabMeItemClass.getDeclaredFields())
             {
-                try
+                try 
                 {
                     if (f.getType() == String.class)
                     {
                         f.setAccessible(true);
-                        String value = (String) f.get(item);
+                        String value = (String)f.get(item);
                         if (value == null)
                             continue;
-                        if (value.equals("Dữ liệu trên máy") || value.equals("Data on device"))
-                            tabMeItemTitleField = f;
-                        else if (value.equals("Quản lý dữ liệu Zalo của bạn") || value.equals("Manage your Zalo data"))
-                            tabMeItemDescriptionField = f;
+                        if (value.equals(titleValue))
+                        {
+                            if (tabMeItemTitleField == null)
+                                tabMeItemTitleField = f;
+                        }
+                        else if (value.equals(descValue))
+                        {
+                            if (tabMeItemDescriptionField == null)
+                                tabMeItemDescriptionField = f;
+                        }
                     }
                     else if (f.getType() == int.class && tabMeItemIconField == null)
                     {
@@ -521,7 +538,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                             tabMeItemIconField = f;
                     }
                 }
-                catch (Throwable ignored) { }
+                catch (Exception ignored) { }
             }
             break;
         }
@@ -537,36 +554,25 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             {
                 if (!item.toString().contains("SettingData(id="))
                     continue;
-                String title = (String) tabMeItemTitleField.get(item);
-                if (title == null)
+                String trackingValue = (String)tabMeItemTrackingField.get(item);
+                if (!"tab_me_privacy".equals(trackingValue))
                     continue;
-                if (title.equals("Privacy") || title.equals("Quyền riêng tư"))
-                {
-                    template = item;
-                    isEnglish = title.equals("Privacy");
-                    break;
-                }
+                template = item;
+                isEnglish = !item.toString().contains(", title=Quyền riêng tư, desc=");
+                break;
             }
             if (template == null)
             {
                 Logger.e("Template item not found, cannot create custom menu item");
                 return null;
             }
-            Object newItem = Utils.UnsafeAllocate(tabMeItemClass);
-            for (Field field : Utils.GetAllFields(tabMeItemClass))
-            {
-                field.setAccessible(true);
-                field.set(newItem, field.get(template));
-            }
+            Object newItem = Utils.Clone(template);
             tabMeItemTrackingField.setAccessible(true);
             tabMeItemTrackingField.set(newItem, CUSTOM_ITEM_MARKER);
             tabMeItemTitleField.setAccessible(true);
             tabMeItemTitleField.set(newItem, "ZaloXposed");
             tabMeItemDescriptionField.setAccessible(true);
-            if (isEnglish)
-                tabMeItemDescriptionField.set(newItem, "ZaloXposed settings");
-            else
-                tabMeItemDescriptionField.set(newItem, "Cài đặt ZaloXposed");
+            tabMeItemDescriptionField.set(newItem, isEnglish ? "ZaloXposed settings" : "Cài đặt ZaloXposed");
             tabMeItemIconField.setAccessible(true);
             tabMeItemIconField.setInt(newItem, Utils.GetDrawableResourceIdByName("zds_oic_premium_crown_color_24"));
             return newItem;
@@ -797,7 +803,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
 
     private int dp(Context context, int value)
     {
-        return (int) (value * context.getResources().getDisplayMetrics().density);
+        return (int)(value * context.getResources().getDisplayMetrics().density);
+    }
+
+    private void hideKeyboard(View view)
+    {
+        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null)
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     private void styleEditText(EditText editText, Context context, RelativeLayout templateItem)
