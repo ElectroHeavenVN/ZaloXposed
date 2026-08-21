@@ -185,10 +185,17 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Ads in Timeline" : "Ẩn quảng cáo trong Nhật Ký");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideFeedItemZInstantAds());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideFeedItemZInstantAds);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Block ads network endpoints" : "Chặn yêu cầu mạng quảng cáo");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getBlockAdsEndpoints());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setBlockAdsEndpoints);
 
 
         separator = createSeparator(context);
@@ -206,10 +213,17 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Disable Zalo tracking" : "Tắt tính năng theo dõi của Zalo");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getDisableZaloTracking());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setDisableZaloTracking);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Block QoS network endpoints" : "Chặn yêu cầu mạng QoS");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getBlockQoSEndpoints());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setBlockQoSEndpoints);
 
 
         separator = createSeparator(context);

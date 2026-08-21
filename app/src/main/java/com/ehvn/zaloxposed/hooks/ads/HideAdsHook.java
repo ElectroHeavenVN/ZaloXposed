@@ -94,6 +94,43 @@ public class HideAdsHook extends BaseHook
                 }
                 return result;
             });
-        } 
+        }
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                .returnType("java.lang.String")
+                .paramCount(1)
+                    .addUsingString("/group/ads", StringMatchType.Equals)
+                    .addUsingString("/api/qos/uploadcalllog", StringMatchType.Equals)
+                    .addUsingString("/zpads/inboxnative/getads", StringMatchType.Equals)
+                    .addUsingString("/api/qos/zinstant", StringMatchType.Equals)
+                    .addUsingString("/api/qos/uploaddetaillog", StringMatchType.Equals)
+                    .addUsingString("/api/qos/uploadactionlog", StringMatchType.Equals)
+                    .addUsingString("/api/qos/uploadv3", StringMatchType.Equals)
+                    .addUsingString("/api/qos/uploadv2", StringMatchType.Equals)
+                    .addUsingString("/zalocloudqos", StringMatchType.Equals)
+            ));
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found");
+            return;
+        }
+        for (MethodData methodData : methods)
+        {
+            Method method = methodData.getMethodInstance(classLoader);
+            Logger.i("Hooking: " + method);
+            module.hook(method).intercept(chain ->
+            {
+                if (!Config.getBlockAdsEndpoints())
+                    return chain.proceed();
+                Enum<?> enumValue = (Enum<?>)chain.getArg(0);
+                int ord = enumValue.ordinal();
+                return switch (ord)
+                {
+                    case 147, 161 -> "";
+                    default -> chain.proceed();
+                };
+            });
+        }
     }
 }

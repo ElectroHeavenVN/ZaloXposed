@@ -36,8 +36,10 @@ public final class Config
     public static final String KEY_ANTI_DELETE_INCLUDE_MY_DELETION = "anti_delete_include_my_deletion";
     public static final String KEY_HIDE_Z_INSTANT_ADS = "ads_hide_z_instant";
     public static final String KEY_HIDE_FEED_ITEM_Z_INSTANT_ADS = "ads_hide_feed_item_z_instant";
+    public static final String KEY_BLOCK_ADS_ENDPOINTS = "block_ads_endpoints";
     public static final String KEY_DISABLE_FIREBASE_LOGGING = "logging_disable_firebase";
     public static final String KEY_DISABLE_ZALO_TRACKING = "logging_disable_zalo_tracking";
+    public static final String KEY_BLOCK_ZALO_QOS = "logging_block_zalo_qos";
 
     public interface OnConfigChangedListener 
     {
@@ -370,6 +372,16 @@ public final class Config
         return (boolean)get(KEY_HIDE_FEED_ITEM_Z_INSTANT_ADS, false);
     }
 
+    public static boolean getBlockAdsEndpoints()
+    {
+        return (boolean)get(KEY_BLOCK_ADS_ENDPOINTS, false);
+    }
+
+    public static void setBlockAdsEndpoints(boolean value)
+    {
+        set(KEY_BLOCK_ADS_ENDPOINTS, value);
+    }
+
     public static void setHideFeedItemZInstantAds(boolean value)
     {
         set(KEY_HIDE_FEED_ITEM_Z_INSTANT_ADS, value);
@@ -393,5 +405,15 @@ public final class Config
     public static void setDisableZaloTracking(boolean value)
     {
         set(KEY_DISABLE_ZALO_TRACKING, value);
+    }
+
+    public static boolean getBlockQoSEndpoints()
+    {
+        return (boolean)get(KEY_BLOCK_ZALO_QOS, true);
+    }
+
+    public static void setBlockQoSEndpoints(boolean value)
+    {
+        set(KEY_BLOCK_ZALO_QOS, value);
     }
 }

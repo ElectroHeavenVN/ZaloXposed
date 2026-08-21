@@ -10,6 +10,7 @@ import org.luckypray.dexkit.result.*;
 
 import java.io.InputStream;
 import java.lang.reflect.*;
+import java.net.*;
 import java.nio.charset.*;
 import java.util.*;
 
@@ -23,6 +24,14 @@ public class TestHook extends BaseHook
     @Override
     public void hook() throws Throwable
     {
+        // module.hook(URL.class.getDeclaredMethod("openConnection")).intercept(chain ->
+        // {
+        //     Object result = chain.proceed();
+        //     Logger.i("openConnection: " + chain.getThisObject());
+        //     Logger.i("stack trace: " + Utils.GetStackTrace());
+        //     return result;
+        // });
+
         // Constructor<?> ctor = JSONObject.class.getConstructor(String.class);
         // Logger.i("Hooking: " + ctor);
         // module.hook(ctor).intercept(chain ->
