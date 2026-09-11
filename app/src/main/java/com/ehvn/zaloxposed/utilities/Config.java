@@ -440,4 +440,16 @@ public final class Config
     {
         set(KEY_BLOCK_ZALO_QOS, value);
     }
+
+    public static final String KEY_ENABLE_SILENT_TYPING = "enable_silent_typing";
+
+    public static boolean getEnableSilentTyping()
+    {
+        return (boolean)get(KEY_ENABLE_SILENT_TYPING, false);
+    }
+
+    public static void setEnableSilentTyping(boolean value)
+    {
+        set(KEY_ENABLE_SILENT_TYPING, value);
+    }
 }

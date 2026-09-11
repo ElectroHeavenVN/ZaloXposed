@@ -51,6 +51,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new UnlockZCloudHook());
         hooks.add(new EnableShareHiddenStickerPackHook());
         hooks.add(new AntiRecallDeleteHook());
+        hooks.add(new SilentTypingHook());
 
         hooks.add(new TestHook());
     }
