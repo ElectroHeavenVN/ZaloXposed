@@ -329,12 +329,9 @@ public class EnableChatHeadHook extends BaseHook
                 .name("run")
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .paramCount(0)
-                .addUsingString("fetchZaloFriendUidSocket", StringMatchType.Equals)
-                .addUsingString("ZPF-PromotionTransferTooltip", StringMatchType.Equals)
-                .addUsingString("getChildZaloViewManager(...)", StringMatchType.Equals)
+                .paramCount(0) 
                 .addUsingString("System Setting not allow to create Bubbles on Screen", StringMatchType.Equals)
-                .addUsingString("ChatView: Open Bubble Chat ", StringMatchType.Equals)
+                .addUsingString("ChatView: Open Bubble Chat", StringMatchType.Contains)
             ));
         if (methods.isEmpty())
             Logger.e("Target method not found 8");
