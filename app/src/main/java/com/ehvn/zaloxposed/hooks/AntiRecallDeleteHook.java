@@ -6,32 +6,89 @@ import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.luckypray.dexkit.query.FindMethod;
+import org.luckypray.dexkit.query.enums.StringMatchType;
+import org.luckypray.dexkit.query.matchers.MethodMatcher;
+import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class AntiRecallDeleteHook extends BaseHook
 {
     @Override
     public void hook() throws Throwable
     {
-        Class<?> clazz = Class.forName("com.zing.zalocore.connection.socket.NativeSocket", false, classLoader);
-        Method method = clazz.getDeclaredMethod("onReceivePackage", int.class, Object.class);
-        Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->
+        // Class<?> clazz = Class.forName("com.zing.zalocore.connection.socket.NativeSocket", false, classLoader);
+        // Method method = clazz.getDeclaredMethod("onReceivePackage", int.class, Object.class);
+        // Logger.i("Hooking: " + method);
+        // module.hook(method).intercept(chain ->
+        // {
+        //     if (!Config.getEnableAntiRecall() && !Config.getEnableAntiDelete())
+        //         return chain.proceed();
+        //     Object arg1 = chain.getArg(1);
+        //     Field paramsField = arg1.getClass().getDeclaredField("params");
+        //     paramsField.setAccessible(true);
+        //     String json = new String((byte[]) paramsField.get(arg1), StandardCharsets.UTF_8);
+        //     if (!json.contains(",\"msg\":[{\"text\":{\"type\":\""))
+        //         return chain.proceed();
+        //     JSONObject jsonObject = new JSONObject(json);
+        //     if (processMsgPayload(jsonObject))
+        //     {
+        //         String modifiedJson = jsonObject.toString();
+        //         paramsField.set(arg1, modifiedJson.getBytes(StandardCharsets.UTF_8));
+        //     }
+        //     return chain.proceed();
+        // });
+
+        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("void")
+                .paramCount(8)
+                .paramTypes("java.lang.String", "int", "int", "org.json.JSONObject", "int", "boolean", "long", null)
+                .addUsingString("currentUserUid", StringMatchType.Equals)
+                .addUsingString("PullMessage", StringMatchType.Equals)
+                .addUsingString("ChatPacketHandler", StringMatchType.Equals)
+                .addUsingNumber(10104)
+            ));
+        if (methods.isEmpty())
         {
-            if (!Config.getEnableAntiRecall() && !Config.getEnableAntiDelete())
+            Logger.e("Target method not found");
+            return;
+        }
+        for (MethodData methodData : methods)
+        {
+            Method method2 = methodData.getMethodInstance(classLoader);
+            Logger.i("Hooking: " + method2);
+            module.hook(method2).intercept(chain ->
+            {
+                if (!Config.getEnableAntiRecall() && !Config.getEnableAntiDelete())
+                    return chain.proceed();
+                Object arg3 = chain.getArg(3);
+                if (!(arg3 instanceof JSONObject))
+                    return chain.proceed();
+                if (!processMsgPayload((JSONObject)arg3))
+                    return chain.proceed();
                 return chain.proceed();
-            Object arg1 = chain.getArg(1);
-            Field paramsField = arg1.getClass().getDeclaredField("params");
-            paramsField.setAccessible(true);
-            String json = new String((byte[]) paramsField.get(arg1), StandardCharsets.UTF_8);
-            if (!json.contains(",\"msg\":[{\"text\":{\"type\":\""))
-                return chain.proceed();
-            boolean modified = false;
-            JSONObject jsonObject = new JSONObject(json);
-            JSONArray msgArray = jsonObject.getJSONArray("msg");
+            });
+        }
+    }
+
+    private static boolean processMsgPayload(JSONObject msgPayload)
+    {
+        boolean modified = false;
+        try 
+        {
+            if (!msgPayload.has("msg"))
+            {
+                Logger.e("msgPayload does not contain 'msg' key");
+                return false;
+            }
+            JSONArray msgArray = msgPayload.getJSONArray("msg");
             for (int i = 0; i < msgArray.length(); i++)
             {
                 JSONObject msgObject = msgArray.getJSONObject(i).getJSONObject("text");
@@ -118,12 +175,11 @@ public class AntiRecallDeleteHook extends BaseHook
                     modified = true;
                 }
             }
-            if (modified)
-            {
-                String modifiedJson = jsonObject.toString();
-                paramsField.set(arg1, modifiedJson.getBytes(StandardCharsets.UTF_8));
-            }
-            return chain.proceed();
-        });
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
+        return modified;
     }
 }
