@@ -113,13 +113,10 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
             if (msgTypeField.get(msg) != Integer.valueOf(0))
                 return chain.proceed();
             String msgStr = msg.toString();
-            if (
-                !msgStr.startsWith("ChatContent{msg='Message recalled', ") && 
-                !msgStr.startsWith("ChatContent{msg='Message deleted', ") &&
-
-                !msgStr.matches("ChatContent\\{msg='[0-9]+ messages dele.*?', .*") &&
-                !msgStr.matches("ChatContent\\{msg='[0-9]+ messages reca.*?', .*") // toString limited msg content to ~18-20 chars
-                )
+            // toString limited msg content to ~18-20 chars
+            boolean isRecall = msgStr.startsWith("ChatContent{msg='Message recalled', ") || msgStr.matches("ChatContent\\{msg='[0-9]+ messages reca.*?', .*");
+            boolean isDelete = msgStr.startsWith("ChatContent{msg='Message deleted', ") || msgStr.matches("ChatContent\\{msg='[0-9]+ messages dele.*?', .*");
+            if (!isRecall && !isDelete)
                 return chain.proceed();
             Object quote = null;
             if (quoteField == null)
@@ -207,13 +204,13 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
             boolean darkTheme = lum < 0.5;
             Paint fill = new Paint();
             fill.setStyle(Paint.Style.FILL);
-            fill.setColor(darkTheme ? 0xB0400000 : 0xDDFFDDDD);
+            fill.setColor(isRecall ? (darkTheme ? 0xB0403800 : 0xDDFFFFDD) : (darkTheme ? 0xB0400000 : 0xDDFFDDDD));
             fill.setAntiAlias(true);
             canvas.drawRoundRect(rect, 24f, 24f, fill);
             Paint paint = new Paint();
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(4f);
-            paint.setColor(0xFFE53935);
+            paint.setColor(isRecall ? 0xFFFBC02D : 0xFFE53935);
             paint.setAntiAlias(true);
             paint.setPathEffect(new DashPathEffect(new float[]{20f, 12f}, 0f));
             canvas.drawRoundRect(rect, 24f, 24f, paint);
