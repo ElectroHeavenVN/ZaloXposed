@@ -13,34 +13,6 @@ public final class Config
 {
     private Config() { }
 
-    public static final String KEY_ENABLE_BACKGROUND = "enable_bg";
-    public static final String KEY_ENABLE_EXTENDED_GRID_MENU = "enable_extended_grid_menu";
-    public static final String KEY_ENABLE_CHAT_HEAD = "enable_chat_head";
-    public static final String KEY_UNLOCK_Z_CLOUD = "unlock_z_cloud";
-    public static final String KEY_ENABLE_TTL_OVERRIDE = "enable_msg_ttl_override";
-    public static final String KEY_MSG_TTL = "msg_ttl_value";
-    public static final String KEY_ENABLE_FAKE_GROUP_ROLE = "enable_fake_group_role";
-    public static final String KEY_FAKE_GROUP_ROLE_LEVEL = "fake_group_role_level";
-    public static final String KEY_ENABLE_SHARE_HIDDEN_STICKER_PACK = "enable_share_hidden_sticker_pack";
-    public static final String KEY_ENABLE_EXTENDED_GROUP_SETTING_MENU = "enable_extended_group_setting_menu";
-    public static final String KEY_HIDE_MEDIA_BOX = "ads_hide_media_box";
-    public static final String KEY_HIDE_BIZ_BOX = "ads_hide_business_box";
-    public static final String KEY_ENABLE_CUSTOMIZE_BOTTOM_ROW = "enable_customize_bottom_row";
-    public static final String KEY_HIDE_DISCOVERY_TAB = "ads_hide_discovery_tab";
-    public static final String KEY_HIDE_NEWS_FEED_TAB = "ads_hide_news_feed_tab";
-    public static final String KEY_SHOW_MORE_TAB = "ads_show_more_tab";
-    public static final String KEY_SHOW_GROUPS_TAB = "ads_show_groups_tab";
-    public static final String KEY_ENABLE_ANTI_RECALL = "enable_anti_recall";
-    public static final String KEY_ENABLE_ANTI_DELETE = "enable_anti_delete";
-    public static final String KEY_ANTI_RECALL_INCLUDE_ME = "anti_recall_include_me";
-    public static final String KEY_ANTI_DELETE_INCLUDE_MY_DELETION = "anti_delete_include_my_deletion";
-    public static final String KEY_HIDE_Z_INSTANT_ADS = "ads_hide_z_instant";
-    public static final String KEY_HIDE_FEED_ITEM_Z_INSTANT_ADS = "ads_hide_feed_item_z_instant";
-    public static final String KEY_BLOCK_ADS_ENDPOINTS = "block_ads_endpoints";
-    public static final String KEY_DISABLE_FIREBASE_LOGGING = "logging_disable_firebase";
-    public static final String KEY_DISABLE_ZALO_TRACKING = "logging_disable_zalo_tracking";
-    public static final String KEY_BLOCK_ZALO_QOS = "logging_block_zalo_qos";
-
     public interface OnConfigChangedListener 
     {
         void onConfigChanged(String key, Object oldValue, Object newValue);
@@ -147,6 +119,8 @@ public final class Config
         }
     }
 
+    public static final String KEY_ENABLE_BACKGROUND = "enable_bg";
+
     public static boolean getEnableBackground()
     {
         return (boolean)get(KEY_ENABLE_BACKGROUND, true);
@@ -156,6 +130,8 @@ public final class Config
     {
         set(KEY_ENABLE_BACKGROUND, value);
     }
+
+    public static final String KEY_ENABLE_EXTENDED_GRID_MENU = "enable_extended_grid_menu";
 
     public static boolean getEnableExtendedGridMenu()
     {
@@ -167,6 +143,8 @@ public final class Config
         set(KEY_ENABLE_EXTENDED_GRID_MENU, value);
     }
 
+    public static final String KEY_ENABLE_CHAT_HEAD = "enable_chat_head";
+
     public static boolean getEnableChatHead()
     {
         return (boolean)get(KEY_ENABLE_CHAT_HEAD, false);
@@ -176,6 +154,8 @@ public final class Config
     {
         set(KEY_ENABLE_CHAT_HEAD, value);
     }
+
+    public static final String KEY_UNLOCK_Z_CLOUD = "unlock_z_cloud";
 
     public static boolean getUnlockZCloud()
     {
@@ -187,6 +167,8 @@ public final class Config
         set(KEY_UNLOCK_Z_CLOUD, value);
     }
 
+    public static final String KEY_ENABLE_TTL_OVERRIDE = "enable_msg_ttl_override";
+
     public static boolean getEnableTTLOverride()
     {
         return (boolean)get(KEY_ENABLE_TTL_OVERRIDE, false);
@@ -196,7 +178,9 @@ public final class Config
     {
         set(KEY_ENABLE_TTL_OVERRIDE, value);
     }
-  
+
+    public static final String KEY_MSG_TTL = "msg_ttl_value";
+
     public static long getTTL()
     {
         return (long)get(KEY_MSG_TTL, 0L);
@@ -206,7 +190,9 @@ public final class Config
     {
         set(KEY_MSG_TTL, value);
     }
-    
+
+    public static final String KEY_ENABLE_FAKE_GROUP_ROLE = "enable_fake_group_role";
+
     public static boolean getEnableFakeGroupRole()
     {
         return (boolean)get(KEY_ENABLE_FAKE_GROUP_ROLE, false);
@@ -216,6 +202,8 @@ public final class Config
     {
         set(KEY_ENABLE_FAKE_GROUP_ROLE, value);
     }
+
+    public static final String KEY_FAKE_GROUP_ROLE_LEVEL = "fake_group_role_level";
 
     public static int getFakeGroupRoleLevel()
     {
@@ -227,6 +215,8 @@ public final class Config
         set(KEY_FAKE_GROUP_ROLE_LEVEL, value);
     }
 
+    public static final String KEY_ENABLE_SHARE_HIDDEN_STICKER_PACK = "enable_share_hidden_sticker_pack";
+
     public static boolean getEnableShareHiddenStickerPack()
     {
         return (boolean)get(KEY_ENABLE_SHARE_HIDDEN_STICKER_PACK, false);
@@ -236,6 +226,8 @@ public final class Config
     {
         set(KEY_ENABLE_SHARE_HIDDEN_STICKER_PACK, value);
     }
+
+    public static final String KEY_ENABLE_EXTENDED_GROUP_SETTING_MENU = "enable_extended_group_setting_menu";
 
     public static boolean getEnableExtendedGroupSettingMenu()
     {
@@ -247,6 +239,8 @@ public final class Config
         set(KEY_ENABLE_EXTENDED_GROUP_SETTING_MENU, value);
     }
 
+    public static final String KEY_HIDE_MEDIA_BOX = "ads_hide_media_box";
+
     public static boolean getHideMediaBox()
     {
         return (boolean)get(KEY_HIDE_MEDIA_BOX, false);
@@ -256,6 +250,8 @@ public final class Config
     {
         set(KEY_HIDE_MEDIA_BOX, value);
     }
+
+    public static final String KEY_HIDE_BIZ_BOX = "ads_hide_business_box";
 
     public static boolean getHideBizBox()
     {
@@ -267,6 +263,8 @@ public final class Config
         set(KEY_HIDE_BIZ_BOX, value);
     }
 
+    public static final String KEY_ENABLE_CUSTOMIZE_BOTTOM_ROW = "enable_customize_bottom_row";
+
     public static boolean getEnableCustomizeBottomRow()
     {
         return (boolean)get(KEY_ENABLE_CUSTOMIZE_BOTTOM_ROW, false);
@@ -277,6 +275,8 @@ public final class Config
         set(KEY_ENABLE_CUSTOMIZE_BOTTOM_ROW, value);
     }
 
+    public static final String KEY_HIDE_DISCOVERY_TAB = "ads_hide_discovery_tab";
+    
     public static boolean getHideDiscoveryTab()
     {
         return (boolean)get(KEY_HIDE_DISCOVERY_TAB, false);
@@ -286,6 +286,8 @@ public final class Config
     {
         set(KEY_HIDE_DISCOVERY_TAB, value);
     }
+
+    public static final String KEY_HIDE_NEWS_FEED_TAB = "ads_hide_news_feed_tab";
 
     public static boolean getHideNewsFeedTab()
     {
@@ -297,6 +299,8 @@ public final class Config
         set(KEY_HIDE_NEWS_FEED_TAB, value);
     }
 
+    public static final String KEY_SHOW_MORE_TAB = "ads_show_more_tab";
+
     public static boolean getShowMoreTab()
     {
         return (boolean)get(KEY_SHOW_MORE_TAB, false);
@@ -306,6 +310,8 @@ public final class Config
     {
         set(KEY_SHOW_MORE_TAB, value);
     }
+
+    public static final String KEY_SHOW_GROUPS_TAB = "ads_show_groups_tab";
 
     public static boolean getShowGroupsTab()
     {
@@ -317,6 +323,8 @@ public final class Config
         set(KEY_SHOW_GROUPS_TAB, value);
     }
 
+    public static final String KEY_ENABLE_ANTI_RECALL = "enable_anti_recall";
+
     public static boolean getEnableAntiRecall()
     {
         return (boolean)get(KEY_ENABLE_ANTI_RECALL, false);
@@ -326,6 +334,8 @@ public final class Config
     {
         set(KEY_ENABLE_ANTI_RECALL, value);
     }
+
+    public static final String KEY_ENABLE_ANTI_DELETE = "enable_anti_delete";
 
     public static boolean getEnableAntiDelete()
     {
@@ -337,6 +347,8 @@ public final class Config
         set(KEY_ENABLE_ANTI_DELETE, value);
     }
 
+    public static final String KEY_ANTI_RECALL_INCLUDE_ME = "anti_recall_include_me";
+    
     public static boolean getAntiRecallIncludeMe()
     {
         return (boolean)get(KEY_ANTI_RECALL_INCLUDE_ME, false);
@@ -347,6 +359,7 @@ public final class Config
         set(KEY_ANTI_RECALL_INCLUDE_ME, value);
     }
 
+    public static final String KEY_ANTI_DELETE_INCLUDE_MY_DELETION = "anti_delete_include_my_deletion";
     public static boolean getAntiDeleteIncludeMyDeletion()
     {
         return (boolean)get(KEY_ANTI_DELETE_INCLUDE_MY_DELETION, false);
@@ -357,6 +370,8 @@ public final class Config
         set(KEY_ANTI_DELETE_INCLUDE_MY_DELETION, value);
     }
 
+    public static final String KEY_HIDE_Z_INSTANT_ADS = "ads_hide_z_instant";
+    
     public static boolean getHideZInstantAds()
     {
         return (boolean)get(KEY_HIDE_Z_INSTANT_ADS, false);
@@ -367,11 +382,19 @@ public final class Config
         set(KEY_HIDE_Z_INSTANT_ADS, value);
     }
 
+    public static final String KEY_HIDE_FEED_ITEM_Z_INSTANT_ADS = "ads_hide_feed_item_z_instant";
+    
     public static boolean getHideFeedItemZInstantAds()
     {
         return (boolean)get(KEY_HIDE_FEED_ITEM_Z_INSTANT_ADS, false);
     }
 
+    public static void setHideFeedItemZInstantAds(boolean value)
+    {
+        set(KEY_HIDE_FEED_ITEM_Z_INSTANT_ADS, value);
+    }
+
+    public static final String KEY_BLOCK_ADS_ENDPOINTS = "block_ads_endpoints";
     public static boolean getBlockAdsEndpoints()
     {
         return (boolean)get(KEY_BLOCK_ADS_ENDPOINTS, false);
@@ -382,10 +405,7 @@ public final class Config
         set(KEY_BLOCK_ADS_ENDPOINTS, value);
     }
 
-    public static void setHideFeedItemZInstantAds(boolean value)
-    {
-        set(KEY_HIDE_FEED_ITEM_Z_INSTANT_ADS, value);
-    }
+    public static final String KEY_DISABLE_FIREBASE_LOGGING = "logging_disable_firebase";
 
     public static boolean getDisableFirebaseLogging()
     {
@@ -397,6 +417,8 @@ public final class Config
         set(KEY_DISABLE_FIREBASE_LOGGING, value);
     }
 
+    public static final String KEY_DISABLE_ZALO_TRACKING = "logging_disable_zalo_tracking";
+
     public static boolean getDisableZaloTracking()
     {
         return (boolean)get(KEY_DISABLE_ZALO_TRACKING, true);
@@ -406,6 +428,8 @@ public final class Config
     {
         set(KEY_DISABLE_ZALO_TRACKING, value);
     }
+
+    public static final String KEY_BLOCK_ZALO_QOS = "logging_block_zalo_qos";
 
     public static boolean getBlockQoSEndpoints()
     {
