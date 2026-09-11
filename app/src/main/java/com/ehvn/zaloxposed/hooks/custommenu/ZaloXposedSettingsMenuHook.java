@@ -273,6 +273,13 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide typing indicators" : "Ẩn trạng thái đang nhập");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableSilentTyping());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableSilentTyping);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide \"Seen\" status" : "Ẩn trạng thái Đã xem");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableSilentTyping());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableSilentTyping);
 
 
         separator = createSeparator(context);

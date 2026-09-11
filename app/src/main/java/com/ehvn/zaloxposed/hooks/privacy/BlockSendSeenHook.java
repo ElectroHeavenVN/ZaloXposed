@@ -1,5 +1,6 @@
-package com.ehvn.zaloxposed.hooks;
+package com.ehvn.zaloxposed.hooks.privacy;
 
+import com.ehvn.zaloxposed.hooks.BaseHook;
 import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Logger;
 
@@ -12,7 +13,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-public class SilentTypingHook extends BaseHook
+public class BlockSendSeenHook extends BaseHook
 {
     @Override
     public void hook() throws Throwable
@@ -21,13 +22,13 @@ public class SilentTypingHook extends BaseHook
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("void")
-                .paramCount(4)
-                .paramTypes("java.lang.String", "int", "boolean", "boolean")
-                .addUsingString("uid", StringMatchType.Equals)
+                .paramCount(2)
+                .paramTypes("java.util.ArrayList", "boolean")
+                .addUsingString("SendSeenManager", StringMatchType.Equals)
                 .addUsingString("MessageRepository", StringMatchType.Equals)
-                .addUsingNumber(10000)
-                .addUsingNumber(3000)
-                .addUsingNumber(3600001)
+                .addUsingString("MsgList:", StringMatchType.Contains)
+                .addUsingNumber(203)
+                .addUsingNumber(107)
             ));
         if (methods.isEmpty())
         {
@@ -40,7 +41,7 @@ public class SilentTypingHook extends BaseHook
             Logger.i("Hooking: " + method);
             module.hook(method).intercept(chain ->
             {
-                if (Config.getEnableSilentTyping())
+                if (Config.getBlockSendSeen())
                     return null;
                 return chain.proceed();
             });

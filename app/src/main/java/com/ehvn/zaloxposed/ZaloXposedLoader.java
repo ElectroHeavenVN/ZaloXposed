@@ -7,6 +7,8 @@ import com.ehvn.zaloxposed.hooks.*;
 import com.ehvn.zaloxposed.hooks.ads.HideAdsHook;
 import com.ehvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
 import com.ehvn.zaloxposed.hooks.permanent.*;
+import com.ehvn.zaloxposed.hooks.privacy.BlockSendSeenHook;
+import com.ehvn.zaloxposed.hooks.privacy.SilentTypingHook;
 import com.ehvn.zaloxposed.hooks.tracking.DisableFirebaseLoggingHook;
 import com.ehvn.zaloxposed.hooks.tracking.DisableZaloTrackingHook;
 import com.ehvn.zaloxposed.utilities.Config;
@@ -52,6 +54,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new EnableShareHiddenStickerPackHook());
         hooks.add(new AntiRecallDeleteHook());
         hooks.add(new SilentTypingHook());
+        hooks.add(new BlockSendSeenHook());
 
         hooks.add(new TestHook());
     }

@@ -452,4 +452,16 @@ public final class Config
     {
         set(KEY_ENABLE_SILENT_TYPING, value);
     }
+
+    public static final String KEY_BLOCK_SEND_SEEN = "block_send_seen";
+
+    public static boolean getBlockSendSeen()
+    {
+        return (boolean)get(KEY_BLOCK_SEND_SEEN, false);
+    }
+
+    public static void setBlockSendSeen(boolean value)
+    {
+        set(KEY_BLOCK_SEND_SEEN, value);
+    }
 }
