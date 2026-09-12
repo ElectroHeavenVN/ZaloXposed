@@ -269,7 +269,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide typing indicators" : "Ẩn trạng thái đang nhập");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableSilentTyping());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableSilentTyping);
@@ -278,22 +278,44 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide \"Seen\" status" : "Ẩn trạng thái Đã xem");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableSilentTyping());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableSilentTyping);
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getBlockSendSeen());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setBlockSendSeen);
 
 
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Extended grid menu" : "Chat menu mở rộng");
+        headerTitle.setText(isEnglish ? "User interface" : "Giao diện");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable extended grid menu" : "Kích hoạt chat menu mở rộng");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGridMenu());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGridMenu);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable extended group right menu" : "Kích hoạt menu nhóm mở rộng");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGroupRightMenu());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGroupRightMenu);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable extended group settings menu" : "Kích hoạt menu cài đặt nhóm mở rộng");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGroupSettingMenu());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGroupSettingMenu);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Show Chat Protection in group right menu" : "Hiển thị Bảo vệ trò chuyện trong menu nhóm");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Replace the \"Disappear messages\" menu when activated" : "Thay thế menu \"Tin nhắn tự xoá\" khi được kích hoạt");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableChatProtection());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableChatProtection);
 
 
         separator = createSeparator(context);
@@ -316,13 +338,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         headerTitle = createHeaderTitle(context);
         headerTitle.setText(isEnglish ? "Group" : "Nhóm");
         rootLayout.addView(headerTitle);
-        listItemSetting = ListItemSettingHelper.CreateNew(context);
-        rootLayout.addView(listItemSetting);
-        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable extended group settings menu" : "Kích hoạt menu cài đặt nhóm mở rộng");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGroupSettingMenu());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGroupSettingMenu);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");

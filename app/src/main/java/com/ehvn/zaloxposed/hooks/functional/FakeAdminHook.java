@@ -1,6 +1,8 @@
-package com.ehvn.zaloxposed.hooks;
+package com.ehvn.zaloxposed.hooks.functional;
 
+import com.ehvn.zaloxposed.hooks.BaseHook;
 import com.ehvn.zaloxposed.utilities.Config;
+import com.ehvn.zaloxposed.utilities.CoreUtilityHelper;
 import com.ehvn.zaloxposed.utilities.Logger;
 import com.ehvn.zaloxposed.utilities.Utils;
 
@@ -56,7 +58,7 @@ public class FakeAdminHook extends BaseHook
             }
             if (!calledFromClazz)
                 return chain.proceed();
-            String userId = Utils.GetCurrentUserID();
+            String userId = CoreUtilityHelper.GetCurrentUserID();
             if (userId.isEmpty() || "0".equals(userId))
                 return chain.proceed();
             JSONArray arr = (JSONArray)chain.proceed();

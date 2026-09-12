@@ -1,8 +1,9 @@
-package com.ehvn.zaloxposed.hooks;
+package com.ehvn.zaloxposed.hooks.functional;
 
+import com.ehvn.zaloxposed.hooks.BaseHook;
 import com.ehvn.zaloxposed.utilities.Config;
+import com.ehvn.zaloxposed.utilities.CoreUtilityHelper;
 import com.ehvn.zaloxposed.utilities.Logger;
-import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.json.JSONObject;
 
@@ -26,7 +27,7 @@ public class FakeOwnerHook extends BaseHook
                 return chain.proceed();
             if (!jsonString.contains(",\"ts\":"))
                 return chain.proceed();
-            String userId = Utils.GetCurrentUserID();
+            String userId = CoreUtilityHelper.GetCurrentUserID();
             if (userId.isEmpty() || "0".equals(userId))
                 return chain.proceed();
             String modifiedJsonString = jsonString.replaceAll("\"creatorId\":\\d+", "\"creatorId\":" + userId);

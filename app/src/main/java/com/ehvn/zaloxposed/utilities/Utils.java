@@ -1,7 +1,7 @@
 package com.ehvn.zaloxposed.utilities;
 
+import android.annotation.SuppressLint;
 import android.content.pm.ApplicationInfo;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -39,16 +39,14 @@ public final class Utils
     private Utils() { }
 
     private static final Map<Class<?>, String> PRIMITIVE_MAP = new HashMap<>();
-    private static final String TAG = "ZaloXposed";
     private static ClassLoader sClassLoader;
     private static String externalFilesDir = "";
     private static String packageName = "";
     private static Class<?> cfgClass;
     private static Method getCurrentUserInfoMethod;
-    private static String mdPath = "";
     private static MultiDexContainer<? extends DexBackedDexFile> dexContainer;
-    private static Class<?> drawableResourceClass = null;
-    private static Class<?> resourceClass = null;
+    private static final ArrayList<Class<?>> drawableResourceClasses = new ArrayList<>();
+    private static final ArrayList<Class<?>> resourceClasses = new ArrayList<>();
 
     static
     {
@@ -78,7 +76,7 @@ public final class Utils
             ));
         if (methods.isEmpty())
         {
-            Log.e(TAG, "Config method not found");
+            Logger.e("Config method not found");
             return;
         }
         cfgClass = methods.get(0).getMethodInstance(sClassLoader).getDeclaringClass();
@@ -90,24 +88,28 @@ public final class Utils
                 .addUsingString("UserInfo", StringMatchType.Equals)
             ));
         getCurrentUserInfoMethod = methods.isEmpty() ? null : methods.get(0).getMethodInstance(sClassLoader);
+        LoadResourceClasses(bridge, classLoader);
+    }
+
+    private static void LoadResourceClasses(DexKitBridge bridge, ClassLoader classLoader)
+    {
         List<ClassData> classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("zds_ic_storage_line_24")));
         for (ClassData classData : classes)
         {
             try
             {
                 Class<?> clazz = classData.getInstance(classLoader);
-                if (clazz.getName().equals("com.zing.zalo.R.drawable"))
-                    continue;
-                drawableResourceClass = clazz;
-                break;
+                drawableResourceClasses.add(clazz);
             }
             catch (Throwable ignored) { }
         }
-        if (drawableResourceClass == null && classes.size() > 0)
+        classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("bg_btn_postfeed")));
+        for (ClassData classData : classes)
         {
             try
             {
-                drawableResourceClass = classes.get(0).getInstance(classLoader);
+                Class<?> clazz = classData.getInstance(classLoader);
+                drawableResourceClasses.add(clazz);
             }
             catch (Throwable ignored) { }
         }
@@ -117,18 +119,17 @@ public final class Utils
             try
             {
                 Class<?> clazz = classData.getInstance(classLoader);
-                if (clazz.getName().equals("com.zing.zalo.R"))
-                    continue;
-                resourceClass = clazz;
-                break;
+                resourceClasses.add(clazz);
             }
             catch (Throwable ignored) { }
         }
-        if (resourceClass == null && classes.size() > 0)
+        classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("str_group_invite_link")));
+        for (ClassData classData : classes)
         {
             try
             {
-                resourceClass = classes.get(0).getInstance(classLoader);
+                Class<?> clazz = classData.getInstance(classLoader);
+                resourceClasses.add(clazz);
             }
             catch (Throwable ignored) { }
         }
@@ -139,73 +140,9 @@ public final class Utils
         return cfgClass;
     }
 
-    public static String GetCurrentUserID()
+    public static ClassLoader GetClassLoader()
     {
-        try
-        {
-            Class<?> clazz = Class.forName("com.zing.zalocore.CoreUtility", true, sClassLoader);
-            for (Field field : clazz.getDeclaredFields())
-            {
-                if (field.getType() != String.class)
-                    continue;
-                field.setAccessible(true);
-                String value = (String) field.get(null);
-                if (value != null && value.matches("\\d+"))
-                    return value;
-            }
-        }
-        catch (Exception e)
-        {
-            Log.e(TAG, "GetCurrentUserID error: " + e);
-        }
-        return "0";
-    }
-
-    public static String GetCurrentUserToken()
-    {
-        try
-        {
-            String userID = GetCurrentUserID();
-            if (userID.isEmpty())
-                return "";
-            Class<?> clazz = Class.forName("com.zing.zalocore.CoreUtility", true, sClassLoader);
-            for (Field field : clazz.getDeclaredFields())
-            {
-                if (field.getType() != String.class)
-                    continue;
-                field.setAccessible(true);
-                String value = (String) field.get(null);
-                if (value != null && value.contains(userID) && !value.equals(userID))
-                    return value;
-            }
-        }
-        catch (Exception e)
-        {
-            Log.e(TAG, "GetCurrentUserToken error: " + e);
-        }
-        return "";
-    }
-
-    public static String GetAppVersion()
-    {
-        try
-        {
-            Class<?> clazz = Class.forName("com.zing.zalocore.CoreUtility", true, sClassLoader);
-            for (Field field : clazz.getDeclaredFields())
-            {
-                if (field.getType() != String.class)
-                    continue;
-                field.setAccessible(true);
-                String value = (String) field.get(null);
-                if (value != null && value.matches("\\d{2}\\.\\d{2}\\.\\d{2}"))
-                    return value;
-            }
-        }
-        catch (Exception e)
-        {
-            Log.e(TAG, "GetAppVersion error: " + e);
-        }
-        return "";
+        return sClassLoader;
     }
 
     public static String GetStackTrace()
@@ -237,11 +174,12 @@ public final class Utils
         }
         catch (Exception e)
         {
-            Log.e(TAG, "GetCurrentUserInfo error: " + e);
+            Logger.e(e);
         }
         return "";
     }
 
+    @SuppressLint("DiscouragedPrivateApi")
     public static Object UnsafeAllocate(Class<?> clazz) throws Exception
     {
         Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
@@ -327,7 +265,7 @@ public final class Utils
         return null;
     }
 
-    public static Object FindObjectByValue(List<Object> objList, Object value)
+    public static Object FindObjectContainsValue(List<Object> objList, Object value)
     {
         for (Object obj : objList)
         {
@@ -441,6 +379,17 @@ public final class Utils
         return "L" + clazz.getName().replace('.', '/') + ";";
     }
 
+    public static String DescriptorToClassName(String descriptor)
+    {
+        if (descriptor == null || descriptor.isEmpty())
+            return "";
+        if (descriptor.startsWith("L"))
+            descriptor = descriptor.substring(1);
+        if (descriptor.endsWith(";"))
+            descriptor = descriptor.substring(0, descriptor.length() - 1);
+        return descriptor.replace('/', '.');
+    }
+
     public static String GetExternalFilesDir()
     {
         if (externalFilesDir.isEmpty())
@@ -463,6 +412,7 @@ public final class Utils
         return externalFilesDir;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static String GetZaloXposedDir()
     {
         String externalFilesDir = GetExternalFilesDir();
@@ -478,17 +428,30 @@ public final class Utils
     {
         try
         { 
-            if (drawableResourceClass == null)
+            if (drawableResourceClasses.isEmpty())
+            {
+                Logger.e("Drawable resource classes not found");
+                return 0;
+            }
+            Field field = null;
+            for (Class<?> clazz : drawableResourceClasses)
+            {
+                try
+                {
+                    field = clazz.getField(resourceName);
+                }
+                catch (NoSuchFieldException ignored) { }
+            }
+            if (field == null)
             {
                 Logger.e("Drawable resource class not found");
                 return 0;
             }
-            Field field = drawableResourceClass.getField(resourceName);
             return field.getInt(null);
         }
         catch (Exception e)
         {
-            Log.e(TAG, "GetDrawableResourceIdByName error: " + e);
+            Logger.e(e);
         }
         return 0;
     }
@@ -496,18 +459,31 @@ public final class Utils
     public static int GetResourceIdByName(String resourceName)
     {
         try
-        { 
-            if (resourceClass == null)
+        {
+            if (resourceClasses.isEmpty())
+            {
+                Logger.e("Resource classes not found");
+                return 0;
+            }
+            Field field = null;
+            for (Class<?> clazz : resourceClasses)
+            {
+                try
+                {
+                    field = clazz.getField(resourceName);
+                }
+                catch (NoSuchFieldException ignored) { }
+            }
+            if (field == null)
             {
                 Logger.e("Resource class not found");
                 return 0;
             }
-            Field field = resourceClass.getField(resourceName);
             return field.getInt(null);
         }
         catch (Exception e)
         {
-            Log.e(TAG, "GetResourceIdByName error: " + e);
+            Logger.e(e);
         }
         return 0;
     }

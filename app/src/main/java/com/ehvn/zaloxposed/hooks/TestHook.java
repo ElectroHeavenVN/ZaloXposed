@@ -8,7 +8,7 @@ import org.luckypray.dexkit.query.enums.*;
 import org.luckypray.dexkit.query.matchers.*;
 import org.luckypray.dexkit.result.*;
 
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.*;
 import java.net.*;
 import java.nio.charset.*;
@@ -19,11 +19,49 @@ import android.graphics.drawable.*;
 import android.view.*;
 import android.widget.*;
 
+import io.github.libxposed.api.*;
+
 public class TestHook extends BaseHook
 {
     @Override
     public void hook() throws Throwable
     {
+        // Fake zBusiness plan
+        // List<ClassData> classes = bridge.findClass(FindClass.create()
+        //     .matcher(ClassMatcher.create()
+        //         .modifiers(Modifier.PUBLIC | Modifier.ABSTRACT)
+        //         .addUsingString("enable_business_tools_activation_ba", StringMatchType.Equals)
+        //         .addUsingString("CONTENT_TIP_ZBUSINESS_${UserID}", StringMatchType.Equals)
+        //         .addUsingString("enable_tip_tab_me_activation_business_account", StringMatchType.Equals)
+        //         .addUsingString("CONFIG_POPUP_BA_PURCHASE_SUCCESS_${UserID}", StringMatchType.Equals)
+        //         .addUsingString("description_vi", StringMatchType.Equals)
+        //         .addUsingString("SETTING_SHOW_LABEL_BA_${UserID}", StringMatchType.Equals)
+        //     ));
+        // if (classes.isEmpty())
+        // {
+        //     Logger.e("Target class not found");
+        //     return;
+        // }
+        // Class<?> zBusinessManagerClass = classes.get(0).getInstance(classLoader);
+        // List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        //     .matcher(MethodMatcher.create()
+        //         .declaredClass(zBusinessManagerClass)
+        //         .modifiers(Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL)
+        //         .returnType("int")
+        //         .paramCount(0)
+        //         .addUsingNumber(0)
+        //     ));
+        // if (methods.isEmpty())
+        // {
+        //     Logger.e("Target method not found");
+        //     return;
+        // }
+        // for (MethodData methodData : methods)
+        // {
+        //     Method method = methodData.getMethodInstance(classLoader);
+        //     module.hook(method).intercept(chain -> 3);
+        // }
+
         // module.hook(URL.class.getDeclaredMethod("openConnection")).intercept(chain ->
         // {
         //     Object result = chain.proceed();

@@ -1,8 +1,9 @@
-package com.ehvn.zaloxposed.hooks;
+package com.ehvn.zaloxposed.hooks.functional;
 
+import com.ehvn.zaloxposed.hooks.BaseHook;
 import com.ehvn.zaloxposed.utilities.Config;
+import com.ehvn.zaloxposed.utilities.CoreUtilityHelper;
 import com.ehvn.zaloxposed.utilities.Logger;
-import com.ehvn.zaloxposed.utilities.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,10 +12,8 @@ import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
 import org.luckypray.dexkit.result.MethodData;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class AntiRecallDeleteHook extends BaseHook
@@ -101,7 +100,7 @@ public class AntiRecallDeleteHook extends BaseHook
                     if (!Config.getAntiRecallIncludeMe()) 
                     {
                         long senderId = dataObject.getLong("fromU");
-                        if ((senderId + "").equals(Utils.GetCurrentUserID()))
+                        if ((senderId + "").equals(CoreUtilityHelper.GetCurrentUserID()))
                             continue;
                     }
                     msgObject.put("type", "webchat");
@@ -139,7 +138,7 @@ public class AntiRecallDeleteHook extends BaseHook
                     if (!Config.getAntiDeleteIncludeMyDeletion()) 
                     {
                         long deleterId = dataObject.getLong("fromU");
-                        if ((deleterId + "").equals(Utils.GetCurrentUserID()))
+                        if ((deleterId + "").equals(CoreUtilityHelper.GetCurrentUserID()))
                             continue;
                     }
                     msgObject.put("type", "webchat");

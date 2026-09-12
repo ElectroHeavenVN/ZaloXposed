@@ -4,13 +4,13 @@ import android.content.res.AssetManager;
 import android.util.Log;
 
 import com.ehvn.zaloxposed.hooks.*;
-import com.ehvn.zaloxposed.hooks.ads.HideAdsHook;
-import com.ehvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
+import com.ehvn.zaloxposed.hooks.functional.*;
+import com.ehvn.zaloxposed.hooks.privacy.*;
 import com.ehvn.zaloxposed.hooks.permanent.*;
-import com.ehvn.zaloxposed.hooks.privacy.BlockSendSeenHook;
-import com.ehvn.zaloxposed.hooks.privacy.SilentTypingHook;
-import com.ehvn.zaloxposed.hooks.tracking.DisableFirebaseLoggingHook;
-import com.ehvn.zaloxposed.hooks.tracking.DisableZaloTrackingHook;
+import com.ehvn.zaloxposed.hooks.tracking.*;
+import com.ehvn.zaloxposed.hooks.ui.*;
+import com.ehvn.zaloxposed.hooks.ads.*;
+import com.ehvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
 import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Logger;
 import com.ehvn.zaloxposed.utilities.Utils;
@@ -35,13 +35,13 @@ public class ZaloXposedLoader extends XposedModule
 
         hooks.add(new ChatInputBarTitleHook());
         hooks.add(new EnableE2EEHook());
+        hooks.add(new EnableLabelHook());
         hooks.add(new RestoreDevToolsMenuHook());
         hooks.add(new EnableSetNicknameInGroupHook());
         hooks.add(new DisableDohHook());
         hooks.add(new AntiRecallDeleteChatRowHook());
         hooks.add(new DisableFirebaseLoggingHook());
         hooks.add(new DisableZaloTrackingHook());
-
         hooks.add(new HideAdsHook());
         hooks.add(new CustomizeBottomRowHook());
         hooks.add(new EnableChatHeadHook());
@@ -55,6 +55,8 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new AntiRecallDeleteHook());
         hooks.add(new SilentTypingHook());
         hooks.add(new BlockSendSeenHook());
+        hooks.add(new ExtendedGroupRightMenuHook());
+        hooks.add(new EnableChatProtectionHook());
 
         hooks.add(new TestHook());
     }
@@ -66,6 +68,7 @@ public class ZaloXposedLoader extends XposedModule
         Logger.Init(this);
     }
 
+    @SuppressWarnings("JavaReflectionMemberAccess")
     @Override
     public void onPackageReady(PackageReadyParam param)
     {

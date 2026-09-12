@@ -143,6 +143,17 @@ public final class Config
         set(KEY_ENABLE_EXTENDED_GRID_MENU, value);
     }
 
+    public static final String KEY_ENABLE_EXTENDED_GROUP_RIGHT_MENU = "enable_extended_group_right_menu";
+
+    public static boolean getEnableExtendedGroupRightMenu()
+    {
+        return (boolean)get(KEY_ENABLE_EXTENDED_GROUP_RIGHT_MENU, false);
+    }
+    public static void setEnableExtendedGroupRightMenu(boolean value)
+    {
+        set(KEY_ENABLE_EXTENDED_GROUP_RIGHT_MENU, value);
+    }
+
     public static final String KEY_ENABLE_CHAT_HEAD = "enable_chat_head";
 
     public static boolean getEnableChatHead()
@@ -225,6 +236,18 @@ public final class Config
     public static void setEnableShareHiddenStickerPack(boolean value)
     {
         set(KEY_ENABLE_SHARE_HIDDEN_STICKER_PACK, value);
+    }
+
+    public static final String KEY_ENABLE_CHAT_PROTECTION = "enable_chat_protection";
+
+    public static boolean getEnableChatProtection()
+    {
+        return (boolean)get(KEY_ENABLE_CHAT_PROTECTION, false);
+    }
+
+    public static void setEnableChatProtection(boolean value)
+    {
+        set(KEY_ENABLE_CHAT_PROTECTION, value);
     }
 
     public static final String KEY_ENABLE_EXTENDED_GROUP_SETTING_MENU = "enable_extended_group_setting_menu";
