@@ -87,21 +87,27 @@ public class ZaloXposedLoader extends XposedModule
             return;
         }
         Config.Load();
-        for (BaseHook hook : hooks)
+        try
         {
-            try
+            AssetManager assetManager = AssetManager.class.getDeclaredConstructor().newInstance();
+            Method addAssetPath = AssetManager.class.getMethod("addAssetPath", String.class);
+            addAssetPath.invoke(assetManager, getModuleApplicationInfo().sourceDir);
+            for (BaseHook hook : hooks)
             {
-                AssetManager assetManager = AssetManager.class.getDeclaredConstructor().newInstance();
-                Method addAssetPath = AssetManager.class.getMethod("addAssetPath", String.class);
-                addAssetPath.invoke(assetManager, getModuleApplicationInfo().sourceDir);
-                hook.init(this, bridge, param, assetManager);
-                hook.hook();
+                try
+                {
+                    hook.init(this, bridge, param, assetManager);
+                    hook.hook();
+                }
+                catch (Throwable e)
+                {
+                    Logger.e(e);
+                }
             }
-            catch (Throwable e)
-            {
-                Logger.e("Error in " + hook.getClass().getSimpleName());
-                Logger.e(e);
-            }
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
         }
     }
 }
