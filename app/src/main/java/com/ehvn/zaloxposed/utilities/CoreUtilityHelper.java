@@ -1,7 +1,5 @@
 package com.ehvn.zaloxposed.utilities;
 
-import android.util.Log;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
