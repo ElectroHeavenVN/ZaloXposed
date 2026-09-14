@@ -1,7 +1,7 @@
 [versions]
 agp = "9.3.2"
 dexkit = "2.2.0"
-smaliDexlib2 = "3.0.9"
+smaliDexlib2 = "3.0.10"
 
 [libraries]
 dexkit = { module = "org.luckypray:dexkit", version.ref = "dexkit" }
