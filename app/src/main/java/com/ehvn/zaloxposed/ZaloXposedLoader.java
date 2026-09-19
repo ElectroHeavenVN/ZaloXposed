@@ -66,6 +66,7 @@ public class ZaloXposedLoader extends XposedModule
         {
             hooks.add(new SpoofAppSignatureHook());
             hooks.add(new SpoofPackageNameHook());
+            hooks.add(new FixProviderHook());
         }
     }
 
@@ -102,6 +103,7 @@ public class ZaloXposedLoader extends XposedModule
             Logger.e(e);
             return;
         }
+        Common.setPackageName(param.getPackageName());
         Config.Load();
         try
         {
