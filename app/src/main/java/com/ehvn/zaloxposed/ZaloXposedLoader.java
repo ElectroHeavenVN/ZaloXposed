@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.ehvn.zaloxposed.hooks.*;
 import com.ehvn.zaloxposed.hooks.functional.*;
+import com.ehvn.zaloxposed.hooks.morphe.*;
 import com.ehvn.zaloxposed.hooks.privacy.*;
 import com.ehvn.zaloxposed.hooks.permanent.*;
 import com.ehvn.zaloxposed.hooks.tracking.*;
@@ -30,6 +31,7 @@ public class ZaloXposedLoader extends XposedModule
     static
     {
         System.loadLibrary("dexkit");
+
         hooks.add(new ZaloXposedSettingsMenuHook());
         hooks.add(new CustomBackgroundHook());
 
@@ -59,6 +61,12 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new EnableChatProtectionHook());
 
         hooks.add(new TestHook());
+
+        if (MorpheConstants.isPatchedByMorphe())
+        {
+            hooks.add(new SpoofAppSignatureHook());
+            hooks.add(new SpoofPackageNameHook());
+        }
     }
 
     @Override
@@ -72,9 +80,17 @@ public class ZaloXposedLoader extends XposedModule
     @Override
     public void onPackageReady(PackageReadyParam param)
     {
-        if (!param.getPackageName().equals("com.zing.zalo"))
+        if (!param.getPackageName().startsWith("com.zing.zalo"))
             return;
         Logger.i("Loading ZaloXposed");
+        try
+        {
+            System.loadLibrary("ZaloXposedNative");
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
         try
         {
             if (bridge == null)

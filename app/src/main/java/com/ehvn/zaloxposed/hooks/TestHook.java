@@ -14,6 +14,8 @@ import java.net.*;
 import java.nio.charset.*;
 import java.util.*;
 
+import android.content.*;
+import android.content.pm.*;
 import android.graphics.*;
 import android.graphics.drawable.*;
 import android.view.*;
@@ -26,6 +28,12 @@ public class TestHook extends BaseHook
     @Override
     public void hook() throws Throwable
     {
+        // module.hook(System.class.getDeclaredMethod("exit", int.class)).intercept(chain ->
+        // {
+            // Logger.i("Exit stack trace: " + Utils.GetStackTrace());
+            // return chain.proceed();
+        // });
+
         // Fake zBusiness plan
         // List<ClassData> classes = bridge.findClass(FindClass.create()
         //     .matcher(ClassMatcher.create()

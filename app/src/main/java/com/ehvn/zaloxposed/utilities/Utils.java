@@ -502,4 +502,12 @@ public final class Utils
             layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
         view.setLayoutParams(layoutParams);
     }
+
+    public static String HexString(byte[] data)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : data)
+            sb.append(String.format("%02x ", b & 0xff));
+        return sb.toString();
+    }
 }
