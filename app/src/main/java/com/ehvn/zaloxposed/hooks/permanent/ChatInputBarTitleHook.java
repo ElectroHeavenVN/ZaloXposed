@@ -2,6 +2,7 @@ package com.ehvn.zaloxposed.hooks.permanent;
 
 import android.widget.TextView;
 
+import com.ehvn.zaloxposed.MorpheConstants;
 import com.ehvn.zaloxposed.hooks.BaseHook;
 import com.ehvn.zaloxposed.utilities.Logger;
 
@@ -40,7 +41,7 @@ public class ChatInputBarTitleHook extends BaseHook
                 return result;
             if (actionEditTextView.getHint().length() <= 0)
                 return result;
-            actionEditTextView.setHint("ZaloXposed by ElectroHeavenVN");
+            actionEditTextView.setHint(MorpheConstants.getModuleName() + " by ElectroHeavenVN");
             return result;
         });
     }

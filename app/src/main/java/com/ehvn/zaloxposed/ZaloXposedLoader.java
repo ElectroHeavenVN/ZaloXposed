@@ -73,7 +73,7 @@ public class ZaloXposedLoader extends XposedModule
     @Override
     public void onModuleLoaded(ModuleLoadedParam param)
     {
-        log(Log.INFO, "ZaloXposed", "Loaded");
+        log(Log.INFO, MorpheConstants.getModuleName(), "Loaded");
         Logger.Init(this);
     }
 

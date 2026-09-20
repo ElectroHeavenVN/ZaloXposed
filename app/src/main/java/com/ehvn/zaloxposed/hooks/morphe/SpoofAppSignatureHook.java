@@ -117,6 +117,7 @@ public class SpoofAppSignatureHook extends BaseHook
         for (MethodData methodData : methods)
         {
             Method method = methodData.getMethodInstance(classLoader);
+            Logger.i("Hooking: " + method);
             module.hook(method).intercept(chain -> SHA1_SIG);
         }
         // Method method = methods.get(0).getMethodInstance(classLoader);

@@ -1,5 +1,7 @@
 package com.ehvn.zaloxposed.utilities;
 
+import com.ehvn.zaloxposed.MorpheConstants;
+
 import android.annotation.SuppressLint;
 import android.content.pm.ApplicationInfo;
 import android.view.View;
@@ -405,7 +407,7 @@ public final class Utils
             }
             catch (Exception e)
             {
-                Logger.e("[ZaloXposed] Cannot get externalFilesDir:");
+                Logger.e("[" + MorpheConstants.getModuleName() + "] Cannot get externalFilesDir:");
                 Logger.e(e);
             }
         }

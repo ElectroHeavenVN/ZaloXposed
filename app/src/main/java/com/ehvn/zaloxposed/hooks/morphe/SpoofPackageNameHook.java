@@ -68,9 +68,10 @@ public class SpoofPackageNameHook extends BaseHook
         for (MethodData methodData : methods)
         {
             Method method = methodData.getMethodInstance(classLoader);
+            Logger.i("Hooking: " + method);
             module.hook(method).intercept(chain ->
             {
-                int pid = (int) chain.getArg(1);
+                int pid = (int)chain.getArg(1);
                 if (pid == android.os.Process.myPid())
                     return "com.zing.zalo";
                 return chain.proceed();

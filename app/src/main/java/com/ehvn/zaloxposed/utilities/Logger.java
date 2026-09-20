@@ -2,6 +2,8 @@ package com.ehvn.zaloxposed.utilities;
 
 import android.util.Log;
 
+import com.ehvn.zaloxposed.MorpheConstants;
+
 import io.github.libxposed.api.XposedModule;
 
 public final class Logger
@@ -10,7 +12,7 @@ public final class Logger
 
     private static XposedModule module;
 
-    private static final String TAG = "ZaloXposed";
+    private static final String TAG = MorpheConstants.getModuleName();
 
     public static void Init(XposedModule xposedModule)
     {

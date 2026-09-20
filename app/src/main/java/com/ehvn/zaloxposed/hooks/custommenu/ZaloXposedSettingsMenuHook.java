@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.ehvn.zaloxposed.MorpheConstants;
 import com.ehvn.zaloxposed.hooks.BaseHook;
 import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Logger;
@@ -641,9 +642,10 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             tabMeItemTrackingField.setAccessible(true);
             tabMeItemTrackingField.set(newItem, CUSTOM_ITEM_MARKER);
             tabMeItemTitleField.setAccessible(true);
-            tabMeItemTitleField.set(newItem, "ZaloXposed");
+            String moduleName = MorpheConstants.getModuleName();
+            tabMeItemTitleField.set(newItem, moduleName);
             tabMeItemDescriptionField.setAccessible(true);
-            tabMeItemDescriptionField.set(newItem, isEnglish ? "ZaloXposed settings" : "Cài đặt ZaloXposed");
+            tabMeItemDescriptionField.set(newItem, isEnglish ? moduleName + " settings" : "Cài đặt " + moduleName);
             tabMeItemIconField.setAccessible(true);
             tabMeItemIconField.setInt(newItem, Utils.GetDrawableResourceIdByName("zds_oic_premium_crown_color_24"));
             return newItem;
@@ -762,7 +764,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 else if ("Quyền riêng tư".equals(title))
                     isEnglish = false;
                 Method setMiddleTitle = actionBar.getClass().getMethod("setMiddleTitle", String.class);
-                setMiddleTitle.invoke(actionBar, isEnglish ? "ZaloXposed Settings" : "Cài đặt ZaloXposed");
+                String moduleName = MorpheConstants.getModuleName();
+                setMiddleTitle.invoke(actionBar, isEnglish ? moduleName + " Settings" : "Cài đặt " + moduleName);
             }
             catch (Exception t)
             {
