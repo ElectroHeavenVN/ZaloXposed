@@ -26,6 +26,11 @@ public class UnlockZCloudHook extends BaseHook
                 .paramCount(0)
                 .addUsingString("ZALO_CLOUD_SUBSCRIPTION_PLAN_", StringMatchType.Equals)
             ));
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 1");
+            return;
+        }
         Method method = methods.get(0).getMethodInstance(classLoader);
         Class<?> clazz = method.getDeclaringClass();
         Logger.i("Hooking: " + method);
@@ -44,6 +49,11 @@ public class UnlockZCloudHook extends BaseHook
                 .addInvoke(MethodMatcher.create().name("toDays"))
                 .declaredClass(clazz)
             ));
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 2");
+            return;
+        }
         method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
         module.hook(method).intercept(chain -> 
@@ -62,6 +72,11 @@ public class UnlockZCloudHook extends BaseHook
                 .addInvoke(MethodMatcher.create().name("toDays"))
                 .declaredClass(clazz)
             ));
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 3");
+            return;
+        }
         method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
         module.hook(method).intercept(chain -> 
@@ -78,6 +93,11 @@ public class UnlockZCloudHook extends BaseHook
                 .addUsingNumber(-1)
                 .declaredClass(clazz)
             ));
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 4");
+            return;
+        }
         MethodData methodData = methods.get(0);
         method = methodData.getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
@@ -95,6 +115,11 @@ public class UnlockZCloudHook extends BaseHook
                 .addCaller(methodData.getDescriptor())
                 .declaredClass(clazz)
             ));
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 5");
+            return;
+        }
         method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
         module.hook(method).intercept(chain -> 
@@ -112,6 +137,11 @@ public class UnlockZCloudHook extends BaseHook
                 .addUsingString("ZALO_CLOUD_SUBSCRIPTION_PLAN_", StringMatchType.Equals)
                 .declaredClass(clazz)
             ));
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 6");
+            return;
+        }
         method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
         module.hook(method).intercept(chain -> 
@@ -120,7 +150,6 @@ public class UnlockZCloudHook extends BaseHook
                 return chain.proceed();
             return 0;
         });
-
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -128,6 +157,11 @@ public class UnlockZCloudHook extends BaseHook
                 .paramCount(1)
                 .declaredClass(clazz)
             ));
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 7");
+            return;
+        }
         for (MethodData methodData2 : methods)
         {
             Method method2 = methodData2.getMethodInstance(classLoader);
