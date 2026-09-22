@@ -14,6 +14,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import io.github.libxposed.api.XposedInterface;
+
 public class SpoofAppSignatureHook extends BaseHook
 {
     private static final String SHA1_SIG = "9487ba76b32e9e36785fb4c3540021f85af8d7b7";
@@ -70,7 +72,7 @@ public class SpoofAppSignatureHook extends BaseHook
     {
         Method toByteArray = Signature.class.getDeclaredMethod("toByteArray");
         Logger.i("Hooking: " + toByteArray);
-        module.hook(toByteArray).intercept(chain ->
+        module.hook(toByteArray).setPriority(1).intercept(chain ->
         {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
             boolean calledFromNative = false;
@@ -118,7 +120,7 @@ public class SpoofAppSignatureHook extends BaseHook
         {
             Method method = methodData.getMethodInstance(classLoader);
             Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain -> SHA1_SIG);
+            module.hook(method).setPriority(1).intercept(chain -> SHA1_SIG);
         }
         // Method method = methods.get(0).getMethodInstance(classLoader);
         // Method getAppContext = Class.forName("com.zing.zalo.MainApplication", false, classLoader).getMethod("getAppContext");

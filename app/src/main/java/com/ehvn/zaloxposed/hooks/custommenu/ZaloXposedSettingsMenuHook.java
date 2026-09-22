@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import io.github.libxposed.api.XposedInterface;
+
 @SuppressLint("SetTextI18n")
 public class ZaloXposedSettingsMenuHook extends BaseHook
 {
@@ -491,7 +493,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         Method method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->
+        module.hook(method).setPriority(10).intercept(chain ->
         {
             Object result = chain.proceed();
             if (!(result instanceof ArrayList))
@@ -545,7 +547,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->
+        module.hook(method).setPriority(10).intercept(chain ->
         {
             Object tabMeItem = chain.getArg(0);
             if (tabMeItem == null)
@@ -677,7 +679,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         Method method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->
+        module.hook(method).setPriority(10).intercept(chain ->
         {
             Object result = chain.proceed();
             if (!isOpenZaloXposedSettings)
@@ -708,7 +710,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->  
+        module.hook(method).setPriority(10).intercept(chain ->
         {
             Object result = chain.proceed();
             if (!isOpenZaloXposedSettings)
@@ -745,7 +747,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         method = methods.get(0).getMethodInstance(classLoader);
         Field actionBarField = Utils.FindFieldByType(Class.forName("com.zing.zalo.ui.settings.SettingPrivateV2View", false, classLoader), "com.zing.zalo.zdesign.component.header.ZdsActionBar");
         Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->  
+        module.hook(method).setPriority(10).intercept(chain ->
         {
             Object result = chain.proceed();
             if (!isOpenZaloXposedSettings)

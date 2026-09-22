@@ -28,26 +28,20 @@ import io.github.libxposed.api.*;
 
 public class FixProviderHook extends BaseHook
 {
-    private static boolean internalProviderModified = false;
-    private static boolean preferencesProviderModified = false;
-    
     @Override
     public void hook() throws Throwable
     {
         if (Common.getPackageName().equals("com.zing.zalo"))
             return;
-        Method method = Class.forName("com.zing.zalo.provider.InternalProvider", false, classLoader).getDeclaredMethod("onCreate");
-        Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->
+        Class<?> clazz = Class.forName("com.zing.zalo.provider.InternalProvider", false, classLoader);
+        Logger.i("Hooking <clinit>: " + clazz);
+        Class<?> finalClazz = clazz;
+        module.hookClassInitializer(clazz).setPriority(2).intercept(chain ->
         {
             Object result = chain.proceed();
-            if (internalProviderModified)
-                return result;
-            internalProviderModified = true;
-            Class<?> clazz = chain.getThisObject().getClass();
             Field uriField = null;
             Field uriMatcherField = null;
-            for (Field field : clazz.getDeclaredFields())
+            for (Field field : finalClazz.getDeclaredFields())
             {
                 if (field.getType().getName().equals("android.net.Uri"))
                     uriField = field;
@@ -69,19 +63,16 @@ public class FixProviderHook extends BaseHook
             }
             return result;
         });
-        method = Class.forName("com.zing.zalo.db.PreferencesProvider", false, classLoader).getDeclaredMethod("onCreate");
-        Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->
+        clazz = Class.forName("com.zing.zalo.db.PreferencesProvider", false, classLoader);
+        Logger.i("Hooking <clinit>: " + clazz);
+        Class<?> finalClazz1 = clazz;
+        module.hookClassInitializer(clazz).setPriority(2).intercept(chain ->
         {
             Object result = chain.proceed();
-            if (preferencesProviderModified)
-                return result;
-            preferencesProviderModified = true;
-            Class<?> clazz = chain.getThisObject().getClass();
             Field uriField1 = null;
             Field uriField2 = null;
             Field uriMatcherField = null;
-            for (Field field : clazz.getDeclaredFields())
+            for (Field field : finalClazz1.getDeclaredFields())
             {
                 if (field.getType().getName().equals("android.net.Uri"))
                 {

@@ -22,7 +22,7 @@ public class SpoofPackageNameHook extends BaseHook
     { 
         Method getPackageName = Class.forName("android.app.ContextImpl", false, classLoader).getDeclaredMethod("getPackageName");
         Logger.i("Hooking: " + getPackageName);
-        module.hook(getPackageName).intercept(chain ->
+        module.hook(getPackageName).setPriority(1).intercept(chain ->
         {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
             boolean calledFromNative = false;
@@ -69,7 +69,7 @@ public class SpoofPackageNameHook extends BaseHook
         {
             Method method = methodData.getMethodInstance(classLoader);
             Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain ->
+            module.hook(method).setPriority(1).intercept(chain ->
             {
                 int pid = (int)chain.getArg(1);
                 if (pid == android.os.Process.myPid())
