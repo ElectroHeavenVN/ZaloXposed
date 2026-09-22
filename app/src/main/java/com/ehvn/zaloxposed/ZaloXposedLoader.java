@@ -38,6 +38,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new ChatInputBarTitleHook());
         hooks.add(new EnableE2EEHook());
         hooks.add(new EnableLabelHook());
+        hooks.add(new RestoreGoogleDriveBackupHook());
         hooks.add(new RestoreDevToolsMenuHook());
         hooks.add(new EnableSetNicknameInGroupHook());
         hooks.add(new DisableDohHook());
