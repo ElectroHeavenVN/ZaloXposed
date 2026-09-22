@@ -381,6 +381,18 @@ public final class Utils
         return "L" + clazz.getName().replace('.', '/') + ";";
     }
 
+    public static String GetDescriptor(Method method)
+    {
+        if (method == null)
+            return "";
+        StringBuilder sb = new StringBuilder("(");
+        for (Class<?> paramType : method.getParameterTypes())
+            sb.append(GetDescriptor(paramType));
+        sb.append(")");
+        sb.append(GetDescriptor(method.getReturnType()));
+        return sb.toString();
+    }
+
     public static String DescriptorToClassName(String descriptor)
     {
         if (descriptor == null || descriptor.isEmpty())
