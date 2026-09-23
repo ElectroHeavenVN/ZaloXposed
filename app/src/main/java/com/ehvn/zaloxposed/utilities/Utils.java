@@ -393,6 +393,13 @@ public final class Utils
         return sb.toString();
     }
 
+    public static String GetDescriptor(Field field)
+    {
+        if (field == null)
+            return "";
+        return GetDescriptor(field.getDeclaringClass()) + "->" + field.getName() + ":" + GetDescriptor(field.getType());
+    }
+
     public static String DescriptorToClassName(String descriptor)
     {
         if (descriptor == null || descriptor.isEmpty())
