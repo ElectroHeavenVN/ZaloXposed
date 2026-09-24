@@ -53,7 +53,9 @@ jobs:
           EOF
 
       - name: Build signed release APK
-        run: ./gradlew --no-daemon --stacktrace assembleRelease
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --stacktrace assembleRelease
 
       - name: Collect APK
         shell: bash
