@@ -717,6 +717,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 return result;
             if (rootLayout == null)
                 return result;
+            isOpenZaloXposedSettings = false;
             templateHeader = null;
             templateSeparator = null;
             try
