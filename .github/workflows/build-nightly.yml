@@ -76,7 +76,7 @@ jobs:
           tag_name: nightly
           name: Nightly build
           prerelease: true
-          generate_release_notes: true
+          generate_release_notes: false
           files: release/*.apk
 
       - name: Sync nightly tag with main
