@@ -70,6 +70,15 @@ jobs:
             cp "$apk" "release/ZaloXposed-${apk##*/}"
           done
 
+      - name: Recreate nightly tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git push origin --delete nightly 2>/dev/null || true
+          git tag -d nightly 2>/dev/null || true
+          git tag nightly "$GITHUB_SHA"
+          git push origin refs/tags/nightly
+
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v3
         with:
@@ -78,10 +87,3 @@ jobs:
           prerelease: true
           generate_release_notes: false
           files: release/*.apk
-
-      - name: Sync nightly tag with main
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -f nightly "$GITHUB_SHA"
-          git push origin nightly --force
