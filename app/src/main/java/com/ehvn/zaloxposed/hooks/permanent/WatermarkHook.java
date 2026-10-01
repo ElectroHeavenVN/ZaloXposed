@@ -1,18 +1,13 @@
 package com.ehvn.zaloxposed.hooks.permanent;
 
-import android.view.View;
-import android.widget.TextSwitcher;
 import android.widget.TextView;
 
 import com.ehvn.zaloxposed.MorpheConstants;
 import com.ehvn.zaloxposed.hooks.BaseHook;
 import com.ehvn.zaloxposed.utilities.Logger;
-import com.ehvn.zaloxposed.utilities.Utils;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 @SuppressWarnings("unused")
 public class WatermarkHook extends BaseHook
