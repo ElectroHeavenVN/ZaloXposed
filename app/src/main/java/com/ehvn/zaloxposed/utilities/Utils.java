@@ -385,7 +385,10 @@ public final class Utils
     {
         if (method == null)
             return "";
-        StringBuilder sb = new StringBuilder("(");
+        StringBuilder sb = new StringBuilder(GetDescriptor(method.getDeclaringClass()));
+        sb.append("->");
+        sb.append(method.getName());
+        sb.append("(");
         for (Class<?> paramType : method.getParameterTypes())
             sb.append(GetDescriptor(paramType));
         sb.append(")");
