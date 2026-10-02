@@ -350,6 +350,21 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getRestoreGoogleDriveBackup());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setRestoreGoogleDriveBackup);
 
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Profile" : "Hồ sơ");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Restore profile music options" : "Phục hồi tuỳ chọn nhạc nền hồ sơ");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Replace the ZStyle profile music options" : "Thay thế tuỳ chọn chọn nhạc nền hồ sơ bằng ZStyle");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getRestoreProfileMusic());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setRestoreProfileMusic);
+
     
         separator = createSeparator(context);
         rootLayout.addView(separator);
