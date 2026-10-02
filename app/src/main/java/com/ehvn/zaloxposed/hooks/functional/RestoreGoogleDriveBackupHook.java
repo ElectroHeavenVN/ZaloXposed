@@ -1,6 +1,7 @@
-package com.ehvn.zaloxposed.hooks.permanent;
+package com.ehvn.zaloxposed.hooks.functional;
 
 import com.ehvn.zaloxposed.hooks.BaseHook;
+import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Logger;
 
 import org.luckypray.dexkit.query.FindClass;
@@ -20,8 +21,8 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
     @Override
     public void hook() throws Throwable
     {
-        hookShowNewGDriveBackupSection();
         hookRestoreOldGDriveBackupSection();
+        hookShowNewGDriveBackupSection();
     }
 
     private void hookShowNewGDriveBackupSection() throws ClassNotFoundException, NoSuchMethodException
@@ -83,7 +84,12 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
         {
             Method method = methodData.getMethodInstance(classLoader);
             Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain -> true);
+            module.hook(method).intercept(chain ->
+            {
+                if (Config.getRestoreGoogleDriveBackup())
+                    return true;
+                return chain.proceed();
+            });
         }
     }
 
@@ -128,7 +134,12 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
         {
             Method method = methodData.getMethodInstance(classLoader);
             Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain -> true);
+            module.hook(method).intercept(chain ->
+            {
+                if (Config.getRestoreGoogleDriveBackup())
+                    return true;
+                return chain.proceed();
+            });
         }
     }
 }

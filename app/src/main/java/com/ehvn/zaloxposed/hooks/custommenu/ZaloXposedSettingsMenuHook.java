@@ -335,6 +335,21 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getUnlockZCloud());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setUnlockZCloud);
 
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Backup messages" : "Sao lưu tin nhắn");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Restore Google Drive backup options" : "Phục hồi tuỳ chọn sao lưu ảnh bằng Google Drive");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Replace the ZCloud backup options" : "Thay thế tuỳ chọn sao lưu bằng ZCloud");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getRestoreGoogleDriveBackup());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setRestoreGoogleDriveBackup);
+
     
         separator = createSeparator(context);
         rootLayout.addView(separator);
