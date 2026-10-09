@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.ehvn.zaloxposed.hooks.*;
 import com.ehvn.zaloxposed.hooks.functional.*;
+import com.ehvn.zaloxposed.hooks.morphe.*;
 import com.ehvn.zaloxposed.hooks.privacy.*;
 import com.ehvn.zaloxposed.hooks.permanent.*;
 import com.ehvn.zaloxposed.hooks.tracking.*;
@@ -30,12 +31,15 @@ public class ZaloXposedLoader extends XposedModule
     static
     {
         System.loadLibrary("dexkit");
+
         hooks.add(new ZaloXposedSettingsMenuHook());
         hooks.add(new CustomBackgroundHook());
 
-        hooks.add(new ChatInputBarTitleHook());
+        hooks.add(new WatermarkHook());
         hooks.add(new EnableE2EEHook());
         hooks.add(new EnableLabelHook());
+        hooks.add(new RestoreGoogleDriveBackupHook());
+        hooks.add(new RestoreProfileMusicHook());
         hooks.add(new RestoreDevToolsMenuHook());
         hooks.add(new EnableSetNicknameInGroupHook());
         hooks.add(new DisableDohHook());
@@ -59,12 +63,19 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new EnableChatProtectionHook());
 
         hooks.add(new TestHook());
+
+        if (MorpheConstants.isPatchedByMorphe())
+        {
+            hooks.add(new SpoofAppSignatureHook());
+            hooks.add(new SpoofPackageNameHook());
+            hooks.add(new FixProviderHook());
+        }
     }
 
     @Override
     public void onModuleLoaded(ModuleLoadedParam param)
     {
-        log(Log.INFO, "ZaloXposed", "Loaded");
+        log(Log.INFO, MorpheConstants.getModuleName(), "Loaded");
         Logger.Init(this);
     }
 
@@ -72,9 +83,17 @@ public class ZaloXposedLoader extends XposedModule
     @Override
     public void onPackageReady(PackageReadyParam param)
     {
-        if (!param.getPackageName().equals("com.zing.zalo"))
+        if (!param.getPackageName().startsWith("com.zing.zalo"))
             return;
         Logger.i("Loading ZaloXposed");
+        try
+        {
+            System.loadLibrary("ZaloXposedNative");
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
         try
         {
             if (bridge == null)
@@ -86,22 +105,29 @@ public class ZaloXposedLoader extends XposedModule
             Logger.e(e);
             return;
         }
+        Common.setPackageName(param.getPackageName());
         Config.Load();
-        for (BaseHook hook : hooks)
+        try
         {
-            try
+            AssetManager assetManager = AssetManager.class.getDeclaredConstructor().newInstance();
+            Method addAssetPath = AssetManager.class.getMethod("addAssetPath", String.class);
+            addAssetPath.invoke(assetManager, getModuleApplicationInfo().sourceDir);
+            for (BaseHook hook : hooks)
             {
-                AssetManager assetManager = AssetManager.class.getDeclaredConstructor().newInstance();
-                Method addAssetPath = AssetManager.class.getMethod("addAssetPath", String.class);
-                addAssetPath.invoke(assetManager, getModuleApplicationInfo().sourceDir);
-                hook.init(this, bridge, param, assetManager);
-                hook.hook();
+                try
+                {
+                    hook.init(this, bridge, param, assetManager);
+                    hook.hook();
+                }
+                catch (Throwable e)
+                {
+                    Logger.e(e);
+                }
             }
-            catch (Throwable e)
-            {
-                Logger.e("Error in " + hook.getClass().getSimpleName());
-                Logger.e(e);
-            }
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
         }
     }
 }

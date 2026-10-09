@@ -487,4 +487,28 @@ public final class Config
     {
         set(KEY_BLOCK_SEND_SEEN, value);
     }
+
+    public static final String KEY_RESTORE_PROFILE_MUSIC = "restore_profile_music";
+
+    public static boolean getRestoreProfileMusic()
+    {
+        return (boolean)get(KEY_RESTORE_PROFILE_MUSIC, false);
+    }
+
+    public static void setRestoreProfileMusic(boolean value)
+    {
+        set(KEY_RESTORE_PROFILE_MUSIC, value);
+    }
+
+    public static final String KEY_RESTORE_GOOGLE_DRIVE_BACKUP = "restore_google_drive_backup";
+
+    public static boolean getRestoreGoogleDriveBackup()
+    {
+        return (boolean)get(KEY_RESTORE_GOOGLE_DRIVE_BACKUP, false);
+    }
+
+    public static void setRestoreGoogleDriveBackup(boolean value)
+    {
+        set(KEY_RESTORE_GOOGLE_DRIVE_BACKUP, value);
+    }
 }

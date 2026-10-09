@@ -1,5 +1,7 @@
 package com.ehvn.zaloxposed.utilities;
 
+import com.ehvn.zaloxposed.MorpheConstants;
+
 import android.annotation.SuppressLint;
 import android.content.pm.ApplicationInfo;
 import android.view.View;
@@ -213,8 +215,10 @@ public final class Utils
         {
             try
             {
+                boolean oldAccessible = f.isAccessible();
                 f.setAccessible(true);
                 f.set(cloned, f.get(obj));
+                f.setAccessible(oldAccessible);
             }
             catch (Throwable ignored) { }
         }
@@ -234,8 +238,10 @@ public final class Utils
         {
             try
             {
+                boolean oldAccessible = f.isAccessible();
                 f.setAccessible(true);
                 Object v = f.get(obj);
+                f.setAccessible(oldAccessible);
                 if (value.equals(v))
                     return f;
             }
@@ -280,8 +286,10 @@ public final class Utils
             {
                 try
                 {
+                    boolean oldAccessible = f.isAccessible();
                     f.setAccessible(true);
                     Object v = f.get(obj);
+                    f.setAccessible(oldAccessible);
                     if (value.equals(v))
                         return obj;
                 }
@@ -291,6 +299,10 @@ public final class Utils
         return null;
     }
 
+    /**
+     * @deprecated Please refrain from disassembling methods if possible
+     */
+    @Deprecated
     public static ArrayList<Instruction> Disassemble(Method method) throws IOException
     {
         Class<?> clazz = method.getDeclaringClass();
@@ -338,6 +350,10 @@ public final class Utils
         return new ArrayList<>();
     }
 
+    /**
+     * @deprecated Please refrain from disassembling methods if possible
+     */
+    @Deprecated()
     public static ArrayList<Instruction> Disassemble(Class<?> clazz, String methodName) throws IOException
     {
         for (String entryName : dexContainer.getDexEntryNames())
@@ -379,6 +395,28 @@ public final class Utils
         return "L" + clazz.getName().replace('.', '/') + ";";
     }
 
+    public static String GetDescriptor(Method method)
+    {
+        if (method == null)
+            return "";
+        StringBuilder sb = new StringBuilder(GetDescriptor(method.getDeclaringClass()));
+        sb.append("->");
+        sb.append(method.getName());
+        sb.append("(");
+        for (Class<?> paramType : method.getParameterTypes())
+            sb.append(GetDescriptor(paramType));
+        sb.append(")");
+        sb.append(GetDescriptor(method.getReturnType()));
+        return sb.toString();
+    }
+
+    public static String GetDescriptor(Field field)
+    {
+        if (field == null)
+            return "";
+        return GetDescriptor(field.getDeclaringClass()) + "->" + field.getName() + ":" + GetDescriptor(field.getType());
+    }
+
     public static String DescriptorToClassName(String descriptor)
     {
         if (descriptor == null || descriptor.isEmpty())
@@ -405,7 +443,7 @@ public final class Utils
             }
             catch (Exception e)
             {
-                Logger.e("[ZaloXposed] Cannot get externalFilesDir:");
+                Logger.e("[" + MorpheConstants.getModuleName() + "] Cannot get externalFilesDir:");
                 Logger.e(e);
             }
         }
@@ -501,5 +539,13 @@ public final class Utils
         if (layoutParams.width <= 0)
             layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
         view.setLayoutParams(layoutParams);
+    }
+
+    public static String HexString(byte[] data)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : data)
+            sb.append(String.format("%02x ", b & 0xff));
+        return sb.toString();
     }
 }

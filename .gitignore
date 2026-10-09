@@ -41,3 +41,7 @@ google-services.json
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
+
+ZaloXposedNative/**
+!ZaloXposedNative/**/
+!ZaloXposedNative/Output/**/*.so

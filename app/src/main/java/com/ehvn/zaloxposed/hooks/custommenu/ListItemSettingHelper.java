@@ -444,7 +444,7 @@ public final class ListItemSettingHelper
         return (ImageView) listItemSetting.getClass().getMethod("getIconRemind").invoke(listItemSetting);
     }
 
-    private static void CheckType(RelativeLayout listItemSetting) throws Exception
+    private static void CheckType(RelativeLayout listItemSetting) throws IllegalArgumentException
     {
         if (!listItemSettingClass.isInstance(listItemSetting))
             throw new IllegalArgumentException("Object is not an instance of ListItemSetting");

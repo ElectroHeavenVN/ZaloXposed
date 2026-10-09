@@ -71,11 +71,11 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
         Method method = methods.get(0).getMethodInstance(classLoader);
         Class<?> stickerClass = method.getDeclaringClass();
         ArrayList<Instruction> instructions = Utils.Disassemble(method);
-        // /*
-        //     const-string v1, ",\"is_hidden\":"
-        //     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-        //     iget v1, p0, Lw61/g;->n:I       # <<< isHidden field
-        // */
+        /*
+            const-string v1, ",\"is_hidden\":"
+            invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+            iget v1, p0, Lw61/g;->n:I       # <<< isHidden field
+        */
         for (int i = 0; i < instructions.size() - 2; i++)
         {
             Instruction instruction = instructions.get(i);

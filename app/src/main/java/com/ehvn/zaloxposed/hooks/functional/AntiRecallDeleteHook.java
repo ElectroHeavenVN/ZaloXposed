@@ -1,5 +1,6 @@
 package com.ehvn.zaloxposed.hooks.functional;
 
+import com.ehvn.zaloxposed.MorpheConstants;
 import com.ehvn.zaloxposed.hooks.BaseHook;
 import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.CoreUtilityHelper;
@@ -116,7 +117,7 @@ public class AntiRecallDeleteHook extends BaseHook
                     fakeQuote.put("ts", dataObject.getLong("ts"));
                     fakeQuote.put("msg", "Jump to message");
                     fakeQuote.put("attach", "{\"properties\":{\"color\":0,\"size\":0,\"type\":0,\"subType\":0,\"ext\":\"{\\\"shouldParseLinkOrContact\\\":0}\"},\"msgBubbleLayoutType\":0,\"generatedBy\":\"AntiRecallDeleteHook\"}");
-                    fakeQuote.put("fromD", "ZaloXposed by ElectroHeavenVN");
+                    fakeQuote.put("fromD", MorpheConstants.getModuleName() + " by ElectroHeavenVN");
                     fakeQuote.put("ttl", 0);
                     dataObject.put("quote", fakeQuote);
                     JSONObject paramsExt = new JSONObject();
@@ -159,7 +160,7 @@ public class AntiRecallDeleteHook extends BaseHook
                     else
                         fakeQuote.put("msg", "Jump to message");
                     fakeQuote.put("attach", "{\"properties\":{\"color\":0,\"size\":0,\"type\":0,\"subType\":0,\"ext\":\"{\\\"shouldParseLinkOrContact\\\":0}\"},\"msgBubbleLayoutType\":0,\"generatedBy\":\"AntiRecallDeleteHook\"}");
-                    fakeQuote.put("fromD", "ZaloXposed by ElectroHeavenVN");
+                    fakeQuote.put("fromD", MorpheConstants.getModuleName() + " by ElectroHeavenVN");
                     fakeQuote.put("ttl", 0);
                     dataObject.put("quote", fakeQuote);
                     JSONObject paramsExt = new JSONObject();

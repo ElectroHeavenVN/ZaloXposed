@@ -19,15 +19,19 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.ehvn.zaloxposed.MorpheConstants;
 import com.ehvn.zaloxposed.hooks.BaseHook;
 import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Logger;
 import com.ehvn.zaloxposed.utilities.Utils;
 
+import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
+import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
+import org.luckypray.dexkit.result.ClassData;
 import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Field;
@@ -41,16 +45,11 @@ import java.util.Objects;
 public class ZaloXposedSettingsMenuHook extends BaseHook
 {
     private static final String CUSTOM_ITEM_MARKER = "zalo_xposed_settings";
-
-    private static Class<?> tabMeItemClass = null;
-    private static Field tabMeItemTrackingField = null;
-    private static Field tabMeItemTitleField = null;
-    private static Field tabMeItemDescriptionField = null;
-    private static Field tabMeItemIconField = null;
-    private static boolean tabMeItemInfoLoaded = false;
-    private static boolean isOpenZaloXposedSettings = false;
+    private static boolean isOpenZaloXposedSettings1 = false;
+    private static boolean isOpenZaloXposedSettings2 = false;
+    @SuppressLint("StaticFieldLeak")
     private static LinearLayout rootLayout = null;
-    private static boolean isEnglish = true;
+    private static boolean isEnglish = false;
     private static Class<?> headerTextViewClass = null;
     private TextView templateHeader = null;
     private View templateSeparator = null;
@@ -332,6 +331,36 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getUnlockZCloud());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setUnlockZCloud);
 
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Backup messages" : "Sao lưu tin nhắn");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Restore Google Drive backup options" : "Phục hồi tuỳ chọn sao lưu ảnh bằng Google Drive");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Replace the ZCloud backup options" : "Thay thế tuỳ chọn sao lưu bằng ZCloud");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getRestoreGoogleDriveBackup());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setRestoreGoogleDriveBackup);
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(isEnglish ? "Profile" : "Hồ sơ");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Restore profile music options" : "Phục hồi tuỳ chọn nhạc nền hồ sơ");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Replace the ZStyle profile music options" : "Thay thế tuỳ chọn chọn nhạc nền hồ sơ bằng ZStyle");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getRestoreProfileMusic());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setRestoreProfileMusic);
+
     
         separator = createSeparator(context);
         rootLayout.addView(separator);
@@ -447,8 +476,24 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     {
         ListItemSettingHelper.Init(classLoader);
         ZButtonHelper.Init(classLoader);
+        TabMeSettingItemHelper.Init(bridge, classLoader);
         hookTabMeView();
         hookSettingPrivateView();
+        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .declaredClass("com.zing.zalo.ui.maintab.me.TabMeView")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("boolean")
+                .addUsingString("features@tabme@fullzins@enable", StringMatchType.Equals)
+                .addUsingNumber(0)
+                .addUsingNumber(1)
+            )); 
+        for (MethodData methodData : methods)
+        {
+            Method method = methodData.getMethodInstance(classLoader);
+            Logger.i("Hooking: " + method);
+            module.hook(method).setPriority(10).intercept(chain -> false);
+        }
     }
 
     private void restartApp(Context context)
@@ -482,7 +527,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .addUsingString("tab_me_privacy", StringMatchType.Equals)
                 .addUsingString("tab_me_tool_storage", StringMatchType.Equals)
                 .addUsingString("tab_me_account_and_security", StringMatchType.Equals)
-                .addUsingString("tab_me_business_tools", StringMatchType.Equals)));
+                .addUsingString("tab_me_business_tools", StringMatchType.Equals)
+            ));
         if (methods.isEmpty())
         {
             Logger.e("Target method not found");
@@ -490,28 +536,28 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         Method method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->
+        module.hook(method).setPriority(10).intercept(chain ->
         {
             Object result = chain.proceed();
             if (!(result instanceof ArrayList))
                 return result;
             try
             {
-                ArrayList<Object> items = (ArrayList<Object>) result;
-                loadTabMeItemInfo(items);
-                Object customItem = buildCustomTabMeMenuItem(items);
-                if (customItem == null)
-                    return result;
+                String moduleName = MorpheConstants.getModuleName();
                 Object separatorItem = null;
+                ArrayList<Object> items = (ArrayList<Object>) result;
                 for (int i = items.size() - 1; i >= 0; i--)
                 {
                     Object item = items.get(i);
                     if (!item.toString().contains("SettingData(id="))
                     {
-                        separatorItem = item;
+                        separatorItem = Utils.Clone(item);
                         break;
                     }
                 }
+                Object customItem = TabMeSettingItemHelper.CreateNew(SettingItemID.PRIVACY, "zds_oic_premium_crown_color_24", moduleName);
+                TabMeSettingItemHelper.SetDescription(customItem, isEnglish ? moduleName + " settings" : "Cài đặt " + moduleName);
+                TabMeSettingItemHelper.SetTracking(customItem, CUSTOM_ITEM_MARKER);
                 items.add(2, customItem);
                 items.add(3, separatorItem);
                 return items;
@@ -544,18 +590,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->
+        module.hook(method).setPriority(10).intercept(chain ->
         {
             Object tabMeItem = chain.getArg(0);
             if (tabMeItem == null)
                 return chain.proceed();
-            if (tabMeItem.getClass() != tabMeItemClass)
-                return chain.proceed();
             try
-            {
-                tabMeItemTrackingField.setAccessible(true);
-                String trackingValue = (String) tabMeItemTrackingField.get(tabMeItem);
-                isOpenZaloXposedSettings = CUSTOM_ITEM_MARKER.equals(trackingValue);
+            { 
+                isOpenZaloXposedSettings1 = isOpenZaloXposedSettings2 = CUSTOM_ITEM_MARKER.equals(TabMeSettingItemHelper.GetTracking(tabMeItem));
             }
             catch (Throwable t)
             {
@@ -563,96 +605,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             }
             return chain.proceed();
         });
-    }
-
-    private synchronized void loadTabMeItemInfo(ArrayList<Object> tabMeItems)
-    {
-        if (tabMeItemInfoLoaded)
-            return;
-        int iconValue = Utils.GetDrawableResourceIdByName("zds_ic_storage_line_24");
-        for (Object item : tabMeItems)
-        {
-            Field field = Utils.FindFieldByValue(item, "tab_me_tool_storage");
-            if (field == null)
-                continue;
-            tabMeItemTrackingField = field;
-            String itemStr = item.toString();   //SettingData(id=..., icon=..., title=..., desc=..., type=...)
-            String titleValue = itemStr.substring(itemStr.indexOf(", title=") + 8, itemStr.indexOf(", desc="));
-            String descValue = itemStr.substring(itemStr.indexOf(", desc=") + 7, itemStr.indexOf(", type="));
-            tabMeItemClass = item.getClass();
-
-            for (Field f : tabMeItemClass.getDeclaredFields())
-            {
-                try 
-                {
-                    if (f.getType() == String.class)
-                    {
-                        f.setAccessible(true);
-                        String value = (String)f.get(item);
-                        if (value == null)
-                            continue;
-                        if (value.equals(titleValue))
-                        {
-                            if (tabMeItemTitleField == null)
-                                tabMeItemTitleField = f;
-                        }
-                        else if (value.equals(descValue))
-                        {
-                            if (tabMeItemDescriptionField == null)
-                                tabMeItemDescriptionField = f;
-                        }
-                    }
-                    else if (f.getType() == int.class && tabMeItemIconField == null)
-                    {
-                        int value = f.getInt(item);
-                        if (value == iconValue)
-                            tabMeItemIconField = f;
-                    }
-                }
-                catch (Exception ignored) { }
-            }
-            break;
-        }
-        tabMeItemInfoLoaded = true;
-    }
-
-    private Object buildCustomTabMeMenuItem(ArrayList<Object> items)
-    {
-        try
-        {
-            Object template = null;
-            for (Object item : items)
-            {
-                if (!item.toString().contains("SettingData(id="))
-                    continue;
-                String trackingValue = (String)tabMeItemTrackingField.get(item);
-                if (!"tab_me_privacy".equals(trackingValue))
-                    continue;
-                template = item;
-                isEnglish = !item.toString().contains(", title=Quyền riêng tư, desc=");
-                break;
-            }
-            if (template == null)
-            {
-                Logger.e("Template item not found, cannot create custom menu item");
-                return null;
-            }
-            Object newItem = Utils.Clone(template);
-            tabMeItemTrackingField.setAccessible(true);
-            tabMeItemTrackingField.set(newItem, CUSTOM_ITEM_MARKER);
-            tabMeItemTitleField.setAccessible(true);
-            tabMeItemTitleField.set(newItem, "ZaloXposed");
-            tabMeItemDescriptionField.setAccessible(true);
-            tabMeItemDescriptionField.set(newItem, isEnglish ? "ZaloXposed settings" : "Cài đặt ZaloXposed");
-            tabMeItemIconField.setAccessible(true);
-            tabMeItemIconField.setInt(newItem, Utils.GetDrawableResourceIdByName("zds_oic_premium_crown_color_24"));
-            return newItem;
-        }
-        catch (Throwable t)
-        {
-            Logger.e(t);
-            return null;
-        }
     }
 
     private void hookSettingPrivateView() throws Exception
@@ -675,15 +627,13 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         Method method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->
+        module.hook(method).setPriority(10).intercept(chain ->
         {
             Object result = chain.proceed();
-            if (!isOpenZaloXposedSettings)
-            {
+            if (isOpenZaloXposedSettings1 || isOpenZaloXposedSettings2)
+                rootLayout = (LinearLayout)chain.getArg(1);
+            else 
                 rootLayout = null;
-                return result;
-            }
-            rootLayout = (LinearLayout)chain.getArg(1);
             return result;
         });
         methods = bridge.findMethod(FindMethod.create()
@@ -706,13 +656,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         method = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->  
+        module.hook(method).setPriority(10).intercept(chain ->
         {
             Object result = chain.proceed();
-            if (!isOpenZaloXposedSettings)
+            if (!isOpenZaloXposedSettings1)
                 return result;
             if (rootLayout == null)
                 return result;
+            isOpenZaloXposedSettings1 = false; 
             templateHeader = null;
             templateSeparator = null;
             try
@@ -743,13 +694,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         method = methods.get(0).getMethodInstance(classLoader);
         Field actionBarField = Utils.FindFieldByType(Class.forName("com.zing.zalo.ui.settings.SettingPrivateV2View", false, classLoader), "com.zing.zalo.zdesign.component.header.ZdsActionBar");
         Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain ->  
+        module.hook(method).setPriority(10).intercept(chain ->
         {
             Object result = chain.proceed();
-            if (!isOpenZaloXposedSettings)
+            if (!isOpenZaloXposedSettings2)
                 return result;
             if (actionBarField == null)
                 return result;
+            isOpenZaloXposedSettings2 = false;
             try
             {
                 Object actionBar = actionBarField.get(chain.getThisObject());
@@ -762,7 +714,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 else if ("Quyền riêng tư".equals(title))
                     isEnglish = false;
                 Method setMiddleTitle = actionBar.getClass().getMethod("setMiddleTitle", String.class);
-                setMiddleTitle.invoke(actionBar, isEnglish ? "ZaloXposed Settings" : "Cài đặt ZaloXposed");
+                String moduleName = MorpheConstants.getModuleName();
+                setMiddleTitle.invoke(actionBar, isEnglish ? moduleName + " Settings" : "Cài đặt " + moduleName);
             }
             catch (Exception t)
             {

@@ -20,10 +20,13 @@ import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Logger;
 import com.ehvn.zaloxposed.utilities.Utils;
 
+import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
+import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
+import org.luckypray.dexkit.result.ClassData;
 import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Field;
@@ -155,8 +158,6 @@ public class EnableChatHeadHook extends BaseHook
             Config.addOnConfigChangedListener((key, oldValue, newValue) ->
             {
                 if (!Config.KEY_ENABLE_CHAT_HEAD.equals(key))
-                    return;
-                if (chatHeadUnavailable == null)
                     return;
                 boolean enabled = (Boolean) newValue;
                 try
@@ -380,92 +381,52 @@ public class EnableChatHeadHook extends BaseHook
             Logger.i("Hooking [10]: " + method);
             module.hook(method).intercept(spoofHook);
         }
+        List<ClassData> classes = bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .addUsingString("MiniChatController", StringMatchType.Equals)
+                .fieldCount(5)
+                .addMethod(MethodMatcher.create()
+                    .returnType("boolean")
+                    .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                    .paramCount(0)
+                    .addInvoke(MethodMatcher.create()
+                        .name("canDrawOverlays")
+                        .declaredClass("android.provider.Settings"))
+                    .addInvoke(MethodMatcher.create()
+                        .name("getAppContext")
+                        .declaredClass("com.zing.zalo.MainApplication"))
+                )
+            ));
+        if (classes.isEmpty())
+            Logger.e("Target class not found 11");
+        Class<?> clazz = classes.get(0).getInstance(classLoader);
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
-                .returnType("boolean")
-                .modifiers(Modifier.PUBLIC | Modifier.STATIC)
-                .paramCount(0)
-                .addInvoke(MethodMatcher.create()
-                    .name("canDrawOverlays")
-                    .declaredClass("android.provider.Settings"))
-                .addInvoke(MethodMatcher.create()
-                    .name("getAppContext")
-                    .declaredClass("com.zing.zalo.MainApplication"))
-                ));
+                .declaredClass(clazz)
+                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
+            ));
         if (methods.isEmpty())
             Logger.e("Target method not found 11");
-        Class<?> clazz = null;
         for (MethodData m : methods)
         {
             Method method = m.getMethodInstance(classLoader);
-            if (clazz == null)
-            {
-                Class<?> maybe_DclrClass = method.getDeclaringClass();
-                List<MethodData> dclrMethods = bridge.findMethod(FindMethod.create()
-                    .matcher(MethodMatcher.create()
-                        .declaredClass(maybe_DclrClass)
-                        .returnType("boolean")
-                        .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                        .paramCount(1)
-                        .paramTypes("java.lang.String")
-                        .addUsingString("MiniChatController", StringMatchType.Equals)
-                    ));
-                if (!dclrMethods.isEmpty())
-                    clazz = maybe_DclrClass;
-                else
-                    continue;
-            }
             Logger.i("Hooking [11]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        // more than 1
-        if (clazz != null)
-        {
-            methods = bridge.findMethod(FindMethod.create()
-                .matcher(MethodMatcher.create()
-                    .declaredClass(clazz)
-                    .returnType("void")
-                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                    .paramCount(1)
-                    .paramTypes("java.lang.String")
-                ));
-            if (methods.isEmpty())
-                Logger.e("Target method not found 12");
-            for (MethodData m : methods)
-            {
-                Method method = m.getMethodInstance(classLoader);
-                Logger.i("Hooking [12]: " + method);
-                module.hook(method).intercept(spoofHook);
-            }
-            methods = bridge.findMethod(FindMethod.create()
-                .matcher(MethodMatcher.create()
-                    .declaredClass(clazz)
-                    .returnType("void")
-                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                    .paramCount(2)
-                    .paramTypes("int", "java.lang.String")
-                ));
-            if (methods.isEmpty())
-                Logger.e("Target method not found 13");
-            for (MethodData m : methods)
-            {
-                Method method = m.getMethodInstance(classLoader);
-                Logger.i("Hooking [13]: " + method);
-                module.hook(method).intercept(spoofHook);
-            }
-        }
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .returnType("boolean")
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .paramCount(0)
-                .addUsingString("SETTING_ENABLE_CHAT_HEAD_SERVER", StringMatchType.Equals)));
+                .addUsingString("SETTING_ENABLE_CHAT_HEAD_SERVER", StringMatchType.Equals)
+            ));
         if (methods.isEmpty())
-            Logger.e("Target method not found 14");
+            Logger.e("Target method not found 12");
         for (MethodData m : methods)
         {
             Method method = m.getMethodInstance(classLoader);
-            Logger.i("Hooking [14]: " + method);
+            Logger.i("Hooking [12]: " + method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getEnableChatHead())
@@ -473,61 +434,56 @@ public class EnableChatHeadHook extends BaseHook
                 return true;
             });
         }
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .name("run")
+                .returnType("void")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .paramCount(0)
+                .addUsingString("SMLZCloudMigrationWorkerHelper", StringMatchType.Equals)
+                .addUsingString("HAS_MSG_HIDDEN_CHAT_NEW", StringMatchType.Equals)
+                .addUsingString("LoginView", StringMatchType.Equals)
+                .addUsingString("ZaloBubbleActivity", StringMatchType.Contains)
+                .addUsingString("table_block_chat_info", StringMatchType.Contains)
+                .addUsingString("FIRST_TIME_OPEN_BRUSH_MODE", StringMatchType.Equals)
+                .addUsingString("FIRST_TIME_OPEN_SHAPE_MODE", StringMatchType.Equals)
+            ));
+        if (methods.isEmpty())
+            Logger.e("Target method not found 13");
+        for (MethodData m : methods)
+        {
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [13]: " + method);
+            module.hook(method).intercept(spoofHook);
+        }
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .name("run")
+                .returnType("void")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .paramCount(0)
+                .addUsingString("Path not exist", StringMatchType.Equals)
+                .addUsingString("timeout_next_qr", StringMatchType.Equals)
+                .addUsingString("stickerGifInfo", StringMatchType.Equals)
+                .addUsingString("ai_sticker_panel", StringMatchType.Equals)
+                .addUsingString("gallery_save_photo_when_post_feed", StringMatchType.Equals)
+                .addUsingString("ownerId", StringMatchType.Equals)
+                .addUsingString("VideoTrimmerView", StringMatchType.Equals)
+            ));
+        if (methods.isEmpty())
+            Logger.e("Target method not found 14");
+        for (MethodData m : methods)
+        {
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [14]: " + method);
+            module.hook(method).intercept(spoofHook);
+        }
         Method method = Class.forName("com.zing.zalo.ui.maintab.group.GroupTabView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
-        Logger.i("Hooking [15]: " + method);
+        Logger.i("Hooking [-1]: " + method);
         module.hook(method).intercept(spoofHook);
         method = Class.forName("com.zing.zalo.ui.maintab.msg.MessagesView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
-        Logger.i("Hooking [16]: " + method);
+        Logger.i("Hooking [-2]: " + method);
         module.hook(method).intercept(spoofHook);
-        // clazz = null;
-        // methods = bridge.findMethod(FindMethod.create()
-        //     .matcher(MethodMatcher.create()
-        //         .returnType("void")
-        //         .modifiers(Modifier.PUBLIC)
-        //         .paramCount(1)
-        //         .addUsingString("UPDATE workspec SET period_count = 1 WHERE last_enqueue_time <> 0 AND interval_duration <> 0", StringMatchType.Equals)
-        //     ));
-        // if (methods.isEmpty())
-        //     Logger.e("Target method not found 17");
-        // if (!methods.isEmpty())
-        // {
-        //     clazz = Objects.requireNonNull(methods.get(0).getDeclaredClass()).getInstance(classLoader);
-        //     methods = bridge.findMethod(FindMethod.create()
-        //         .matcher(MethodMatcher.create()
-        //             .declaredClass(clazz)
-        //             .returnType("boolean")
-        //             .modifiers(Modifier.PUBLIC)
-        //             .paramCount(0)
-        //         ));
-        //     if (methods.isEmpty())
-        //         Logger.e("Target method not found 17_2");
-        //     for (MethodData m : methods)
-        //     {
-        //         Method method = m.getMethodInstance(classLoader);
-        //         Logger.i("Hooking [17]: " + method);
-        //         module.hook(method).intercept(chain ->
-        //     }
-        // }
-        // methods = bridge.findMethod(FindMethod.create()
-        //     .matcher(MethodMatcher.create()
-        //         .name("run")
-        //         .returnType("void")
-        //         .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-        //         .paramCount(0)
-        //         .addUsingString("System.exit returned normally, while it was supposed to halt JVM.", StringMatchType.Equals)
-        //         .addUsingString("SMLZCloudMigrationWorkerHelper", StringMatchType.Equals)
-        //         .addUsingString("ActionLogRolledMediaDetect", StringMatchType.Equals)
-        //         .addUsingString("HAS_MSG_HIDDEN_CHAT_NEW", StringMatchType.Equals)
-        //         .addUsingString("features@qr@bank_card@feedback@timeout", StringMatchType.Equals)
-        //         .addUsingString("DatabaseHelper", StringMatchType.Equals)));
-        // if (methods.isEmpty())
-        //     Logger.e("Target method not found 18");
-        // for (MethodData m : methods)
-        // {
-        //     Method method = m.getMethodInstance(classLoader);
-        //     Logger.i("Hooking [18]: " + method);
-        //     module.hook(method).intercept(spoofHook);
-        // }
     }
 
     private void fixMiniChatAndroid13() throws ClassNotFoundException, NoSuchMethodException
@@ -613,7 +569,7 @@ public class EnableChatHeadHook extends BaseHook
             }
             catch (Exception e)
             {
-                Logger.e(Utils.GetStackTrace(e));
+                Logger.e(e);
             }
             return chain.proceed();
         }
