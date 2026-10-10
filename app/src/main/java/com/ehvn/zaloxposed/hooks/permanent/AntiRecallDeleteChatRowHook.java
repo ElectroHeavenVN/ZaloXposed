@@ -24,11 +24,12 @@ import org.luckypray.dexkit.result.MethodData;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AntiRecallDeleteChatRowHook extends BaseHook
 {
-    Field msgField = null;
+    List<Field> msgFields = new ArrayList<>();
     Field msgTypeField = null;
     Field quoteField = null;
     Field quoteDisplayNameField = null;
@@ -63,13 +64,10 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
         Class<?> chatRow = Class.forName("com.zing.zalo.ui.chat.chatrow.ChatRow", false, classLoader);
         for (Field field : chatRow.getDeclaredFields())
         {
-            if (field.getType().equals(msgClass))
-            {
-                msgField = field;
-                break;
-            }
+            if (field.getType().equals(msgClass)) 
+                msgFields.add(field); 
         }
-        if (msgField == null)
+        if (msgFields.isEmpty())
         {
             Logger.e("Target field not found");
             return;
@@ -84,7 +82,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 1");
             return;
         }
         msgTypeField = methods.get(0).getUsingFields().get(0).getField().getFieldInstance(classLoader); 
@@ -98,7 +96,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 2");
             return;
         }
         Method drawMethod = methods.get(0).getMethodInstance(classLoader);
@@ -106,7 +104,13 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
         module.hook(drawMethod).intercept(chain ->
         {
             Object thisObj = chain.getThisObject();
-            Object msg = msgField.get(thisObj);
+            Object msg = null;
+            for (Field f : msgFields)
+            {
+                msg = f.get(thisObj);
+                if (msg != null)
+                    break;
+            }
             if (msg == null)
                 return chain.proceed();
             if (msgTypeField.get(msg) != Integer.valueOf(0))
