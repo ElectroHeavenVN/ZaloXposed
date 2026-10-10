@@ -30,6 +30,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,6 +50,7 @@ public final class Utils
     private static MultiDexContainer<? extends DexBackedDexFile> dexContainer;
     private static final ArrayList<Class<?>> drawableResourceClasses = new ArrayList<>();
     private static final ArrayList<Class<?>> resourceClasses = new ArrayList<>();
+    private static Method getIsVietnameseMethod;
 
     static
     {
@@ -90,6 +92,25 @@ public final class Utils
                 .addUsingString("UserInfo", StringMatchType.Equals)
             ));
         getCurrentUserInfoMethod = methods.isEmpty() ? null : methods.get(0).getMethodInstance(sClassLoader);
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                .paramCount(0)
+                .returnType("boolean")
+                .addUsingString("vi", StringMatchType.Equals)
+                .declaredClass(ClassMatcher.create()
+                    .modifiers(Modifier.PUBLIC | Modifier.ABSTRACT)
+                    .addUsingString("com.zing.zalo.ACTION_EXIT", StringMatchType.Equals)
+                    .addUsingString("vi", StringMatchType.Equals)
+                    .addUsingString("@vi", StringMatchType.Equals)
+                    .addUsingString("en", StringMatchType.Equals)
+                    .addUsingString("@en", StringMatchType.Equals)
+                    .addUsingString("my", StringMatchType.Equals)
+                )
+            ));
+        getIsVietnameseMethod = methods.isEmpty() ? null : methods.get(0).getMethodInstance(sClassLoader);
+        if (getIsVietnameseMethod == null)
+            Logger.e("Cannot find language check method");
         LoadResourceClasses(bridge, classLoader);
     }
 
@@ -547,5 +568,20 @@ public final class Utils
         for (byte b : data)
             sb.append(String.format("%02x ", b & 0xff));
         return sb.toString();
+    }
+
+    public static boolean IsEnglish()
+    {
+        if (getIsVietnameseMethod == null)
+            return true;
+        try
+        {
+            return !((boolean)getIsVietnameseMethod.invoke(null));
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
+        return true;
     }
 }

@@ -49,7 +49,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     private static boolean isOpenZaloXposedSettings2 = false;
     @SuppressLint("StaticFieldLeak")
     private static LinearLayout rootLayout = null;
-    private static boolean isEnglish = false;
     private static Class<?> headerTextViewClass = null;
     private TextView templateHeader = null;
     private View templateSeparator = null;
@@ -66,7 +65,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Custom background" : "Hình nền tuỳ chỉnh");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Custom background" : "Hình nền tuỳ chỉnh");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableBackground());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableBackground);
 
@@ -80,8 +79,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Replace Android Bubble conversations with Mini Chat" : "Thay thế bong bóng hội thoại Android bằng Mini Chat");
-        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Requires Android 11 or higher" : "Yêu cầu Android 11 trở lên");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Replace Android Bubble conversations with Mini Chat" : "Thay thế bong bóng hội thoại Android bằng Mini Chat");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Requires Android 11 or higher" : "Yêu cầu Android 11 trở lên");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableChatHead());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableChatHead);
         listItemSetting.setEnabled(Build.VERSION.SDK_INT > Build.VERSION_CODES.Q);
@@ -90,17 +89,17 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Disappearing messages" : "Tin nhắn tự xoá");
+        headerTitle.setText(Utils.IsEnglish() ? "Disappearing messages" : "Tin nhắn tự xoá");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Override disappearing messages config" : "Ghi đè cấu hình tin nhắn tự xoá");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Override disappearing messages config" : "Ghi đè cấu hình tin nhắn tự xoá");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableTTLOverride());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableTTLOverride);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Disappearing message time" : "Thời gian tin nhắn tự xoá");
+        headerTitle.setText(Utils.IsEnglish() ? "Disappearing message time" : "Thời gian tin nhắn tự xoá");
         TextView titleView = findTitleTextView(headerTitle);
         if (titleView != null)
         {
@@ -114,7 +113,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         input.setImeOptions(EditorInfo.IME_ACTION_DONE);
         input.setText(Config.getTTL() + "");
-        input.setHint(isEnglish ? "Enter value (milliseconds)" : "Nhập giá trị (mili giây)");
+        input.setHint(Utils.IsEnglish() ? "Enter value (milliseconds)" : "Nhập giá trị (mili giây)");
         styleEditText(input, context, listItemSetting);
         input.setOnEditorActionListener((textView, actionId, keyEvent) ->
         {
@@ -157,42 +156,42 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Ads" : "Quảng cáo");
+        headerTitle.setText(Utils.IsEnglish() ? "Ads" : "Quảng cáo");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Media Box" : "Ẩn Media Box");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Hide Media Box" : "Ẩn Media Box");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideMediaBox());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideMediaBox);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Business Box" : "Ẩn Business Box");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Hide Business Box" : "Ẩn Business Box");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideBizBox());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideBizBox);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide ZInstant Ads" : "Ẩn quảng cáo ZInstant");
-        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Hide ads in Messages tab" : "Ẩn quảng cáo trong tab Tin nhắn");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Hide ZInstant Ads" : "Ẩn quảng cáo ZInstant");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Hide ads in Messages tab" : "Ẩn quảng cáo trong tab Tin nhắn");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideZInstantAds());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideZInstantAds);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Ads in Timeline" : "Ẩn quảng cáo trong Nhật Ký");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Hide Ads in Timeline" : "Ẩn quảng cáo trong Nhật Ký");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideFeedItemZInstantAds());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideFeedItemZInstantAds);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Block ads network endpoints" : "Chặn yêu cầu mạng quảng cáo");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Block ads network endpoints" : "Chặn yêu cầu mạng quảng cáo");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getBlockAdsEndpoints());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setBlockAdsEndpoints);
 
@@ -200,27 +199,27 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Logging and tracking" : "Ghi nhật ký và theo dõi");
+        headerTitle.setText(Utils.IsEnglish() ? "Logging and tracking" : "Ghi nhật ký và theo dõi");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Disable Firebase logging" : "Tắt ghi nhật ký Firebase");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Disable Firebase logging" : "Tắt ghi nhật ký Firebase");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getDisableFirebaseLogging());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setDisableFirebaseLogging);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Disable Zalo tracking" : "Tắt tính năng theo dõi của Zalo");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Disable Zalo tracking" : "Tắt tính năng theo dõi của Zalo");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getDisableZaloTracking());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setDisableZaloTracking);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Block QoS network endpoints" : "Chặn yêu cầu mạng QoS");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Block QoS network endpoints" : "Chặn yêu cầu mạng QoS");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getBlockQoSEndpoints());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setBlockQoSEndpoints);
 
@@ -228,34 +227,34 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Recalled and deleted messages" : "Thu hồi và xoá tin nhắn");
+        headerTitle.setText(Utils.IsEnglish() ? "Recalled and deleted messages" : "Thu hồi và xoá tin nhắn");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Anti-Recall" : "Chống thu hồi tin nhắn");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Anti-Recall" : "Chống thu hồi tin nhắn");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableAntiRecall());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableAntiRecall);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Anti-Delete" : "Chống xoá tin nhắn");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Anti-Delete" : "Chống xoá tin nhắn");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableAntiDelete());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableAntiDelete);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Include my recalled messages" : "Bao gồm tin nhắn tôi đã thu hồi");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Include my recalled messages" : "Bao gồm tin nhắn tôi đã thu hồi");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getAntiRecallIncludeMe());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setAntiRecallIncludeMe);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Include messages deleted by me" : "Bao gồm tin nhắn được tôi xoá");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Include messages deleted by me" : "Bao gồm tin nhắn được tôi xoá");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getAntiDeleteIncludeMyDeletion());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setAntiDeleteIncludeMyDeletion);
 
@@ -263,20 +262,20 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Privacy" : "Quyền riêng tư");
+        headerTitle.setText(Utils.IsEnglish() ? "Privacy" : "Quyền riêng tư");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide typing indicators" : "Ẩn trạng thái đang nhập");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Hide typing indicators" : "Ẩn trạng thái đang nhập");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableSilentTyping());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableSilentTyping);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide \"Seen\" status" : "Ẩn trạng thái Đã xem");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Hide \"Seen\" status" : "Ẩn trạng thái Đã xem");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getBlockSendSeen());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setBlockSendSeen);
 
@@ -284,35 +283,35 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "User interface" : "Giao diện");
+        headerTitle.setText(Utils.IsEnglish() ? "User interface" : "Giao diện");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable extended grid menu" : "Kích hoạt chat menu mở rộng");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Enable extended grid menu" : "Kích hoạt chat menu mở rộng");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGridMenu());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGridMenu);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable extended group right menu" : "Kích hoạt menu nhóm mở rộng");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Enable extended group right menu" : "Kích hoạt menu nhóm mở rộng");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGroupRightMenu());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGroupRightMenu);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable extended group settings menu" : "Kích hoạt menu cài đặt nhóm mở rộng");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Enable extended group settings menu" : "Kích hoạt menu cài đặt nhóm mở rộng");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGroupSettingMenu());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGroupSettingMenu);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Show Chat Protection in group right menu" : "Hiển thị Bảo vệ trò chuyện trong menu nhóm");
-        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Replace the \"Disappear messages\" menu when activated" : "Thay thế menu \"Tin nhắn tự xoá\" khi được kích hoạt");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Show Chat Protection in group right menu" : "Hiển thị Bảo vệ trò chuyện trong menu nhóm");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Replace the \"Disappear messages\" menu when activated" : "Thay thế menu \"Tin nhắn tự xoá\" khi được kích hoạt");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableChatProtection());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableChatProtection);
 
@@ -326,8 +325,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Unlock ZCloud" : "Mở khoá ZCloud");
-        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Does not increase My Documents capacity" : "Không tăng dung lượng bộ nhớ My Documents");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Unlock ZCloud" : "Mở khoá ZCloud");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Does not increase My Documents capacity" : "Không tăng dung lượng bộ nhớ My Documents");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getUnlockZCloud());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setUnlockZCloud);
 
@@ -335,14 +334,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Backup messages" : "Sao lưu tin nhắn");
+        headerTitle.setText(Utils.IsEnglish() ? "Backup messages" : "Sao lưu tin nhắn");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Restore Google Drive backup options" : "Phục hồi tuỳ chọn sao lưu ảnh bằng Google Drive");
-        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Replace the ZCloud backup options" : "Thay thế tuỳ chọn sao lưu bằng ZCloud");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Restore Google Drive backup options" : "Phục hồi tuỳ chọn sao lưu ảnh bằng Google Drive");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Replace the ZCloud backup options" : "Thay thế tuỳ chọn sao lưu bằng ZCloud");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getRestoreGoogleDriveBackup());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setRestoreGoogleDriveBackup);
 
@@ -350,14 +349,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Profile" : "Hồ sơ");
+        headerTitle.setText(Utils.IsEnglish() ? "Profile" : "Hồ sơ");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Restore profile music options" : "Phục hồi tuỳ chọn nhạc nền hồ sơ");
-        ListItemSettingHelper.SetSubtitle(listItemSetting, isEnglish ? "Replace the ZStyle profile music options" : "Thay thế tuỳ chọn chọn nhạc nền hồ sơ bằng ZStyle");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Restore profile music options" : "Phục hồi tuỳ chọn nhạc nền hồ sơ");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Replace the ZStyle profile music options" : "Thay thế tuỳ chọn chọn nhạc nền hồ sơ bằng ZStyle");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getRestoreProfileMusic());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setRestoreProfileMusic);
 
@@ -365,20 +364,20 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Group" : "Nhóm");
+        headerTitle.setText(Utils.IsEnglish() ? "Group" : "Nhóm");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Fake my role in groups" : "Giả mạo vai trò trong nhóm");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Fake my role in groups" : "Giả mạo vai trò trong nhóm");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableFakeGroupRole());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableFakeGroupRole);
         RelativeLayout listItemSettingFakeRole = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSettingFakeRole);
         ListItemSettingHelper.SetIDTracking(listItemSettingFakeRole, "");
         ListItemSettingHelper.HideDivider(listItemSettingFakeRole);
-        ListItemSettingHelper.SetTitle(listItemSettingFakeRole, isEnglish ? "Fake role" : "Vai trò giả mạo");
+        ListItemSettingHelper.SetTitle(listItemSettingFakeRole, Utils.IsEnglish() ? "Fake role" : "Vai trò giả mạo");
         String fakeRole = getFakeRoleName(Config.getFakeGroupRoleLevel());
         ListItemSettingHelper.SetStateSetting(listItemSettingFakeRole, fakeRole);
         ListItemSettingHelper.SetOnClickListener(listItemSettingFakeRole, v ->
@@ -401,13 +400,13 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Sticker pack" : "Bộ sticker");
+        headerTitle.setText(Utils.IsEnglish() ? "Sticker pack" : "Bộ sticker");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Allow sharing hidden sticker packs" : "Cho phép chia sẻ bộ sticker ẩn");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Allow sharing hidden sticker packs" : "Cho phép chia sẻ bộ sticker ẩn");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableShareHiddenStickerPack());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableShareHiddenStickerPack);
 
@@ -415,48 +414,48 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText(isEnglish ? "Bottom row" : "Thanh dưới");
+        headerTitle.setText(Utils.IsEnglish() ? "Bottom row" : "Thanh dưới");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Enable bottom row customization" : "Kích hoạt tuỳ chỉnh thanh dưới");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Enable bottom row customization" : "Kích hoạt tuỳ chỉnh thanh dưới");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableCustomizeBottomRow());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableCustomizeBottomRow);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Discovery tab" : "Ẩn tab Khám Phá");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Hide Discovery tab" : "Ẩn tab Khám Phá");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideDiscoveryTab());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideDiscoveryTab);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Hide Newsfeed tab" : "Ẩn tab Tường Nhà");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Hide Newsfeed tab" : "Ẩn tab Tường Nhà");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideNewsFeedTab());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideNewsFeedTab);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Show Groups tab" : "Hiện tab Nhóm");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Show Groups tab" : "Hiện tab Nhóm");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getShowGroupsTab());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setShowGroupsTab);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, isEnglish ? "Show More tab" : "Hiện tab Thêm");
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Show More tab" : "Hiện tab Thêm");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getShowMoreTab());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setShowMoreTab);
 
 
         Object restartButton = ZButtonHelper.CreateNew(context);
         rootLayout.addView((View) restartButton);
-        ZButtonHelper.SetText(restartButton, isEnglish ? "Restart app" : "Khởi động lại ứng dụng");
+        ZButtonHelper.SetText(restartButton, Utils.IsEnglish() ? "Restart app" : "Khởi động lại ứng dụng");
         ZButtonHelper.SetOnClickListener(restartButton, v -> restartApp(context));
         LinearLayout.LayoutParams restartLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         int pad16 = dp(context, 16);
@@ -556,7 +555,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                     }
                 }
                 Object customItem = TabMeSettingItemHelper.CreateNew(SettingItemID.PRIVACY, "zds_oic_premium_crown_color_24", moduleName);
-                TabMeSettingItemHelper.SetDescription(customItem, isEnglish ? moduleName + " settings" : "Cài đặt " + moduleName);
+                TabMeSettingItemHelper.SetDescription(customItem, Utils.IsEnglish() ? moduleName + " settings" : "Cài đặt " + moduleName);
                 TabMeSettingItemHelper.SetTracking(customItem, CUSTOM_ITEM_MARKER);
                 items.add(2, customItem);
                 items.add(3, separatorItem);
@@ -707,15 +706,9 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 Object actionBar = actionBarField.get(chain.getThisObject());
                 if (actionBar == null)
                     return result;
-                Method getMiddleTitle = actionBar.getClass().getMethod("getMiddleTitle");
-                String title = (String) getMiddleTitle.invoke(actionBar);
-                if ("Privacy".equals(title))
-                    isEnglish = true;
-                else if ("Quyền riêng tư".equals(title))
-                    isEnglish = false;
                 Method setMiddleTitle = actionBar.getClass().getMethod("setMiddleTitle", String.class);
                 String moduleName = MorpheConstants.getModuleName();
-                setMiddleTitle.invoke(actionBar, isEnglish ? moduleName + " Settings" : "Cài đặt " + moduleName);
+                setMiddleTitle.invoke(actionBar, Utils.IsEnglish() ? moduleName + " Settings" : "Cài đặt " + moduleName);
             }
             catch (Exception t)
             {
@@ -729,8 +722,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     {
         return switch (roleLevel)
         {
-            case 0 -> isEnglish ? "Admin" : "Phó nhóm";
-            case 1 -> isEnglish ? "Owner" : "Trưởng nhóm";
+            case 0 -> Utils.IsEnglish() ? "Admin" : "Phó nhóm";
+            case 1 -> Utils.IsEnglish() ? "Owner" : "Trưởng nhóm";
             default -> "";
         };
     }
