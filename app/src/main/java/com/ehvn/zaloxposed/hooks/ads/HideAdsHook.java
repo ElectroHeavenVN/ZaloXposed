@@ -29,14 +29,15 @@ public class HideAdsHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(2)
                 .paramTypes("android.view.ViewGroup", "int")
-                .addUsingString("btn_footer_add_multi_conversation_label", StringMatchType.Equals)
                 .addUsingString("TAB_MSG_ITEM_MINI_CHAT_KEY", StringMatchType.Equals)
+                .addUsingString("TAB_MSG_ITEM_KEY", StringMatchType.Equals)
                 .addUsingString("context", StringMatchType.Equals)
-                .addUsingField(FieldMatcher.create().name("btn_see_more"))
+                .addUsingField(FieldMatcher.create().name("warning_low_storage_banner"))
+                .addUsingField(FieldMatcher.create().name("latest_mention_description_footer"))
             ));
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 1");
             return;
         }
         for (MethodData methodData : methods)
@@ -73,7 +74,7 @@ public class HideAdsHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 2");
             return;
         }
         for (MethodData methodData : methods)
@@ -112,7 +113,7 @@ public class HideAdsHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 3");
             return;
         }
         for (MethodData methodData : methods)

@@ -40,9 +40,8 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
                 .addUsingString("provideZaloCloudRepo(...)", StringMatchType.Equals)
                 .addUsingString("quotaUsage", StringMatchType.Equals)
                 .addUsingString("groupId", StringMatchType.Equals)
-                .addUsingString("workManagerImpl.workDatabase", StringMatchType.Equals)
-                // bruh
-                .addUsingString("zalo@123ZALO", StringMatchType.Equals)
+                .addUsingString("SMLZCloud", StringMatchType.Equals)
+                .addUsingString(" failed. Retrying in ", StringMatchType.Equals)
             ));
         if (classes.isEmpty())
         {

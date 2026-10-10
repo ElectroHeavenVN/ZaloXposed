@@ -51,9 +51,11 @@ public class AntiRecallDeleteHook extends BaseHook
                 .paramCount(8)
                 .paramTypes("java.lang.String", "int", "int", "org.json.JSONObject", "int", "boolean", "long", null)
                 .addUsingString("currentUserUid", StringMatchType.Equals)
+                .addUsingString("jsonData", StringMatchType.Equals)
+                .addUsingString("source", StringMatchType.Equals)
                 .addUsingString("PullMessage", StringMatchType.Equals)
                 .addUsingString("ChatPacketHandler", StringMatchType.Equals)
-                .addUsingNumber(10104)
+                .addUsingNumber(15000)
             ));
         if (methods.isEmpty())
         {
