@@ -194,7 +194,8 @@ public class EnableChatHeadHook extends BaseHook
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
-                .addUsingString("QUICK_MESSAGE_FEATURE_ENABLE", StringMatchType.Equals)));
+                .addUsingString("QUICK_MESSAGE_FEATURE_ENABLE", StringMatchType.Equals)
+            ));
         if (methods.isEmpty())
             Logger.e("Target method not found 1");
         for (MethodData m : methods)
@@ -213,7 +214,8 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("LAST_TIME_SHOW_REMIND_UPDATE_MINI_CHAT_PERMISSION", StringMatchType.Equals)
                 .addUsingString("CONFIG_POPUP_BA_PURCHASE_SUCCESS_${UserID}", StringMatchType.Equals)
                 .addUsingString("SHOULD_REMIND_UPDATE_MINI_CHAT_PERMISSION", StringMatchType.Equals)
-                .addUsingString("LAST_TIME_SHOW_REMIND_UPDATE_MINI_CHAT_PERMISSION", StringMatchType.Equals)));
+                .addUsingString("LAST_TIME_SHOW_REMIND_UPDATE_MINI_CHAT_PERMISSION", StringMatchType.Equals)
+            ));
         if (methods.isEmpty())
             Logger.e("Target method not found 2");
         for (MethodData m : methods)
@@ -231,14 +233,14 @@ public class EnableChatHeadHook extends BaseHook
                 .paramTypes("int")
                 .addUsingString("name", StringMatchType.Equals)
                 .addUsingString("id", StringMatchType.Equals)
-                .addUsingField(FieldMatcher.create()
-                        .name("str_optionM_receiveNotification"))
+                .addUsingField(FieldMatcher.create().name("str_optionM_receiveNotification"))
                 .addUsingField(FieldMatcher.create().name("str_optionM_muteConversation"))
                 .addUsingField(FieldMatcher.create().name("str_hide_message"))
                 .addUsingField(FieldMatcher.create().name("context_menu_item_leave_group"))
                 .addUsingField(FieldMatcher.create().name("str_leave_community"))
                 .addUsingField(FieldMatcher.create().name("str_open_bubble_chat"))
-                .addUsingField(FieldMatcher.create().name("str_open_chat_head"))));
+                .addUsingField(FieldMatcher.create().name("str_open_chat_head"))
+            ));
         if (methods.isEmpty())
             Logger.e("Target method not found 3");
         for (MethodData m : methods)
@@ -297,6 +299,7 @@ public class EnableChatHeadHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(1)
                 .paramTypes("java.util.ArrayList")
+                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
             ));
         if (methods.isEmpty())
             Logger.e("Target method not found 6");
@@ -444,13 +447,37 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("table_block_chat_info", StringMatchType.Contains)
                 .addUsingString("FIRST_TIME_OPEN_BRUSH_MODE", StringMatchType.Equals)
                 .addUsingString("FIRST_TIME_OPEN_SHAPE_MODE", StringMatchType.Equals)
+                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
             ));
         if (methods.isEmpty())
-            Logger.e("Target method not found 13");
+            Logger.e("Target method not found 13.1 (13.2 should be found)");
         for (MethodData m : methods)
         {
             Method method = m.getMethodInstance(classLoader);
-            Logger.i("Hooking [13]: " + method);
+            Logger.i("Hooking [13.1]: " + method);
+            module.hook(method).intercept(spoofHook);
+        }
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .name("run")
+                .returnType("void")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .paramCount(0)
+                .addUsingString("conversation_common_info2", StringMatchType.Contains)
+                .addUsingString("SELECT * FROM", StringMatchType.Contains)
+                .addUsingString("PC_TRANSFER", StringMatchType.Equals)
+                .addUsingString("ZaloLauncherActivity", StringMatchType.Equals)
+                .addUsingString("DatabaseChatHelper", StringMatchType.Equals)
+                .addUsingString("event_alarm_manager_v1", StringMatchType.Equals)
+                .addUsingNumber(604800000)
+                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
+            ));
+        if (methods.isEmpty())
+            Logger.e("Target method not found 13.2 (13.1 should be found)");
+        for (MethodData m : methods)
+        {
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [13.2]: " + method);
             module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
@@ -465,13 +492,37 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("gallery_save_photo_when_post_feed", StringMatchType.Equals)
                 .addUsingString("social_timeline", StringMatchType.Equals)
                 .addUsingString("ownerId", StringMatchType.Equals)
+                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
             ));
         if (methods.isEmpty())
-            Logger.e("Target method not found 14");
+            Logger.e("Target method not found 14.1 (14.2 should be found)");
         for (MethodData m : methods)
         {
             Method method = m.getMethodInstance(classLoader);
-            Logger.i("Hooking [14]: " + method);
+            Logger.i("Hooking [14.1]: " + method);
+            module.hook(method).intercept(spoofHook);
+        }
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .name("run")
+                .returnType("void")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .paramCount(0)
+                .addUsingString("/zalo/theme/", StringMatchType.Equals)
+                .addUsingString("aQuery", StringMatchType.Equals)
+                .addUsingString("defaultLanguage", StringMatchType.Equals)
+                .addUsingString("name", StringMatchType.Equals)
+                .addUsingString("PROGRESS", StringMatchType.Equals)
+                .addUsingString("content", StringMatchType.Equals)
+                .addUsingString("Path not exist", StringMatchType.Equals)
+                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
+            ));
+        if (methods.isEmpty())
+            Logger.e("Target method not found 14.2 (14.1 should be found)");
+        for (MethodData m : methods)
+        {
+            Method method = m.getMethodInstance(classLoader);
+            Logger.i("Hooking [14.2]: " + method);
             module.hook(method).intercept(spoofHook);
         }
         Method method = Class.forName("com.zing.zalo.ui.maintab.group.GroupTabView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
