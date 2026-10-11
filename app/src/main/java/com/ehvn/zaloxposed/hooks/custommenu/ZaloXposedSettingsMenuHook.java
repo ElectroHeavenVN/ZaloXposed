@@ -21,17 +21,15 @@ import android.widget.TextView;
 
 import com.ehvn.zaloxposed.MorpheConstants;
 import com.ehvn.zaloxposed.hooks.BaseHook;
+import com.ehvn.zaloxposed.hooks.ResourceHook;
 import com.ehvn.zaloxposed.utilities.Config;
 import com.ehvn.zaloxposed.utilities.Logger;
 import com.ehvn.zaloxposed.utilities.Utils;
 
-import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
-import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.ClassData;
 import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Field;
@@ -45,6 +43,7 @@ import java.util.Objects;
 public class ZaloXposedSettingsMenuHook extends BaseHook
 {
     private static final String CUSTOM_ITEM_MARKER = "zalo_xposed_settings";
+    private static final int CUSTOM_DRAWABLE_ID = -6767;
     private static boolean isOpenZaloXposedSettings1 = false;
     private static boolean isOpenZaloXposedSettings2 = false;
     @SuppressLint("StaticFieldLeak")
@@ -473,6 +472,8 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     @Override
     public void hook() throws Throwable
     {
+        ResourceHook.map(CUSTOM_DRAWABLE_ID, "extension_24px", "zds_oic_premium_crown_color_24");
+
         ListItemSettingHelper.Init(classLoader);
         ZButtonHelper.Init(classLoader);
         TabMeSettingItemHelper.Init(bridge, classLoader);
@@ -554,7 +555,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                         break;
                     }
                 }
-                Object customItem = TabMeSettingItemHelper.CreateNew(SettingItemID.PRIVACY, "zds_oic_premium_crown_color_24", moduleName);
+                Object customItem = TabMeSettingItemHelper.CreateNew(SettingItemID.PRIVACY, CUSTOM_DRAWABLE_ID, moduleName);
                 TabMeSettingItemHelper.SetDescription(customItem, Utils.IsEnglish() ? moduleName + " settings" : "Cài đặt " + moduleName);
                 TabMeSettingItemHelper.SetTracking(customItem, CUSTOM_ITEM_MARKER);
                 items.add(2, customItem);

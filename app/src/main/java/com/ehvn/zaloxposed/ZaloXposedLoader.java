@@ -32,6 +32,7 @@ public class ZaloXposedLoader extends XposedModule
     {
         System.loadLibrary("dexkit");
 
+        hooks.add(new ResourceHook());
         hooks.add(new ZaloXposedSettingsMenuHook());
         hooks.add(new CustomBackgroundHook());
 
