@@ -9,6 +9,9 @@ An **experimental** Xposed module for [Zalo](https://play.google.com/store/apps/
 > [!WARNING]
 > Using this module may **violate [Zalo's Terms of Service](https://zalo.vn/dieukhoan/).** Use at your own risk. The author is not responsible for any account bans or other consequences.
 
+> [!TIP]
+> The author will consider creating a chat group for users to discuss issues and share experiences if more people are interested. Until then, please join the general **[Discord server](https://discord.gg/DsrrgrEQyH)** for discussions about ZaloXposed and related topics.
+
 ## Download
 Visit the **[Latest](https://github.com/ElectroHeavenVN/ZaloXposed/releases/latest) / [Nightly](https://github.com/ElectroHeavenVN/ZaloXposed/releases/tag/nightly) Releases page** to download ZaloXposed.
 <!-- TODO: register the repository to the Xposed Module Repository when a stable version is released -->
@@ -39,6 +42,6 @@ Settings are stored in the Zalo's app-specific external storage directory (Andro
 
 ## Credits
 
-- [libxposed API](https://github.com/libxposed/api) — modern Xposed API.
+- [libxposed API](https://github.com/libxposed/api) ([Mirror](https://github.com/JingMatrix/libxposed-api)) — modern Xposed API.
 - [DexKit](https://github.com/luckypray/DexKit) — runtime dex querying.
 - [smali/dexlib2](https://github.com/google/smali) — dex disassembly.
