@@ -85,7 +85,8 @@ public class ZaloXposedLoader extends XposedModule
     public void onPackageReady(PackageReadyParam param)
     {
         if (!param.getPackageName().startsWith("com.zing.zalo"))
-            return;
+            return;    
+        long startTime = System.currentTimeMillis();
         Logger.i("Loading ZaloXposed");
         try
         {
@@ -117,8 +118,11 @@ public class ZaloXposedLoader extends XposedModule
             {
                 try
                 {
+                    long startHookTime = System.currentTimeMillis();
                     hook.init(this, bridge, param, assetManager);
                     hook.hook();
+                    long endHookTime = System.currentTimeMillis();
+                    Logger.d(hook.getClass().getSimpleName() + " finished in " + (endHookTime - startHookTime) + "ms");
                 }
                 catch (Throwable e)
                 {
@@ -130,5 +134,7 @@ public class ZaloXposedLoader extends XposedModule
         {
             Logger.e(e);
         }
+        long endTime = System.currentTimeMillis();
+        Logger.d("ZaloXposed loaded in " + (endTime - startTime) + "ms");
     }
 }

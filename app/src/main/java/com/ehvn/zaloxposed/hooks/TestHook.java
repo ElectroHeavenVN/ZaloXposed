@@ -18,6 +18,7 @@ import android.content.*;
 import android.content.pm.*;
 import android.graphics.*;
 import android.graphics.drawable.*;
+import android.os.*;
 import android.view.*;
 import android.widget.*;
 

@@ -35,6 +35,8 @@ public final class TabMeSettingItemHelper
     private static Field iconField = null;
     private static Field idField = null;
     private static Method setDesc = null;
+    private static Method tabMeViewGetItemList = null;
+
     public static void Init(DexKitBridge bridge, ClassLoader classLoader) throws Exception
     {
         List<ClassData> classes = bridge.findClass(FindClass.create()
@@ -77,7 +79,6 @@ public final class TabMeSettingItemHelper
             Logger.e("Target enum not found");
         else
             tabMeItemIdEnumClass = classes.get(0).getInstance(classLoader).asSubclass(Enum.class);
-        // Find tracking field (no way to find via reflection, must use disassembly)
         List<MethodData> methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.maintab.me.TabMeView")
@@ -91,8 +92,28 @@ public final class TabMeSettingItemHelper
         if (methods.isEmpty())
             Logger.e("Target method not found 1");
         else
+            tabMeViewGetItemList = methods.get(0).getMethodInstance(classLoader);
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .declaredClass(tabMeSettingItemClass)
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("void")
+                .paramCount(1)
+                .paramTypes("java.lang.String")
+                .addUsingString("<set-?>", StringMatchType.Equals)
+            ));
+        if (methods.isEmpty())
+            Logger.e("Target method not found 2");
+        else
+            setDesc = methods.get(0).getMethodInstance(classLoader);
+    }
+
+    private static void LateInit() throws Exception
+    {
+        if (trackingField == null && tabMeViewGetItemList != null)
         {
-            ArrayList<Instruction> instructions = Utils.Disassemble(methods.get(0).getMethodInstance(classLoader));
+            // Find tracking field (no way to find via reflection, must use disassembly)
+            ArrayList<Instruction> instructions = Utils.Disassemble(tabMeViewGetItemList);
             /*
                 const-string v0, "tab_me_privacy"                       # can be "tab_me_tool_storage", "tab_me_business_tools", etc.
                 iput-object v0, v5, Lrh1/e;->p:Ljava/lang/String;       # <<< tracking field
@@ -119,23 +140,6 @@ public final class TabMeSettingItemHelper
                 break;
             }
         }
-        methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .declaredClass(tabMeSettingItemClass)
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .returnType("void")
-                .paramCount(1)
-                .paramTypes("java.lang.String")
-                .addUsingString("<set-?>", StringMatchType.Equals)
-            ));
-        if (methods.isEmpty())
-            Logger.e("Target method not found 2");
-        else
-            setDesc = methods.get(0).getMethodInstance(classLoader);
-    }
-
-    private static void LateInit() throws Exception
-    {
         if (titleField != null && descriptionField != null && iconField != null && idField != null)
             return;
         Object templateInstance = CreateNew(SettingItemID.TOOL_STORAGE, 12345, "title12345");
@@ -175,6 +179,8 @@ public final class TabMeSettingItemHelper
             }
             field.setAccessible(oldAccessible);
         }
+        if (trackingField == null)
+            Logger.w("LateInit: trackingField not found");
         if (titleField == null)
             Logger.w("LateInit: titleField not found");
         if (descriptionField == null)

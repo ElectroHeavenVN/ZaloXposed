@@ -15,6 +15,7 @@ import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
 import org.luckypray.dexkit.result.MethodData;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -26,9 +27,10 @@ import java.util.Map;
 
 public class EnableShareHiddenStickerPackHook extends BaseHook
 {
-    Field isHidden = null;
+    static Field isHiddenField = null;
     Object stickerInstance = null;
     Map<Object, Integer> stickerMap = new HashMap<>();
+    static Method toJsonMethod = null;
 
     @Override
     public void hook() throws Throwable
@@ -45,7 +47,10 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
                 Integer originalIsHiddenValue = entry.getValue();
                 try
                 {
-                    isHidden.set(sticker, originalIsHiddenValue);
+                    loadFields();
+                    if (isHiddenField == null)
+                        return;
+                    isHiddenField.set(sticker, originalIsHiddenValue);
                 }
                 catch (Exception e)
                 {
@@ -68,9 +73,81 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
             Logger.e("Target method not found");
             return;
         }
-        Method method = methods.get(0).getMethodInstance(classLoader);
-        Class<?> stickerClass = method.getDeclaringClass();
-        ArrayList<Instruction> instructions = Utils.Disassemble(method);
+        toJsonMethod = methods.get(0).getMethodInstance(classLoader);
+        methods = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("void")
+                .paramCount(1)
+                .paramTypes("java.lang.Object")
+                .addUsingString("dataParam", StringMatchType.Equals)
+                .addUsingString("getChildZaloViewManager(...)", StringMatchType.Equals)
+                .addUsingString("tip.csc.sticker.promotion", StringMatchType.Equals)
+                .addUsingString("null cannot be cast to non-null type com.zing.zalo.ui.picker.stickerpanel.custom.EmojiChatPanelPage", StringMatchType.Equals)
+            ));
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found");
+            return;
+        }
+        Method onStickerPackOptionsClicked = methods.get(0).getMethodInstance(classLoader); 
+        Method synchronizedMapClassGet = Class.forName("java.util.Collections$SynchronizedMap", false, classLoader).getDeclaredMethod("get", Object.class);
+        Logger.i("Hooking: " + synchronizedMapClassGet);
+        module.hook(synchronizedMapClassGet).intercept(chain ->
+        {
+            loadFields();
+            if (isHiddenField == null)
+                return chain.proceed();
+            if (!Config.getEnableShareHiddenStickerPack())
+                return chain.proceed();
+            Object key = chain.getArg(0);
+            if (!(key instanceof Integer stickerId))
+                return chain.proceed();
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            boolean calledFromOnStickerPackOptionsClicked = false;
+            for (StackTraceElement element : stackTrace)
+            {
+                if (element.getClassName().equals(onStickerPackOptionsClicked.getDeclaringClass().getName()) &&
+                    element.getMethodName().equals(onStickerPackOptionsClicked.getName()))
+                {
+                    calledFromOnStickerPackOptionsClicked = true;
+                    break;
+                }
+            }
+            if (!calledFromOnStickerPackOptionsClicked)
+                return chain.proceed();
+            Object result = chain.proceed();
+            if (result != null)
+            {
+                stickerMap.put(result, (Integer) isHiddenField.get(result));
+                isHiddenField.set(result, 0);
+                return result;
+            }
+            if (stickerInstance != null)
+                return stickerInstance;
+            try
+            {
+                Class<?> stickerClass = toJsonMethod.getDeclaringClass();
+                Constructor<?> constructor = stickerClass.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                stickerInstance = constructor.newInstance();
+                isHiddenField.set(stickerInstance, 0);
+            }
+            catch (Exception e)
+            {
+                Logger.e("Error creating sticker instance", e);
+            }
+            return null;
+        }); 
+    }
+
+    private static synchronized void loadFields() throws NoSuchFieldException, IOException
+    {
+        if (toJsonMethod == null)
+            return;
+        if (isHiddenField != null)
+            return;
+        ArrayList<Instruction> instructions = Utils.Disassemble(toJsonMethod);
         /*
             const-string v1, ",\"is_hidden\":"
             invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -96,75 +173,14 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
                 continue;
             FieldReference field = (FieldReference)referenceInstruction.getReference();
             String fieldName = field.getName();
-            isHidden = method.getDeclaringClass().getDeclaredField(fieldName);
+            isHiddenField = toJsonMethod.getDeclaringClass().getDeclaredField(fieldName);
             break;
         }
-        if (isHidden == null)
+        if (isHiddenField == null)
         {
             Logger.e("Target field not found");
             return;
         }
-        isHidden.setAccessible(true);
-        methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .returnType("void")
-                .paramCount(1)
-                .paramTypes("java.lang.Object")
-                .addUsingString("dataParam", StringMatchType.Equals)
-                .addUsingString("getChildZaloViewManager(...)", StringMatchType.Equals)
-                .addUsingString("tip.csc.sticker.promotion", StringMatchType.Equals)
-                .addUsingString("null cannot be cast to non-null type com.zing.zalo.ui.picker.stickerpanel.custom.EmojiChatPanelPage", StringMatchType.Equals)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found");
-            return;
-        }
-        Method onStickerPackOptionsClicked = methods.get(0).getMethodInstance(classLoader); 
-        Method synchronizedMapClassGet = Class.forName("java.util.Collections$SynchronizedMap", false, classLoader).getDeclaredMethod("get", Object.class);
-        Logger.i("Hooking: " + synchronizedMapClassGet);
-        module.hook(synchronizedMapClassGet).intercept(chain ->
-        {
-            if (!Config.getEnableShareHiddenStickerPack())
-                return chain.proceed();
-            Object key = chain.getArg(0);
-            if (!(key instanceof Integer stickerId))
-                return chain.proceed();
-            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-            boolean calledFromOnStickerPackOptionsClicked = false;
-            for (StackTraceElement element : stackTrace)
-            {
-                if (element.getClassName().equals(onStickerPackOptionsClicked.getDeclaringClass().getName()) &&
-                    element.getMethodName().equals(onStickerPackOptionsClicked.getName()))
-                {
-                    calledFromOnStickerPackOptionsClicked = true;
-                    break;
-                }
-            }
-            if (!calledFromOnStickerPackOptionsClicked)
-                return chain.proceed();
-            Object result = chain.proceed();
-            if (result != null)
-            {
-                stickerMap.put(result, (Integer)isHidden.get(result));
-                isHidden.set(result, 0);
-                return result;
-            }
-            if (stickerInstance != null)
-                return stickerInstance;
-            try
-            {
-                Constructor<?> constructor = stickerClass.getDeclaredConstructor();
-                constructor.setAccessible(true);
-                stickerInstance = constructor.newInstance();
-                isHidden.set(stickerInstance, 0);
-            }
-            catch (Exception e)
-            {
-                Logger.e("Error creating sticker instance", e);
-            }
-            return null;
-        }); 
+        isHiddenField.setAccessible(true);
     }
 }

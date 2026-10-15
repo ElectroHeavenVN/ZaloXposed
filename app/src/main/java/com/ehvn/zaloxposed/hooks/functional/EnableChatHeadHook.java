@@ -29,6 +29,7 @@ import org.luckypray.dexkit.query.matchers.MethodMatcher;
 import org.luckypray.dexkit.result.ClassData;
 import org.luckypray.dexkit.result.MethodData;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -46,6 +47,9 @@ public class EnableChatHeadHook extends BaseHook
     static Field isAndroid11OrNewerFull = null;
     static Field chatHeadUnavailable = null;
     static boolean chatHeadUnavailableOriginalValue = false;
+    static Class<?> androidVersionCheckClass = null;
+    static Class<?> classContainsChatHeadUnavailableConfig = null;
+    static boolean hooked = false;
 
     @Override
     public void hook() throws Throwable
@@ -69,7 +73,7 @@ public class EnableChatHeadHook extends BaseHook
             return;
         }
         Method targetMethod = methods.get(0).getMethodInstance(classLoader);
-        Class<?> classContainsChatHeadUnavailableConfig = targetMethod.getDeclaringClass();
+        classContainsChatHeadUnavailableConfig = targetMethod.getDeclaringClass();
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .name("<clinit>")
@@ -84,7 +88,6 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 2");
             return;
         }
-        Class<?> androidVersionCheckClass = null;
         for (MethodData m : methods)
         {
             Class<?> tempandroidVersionCheckClass = Objects.requireNonNull(m.getDeclaredClass()).getInstance(classLoader);
@@ -98,62 +101,13 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target class not found 3");
             return;
         }
-        ArrayList<Instruction> instructions = Utils.Disassemble(androidVersionCheckClass, "<clinit>");
-        for (Instruction instruction : instructions)
-        {
-            if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction oneRegisterInstruction)
-            { 
-                FieldReference field = (FieldReference)((ReferenceInstruction)instruction).getReference();
-                String fieldName = field.getName(); 
-                if (isAndroid10FullOrOlder == null)
-                    isAndroid10FullOrOlder = androidVersionCheckClass.getDeclaredField(fieldName);
-                else if (isAndroid11OrNewerFull == null)
-                {
-                    isAndroid11OrNewerFull = androidVersionCheckClass.getDeclaredField(fieldName);
-                    break;
-                }
-            }
-        }
-        if (isAndroid10FullOrOlder == null)
-        {
-            Logger.e("Target field not found 1");
-            return;
-        }
-        if (isAndroid11OrNewerFull == null)
-        {
-            Logger.e("Target field not found 2");
-            return;
-        }
-        instructions = Utils.Disassemble(classContainsChatHeadUnavailableConfig, "<clinit>");
-        for (int i = instructions.size() - 1; i >= 1; i--)
-        {
-            Instruction instruction = instructions.get(i);
-            Instruction prevInstruction = instructions.get(i - 1);
-            if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction oneRegisterInstruction
-                && prevInstruction.getOpcode() == Opcode.SGET_BOOLEAN && prevInstruction instanceof OneRegisterInstruction prevOneRegisterInstruction)
-            { 
-                FieldReference field = (FieldReference)((ReferenceInstruction)prevInstruction).getReference();
-                String fieldName = field.getName();
-                if (!fieldName.equals(isAndroid11OrNewerFull.getName()) || !field.getDefiningClass().equals(Utils.GetDescriptor(isAndroid11OrNewerFull.getDeclaringClass())))
-                    continue;
-                field = (FieldReference)((ReferenceInstruction)instruction).getReference();
-                fieldName = field.getName();
-                chatHeadUnavailable = classContainsChatHeadUnavailableConfig.getDeclaredField(fieldName);
-                break;
-            }
-        }
-        if (chatHeadUnavailable == null)
-        {
-            Logger.e("Target field not found 3");
-            return;
-        }
-        isAndroid10FullOrOlder.setAccessible(true);
-        isAndroid11OrNewerFull.setAccessible(true);
-        chatHeadUnavailable.setAccessible(true);
-        SpoofAndroidVersionCheckFields spoofHook = new SpoofAndroidVersionCheckFields();
         Logger.i("Hooking [0]: " + targetMethod);
         module.hook(targetMethod).intercept(chain ->
         {
+            loadFields();
+            if (isAndroid10FullOrOlder == null || isAndroid11OrNewerFull == null || chatHeadUnavailable == null)
+                return chain.proceed();
+            doHook(new SpoofAndroidVersionCheckFields());
             Object result = chain.proceed();
             Config.addOnConfigChangedListener((key, oldValue, newValue) ->
             {
@@ -182,11 +136,12 @@ public class EnableChatHeadHook extends BaseHook
             catch (Exception ignored) { }
             return result;
         });
-        doHook(spoofHook);
     }
 
     private void doHook(SpoofAndroidVersionCheckFields spoofHook) throws NoSuchMethodException, ClassNotFoundException
     {
+        if (hooked)
+            return;
         List<MethodData> methods;
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -531,6 +486,7 @@ public class EnableChatHeadHook extends BaseHook
         method = Class.forName("com.zing.zalo.ui.maintab.msg.MessagesView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
         Logger.i("Hooking [-2]: " + method);
         module.hook(method).intercept(spoofHook);
+        hooked = true;
     }
 
     private void fixMiniChatAndroid13() throws ClassNotFoundException, NoSuchMethodException
@@ -556,6 +512,66 @@ public class EnableChatHeadHook extends BaseHook
         });
         method = Class.forName("androidx.window.extensions.layout.WindowLayoutComponentImpl", false, classLoader).getDeclaredMethod("addWindowLayoutInfoListener", Context.class, Class.forName("androidx.window.extensions.core.util.function.Consumer", false, classLoader));
         module.hook(method).intercept(new FixWindowLayoutComponentImpl());
+    }
+
+    private static synchronized void loadFields() throws IOException, NoSuchFieldException
+    {
+        if (androidVersionCheckClass == null || classContainsChatHeadUnavailableConfig == null)
+            return;
+        if (isAndroid10FullOrOlder != null && isAndroid11OrNewerFull != null && chatHeadUnavailable != null)
+            return;
+        ArrayList<Instruction> instructions = Utils.Disassemble(androidVersionCheckClass, "<clinit>");
+        for (Instruction instruction : instructions)
+        {
+            if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction oneRegisterInstruction)
+            {
+                FieldReference field = (FieldReference)((ReferenceInstruction)instruction).getReference();
+                String fieldName = field.getName();
+                if (isAndroid10FullOrOlder == null)
+                    isAndroid10FullOrOlder = androidVersionCheckClass.getDeclaredField(fieldName);
+                else if (isAndroid11OrNewerFull == null)
+                {
+                    isAndroid11OrNewerFull = androidVersionCheckClass.getDeclaredField(fieldName);
+                    break;
+                }
+            }
+        }
+        if (isAndroid10FullOrOlder == null)
+        {
+            Logger.e("Target field not found 1");
+            return;
+        }
+        if (isAndroid11OrNewerFull == null)
+        {
+            Logger.e("Target field not found 2");
+            return;
+        }
+        instructions = Utils.Disassemble(classContainsChatHeadUnavailableConfig, "<clinit>");
+        for (int i = instructions.size() - 1; i >= 1; i--)
+        {
+            Instruction instruction = instructions.get(i);
+            Instruction prevInstruction = instructions.get(i - 1);
+            if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction oneRegisterInstruction
+                && prevInstruction.getOpcode() == Opcode.SGET_BOOLEAN && prevInstruction instanceof OneRegisterInstruction prevOneRegisterInstruction)
+            {
+                FieldReference field = (FieldReference)((ReferenceInstruction)prevInstruction).getReference();
+                String fieldName = field.getName();
+                if (!fieldName.equals(isAndroid11OrNewerFull.getName()) || !field.getDefiningClass().equals(Utils.GetDescriptor(isAndroid11OrNewerFull.getDeclaringClass())))
+                    continue;
+                field = (FieldReference)((ReferenceInstruction)instruction).getReference();
+                fieldName = field.getName();
+                chatHeadUnavailable = classContainsChatHeadUnavailableConfig.getDeclaredField(fieldName);
+                break;
+            }
+        }
+        if (chatHeadUnavailable == null)
+        {
+            Logger.e("Target field not found 3");
+            return;
+        }
+        isAndroid10FullOrOlder.setAccessible(true);
+        isAndroid11OrNewerFull.setAccessible(true);
+        chatHeadUnavailable.setAccessible(true);
     }
 
     static class FixWindowLayoutComponentImpl implements XposedInterface.Hooker
@@ -591,6 +607,9 @@ public class EnableChatHeadHook extends BaseHook
 
         public Object intercept(XposedInterface.Chain chain) throws Throwable
         {
+            loadFields();
+            if (isAndroid10FullOrOlder == null || isAndroid11OrNewerFull == null || chatHeadUnavailable == null)
+                return chain.proceed();
             if (!Config.getEnableChatHead())
                 return chain.proceed();
             try

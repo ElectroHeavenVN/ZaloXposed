@@ -473,7 +473,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     public void hook() throws Throwable
     {
         ResourceHook.map(CUSTOM_DRAWABLE_ID, "extension_24px", "zds_oic_premium_crown_color_24");
-
         ListItemSettingHelper.Init(classLoader);
         ZButtonHelper.Init(classLoader);
         TabMeSettingItemHelper.Init(bridge, classLoader);
@@ -487,7 +486,12 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .addUsingString("features@tabme@fullzins@enable", StringMatchType.Equals)
                 .addUsingNumber(0)
                 .addUsingNumber(1)
-            )); 
+            ));
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 5");
+            return;
+        }
         for (MethodData methodData : methods)
         {
             Method method = methodData.getMethodInstance(classLoader);
@@ -531,7 +535,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 1");
             return;
         }
         Method method = methods.get(0).getMethodInstance(classLoader);
@@ -610,7 +614,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
     private void hookSettingPrivateView() throws Exception
     {
         headerTextViewClass = Class.forName("com.zing.zalo.ui.widget.RobotoTextView", false, classLoader);
-
         List<MethodData> methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.settings.SettingPrivateV2View")
@@ -622,7 +625,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .addUsingString("EXTRA_CURRENT_SEEN_SETTING", StringMatchType.Equals)));
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 2");
             return;
         }
         Method method = methods.get(0).getMethodInstance(classLoader);
@@ -651,7 +654,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 3");
             return;
         }
         method = methods.get(0).getMethodInstance(classLoader);
@@ -684,15 +687,22 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .returnType("void")
                 .paramCount(0)
                 .addUsingString("getString(...)", StringMatchType.Equals)
-                .addUsingField(FieldMatcher.create().name("str_title_setting_private"))
+                // .addUsingField(FieldMatcher.create().name("str_title_setting_private"))
+                .addInvoke(MethodMatcher.create()
+                    .declaredClass("com.zing.zalo.zdesign.component.header.ZdsActionBar")
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .returnType("void")
+                    .name("setMiddleTitle")
+                )
             ));
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 4");
             return;
         }
         method = methods.get(0).getMethodInstance(classLoader);
-        Field actionBarField = Utils.FindFieldByType(Class.forName("com.zing.zalo.ui.settings.SettingPrivateV2View", false, classLoader), "com.zing.zalo.zdesign.component.header.ZdsActionBar");
+        // Field actionBarField = Utils.FindFieldByType(Class.forName("com.zing.zalo.ui.settings.SettingPrivateV2View", false, classLoader), "com.zing.zalo.zdesign.component.header.ZdsActionBar");
+        Field actionBarField = Utils.FindFieldByType(Class.forName("com.zing.zalo.ui.zviews.ZaloViewNewActionBar", false, classLoader), "com.zing.zalo.zdesign.component.header.ZdsActionBar");
         Logger.i("Hooking: " + method);
         module.hook(method).setPriority(10).intercept(chain ->
         {

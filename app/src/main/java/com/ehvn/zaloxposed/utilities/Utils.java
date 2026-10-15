@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class Utils
 {
@@ -48,6 +49,8 @@ public final class Utils
     private static Class<?> cfgClass;
     private static Method getCurrentUserInfoMethod;
     private static MultiDexContainer<? extends DexBackedDexFile> dexContainer;
+    private static final List<DexBackedDexFile> cachedDexFiles = new ArrayList<>();
+    private static final Map<String, ClassDef> classDefCache = new ConcurrentHashMap<>();
     private static final ArrayList<Class<?>> drawableResourceClasses = new ArrayList<>();
     private static final ArrayList<Class<?>> resourceClasses = new ArrayList<>();
     private static Method getIsVietnameseMethod;
@@ -320,89 +323,122 @@ public final class Utils
         return null;
     }
 
+    private static synchronized List<DexBackedDexFile> getDexFiles() throws IOException
+    {
+        if (cachedDexFiles.isEmpty() && dexContainer != null)
+        {
+            for (String entryName : dexContainer.getDexEntryNames())
+            {
+                if (!entryName.endsWith(".dex"))
+                    continue;
+                var entry = dexContainer.getEntry(entryName);
+                if (entry != null)
+                    cachedDexFiles.add(entry.getDexFile());
+            }
+        }
+        return cachedDexFiles;
+    }
+
+    private static ClassDef findClassDef(Class<?> clazz) throws IOException
+    {
+        if (clazz == null)
+            return null;
+        String descriptor = GetDescriptor(clazz);
+        ClassDef cached = classDefCache.get(descriptor);
+        if (cached != null)
+            return cached;
+        for (DexBackedDexFile dexFile : getDexFiles())
+        {
+            for (ClassDef classDef : dexFile.getClasses())
+            {
+                if (!descriptor.equals(classDef.getType()))
+                    continue;
+                classDefCache.put(descriptor, classDef);
+                return classDef;
+            }
+        }
+        return null;
+    }
+
     /**
-     * @deprecated Please refrain from disassembling methods if possible
+     * @deprecated Please refrain from disassembling methods if possible, especially in the initialization phase, as it may cause performance issues.
      */
     @Deprecated
     public static ArrayList<Instruction> Disassemble(Method method) throws IOException
     {
-        Class<?> clazz = method.getDeclaringClass();
-        for (String entryName : dexContainer.getDexEntryNames())
+        long startTime = System.currentTimeMillis();
+        try
         {
-            if (!entryName.endsWith(".dex"))
-                continue;
-            var entry = dexContainer.getEntry(entryName);
-            if (entry == null)
-                continue;
-            DexBackedDexFile dexFile = entry.getDexFile();
-            for (ClassDef classDef : dexFile.getClasses())
+            Class<?> clazz = method.getDeclaringClass();
+            ClassDef classDef = findClassDef(clazz);
+            if (classDef == null)
+                return new ArrayList<>();
+            for (com.android.tools.smali.dexlib2.iface.Method m : classDef.getMethods())
             {
-                if (!classDef.getType().equals(GetDescriptor(clazz)))
+                if (!m.getName().equals(method.getName()))
                     continue;
-                for (com.android.tools.smali.dexlib2.iface.Method m : classDef.getMethods())
+                boolean paramsMatch = true;
+                var parameters = method.getParameterTypes();
+                if (m.getParameters().size() != parameters.length)
+                    paramsMatch = false;
+                else
                 {
-                    if (!m.getName().equals(method.getName()))
-                        continue;
-                    boolean paramsMatch = true;
-                    var parameters = method.getParameterTypes();
-                    if (m.getParameters().size() != parameters.length)
-                        paramsMatch = false;
-                    else
+                    for (int i = 0; i < m.getParameters().size(); i++)
                     {
-                        for (int i = 0; i < m.getParameters().size(); i++)
-                        {
-                            if (m.getParameters().get(i).getType().equals(GetDescriptor(parameters[i])))
-                                continue;
-                            paramsMatch = false;
-                            break;
-                        }
+                        if (m.getParameters().get(i).getType().equals(GetDescriptor(parameters[i])))
+                            continue;
+                        paramsMatch = false;
+                        break;
                     }
-                    if (!paramsMatch)
-                        continue;
-                    MethodImplementation impl = m.getImplementation();
-                    if (impl == null)
-                        continue;
-                    ArrayList<Instruction> result = new ArrayList<>();
-                    impl.getInstructions().forEach(result::add);
-                    return result;
                 }
+                if (!paramsMatch)
+                    continue;
+                MethodImplementation impl = m.getImplementation();
+                if (impl == null)
+                    continue;
+                ArrayList<Instruction> result = new ArrayList<>();
+                impl.getInstructions().forEach(result::add);
+                return result;
             }
+            return new ArrayList<>();
         }
-        return new ArrayList<>();
+        finally
+        {
+            long endTime = System.currentTimeMillis();
+            Logger.d("Disassemble " + method.getDeclaringClass().getName() + "->" + method.getName() + " finished in " + (endTime - startTime) + "ms");
+        }
     }
 
     /**
-     * @deprecated Please refrain from disassembling methods if possible
+     * @deprecated Please refrain from disassembling methods if possible, especially in the initialization phase, as it may cause performance issues.
      */
     @Deprecated()
     public static ArrayList<Instruction> Disassemble(Class<?> clazz, String methodName) throws IOException
     {
-        for (String entryName : dexContainer.getDexEntryNames())
+        long startTime = System.currentTimeMillis();
+        try 
         {
-            if (!entryName.endsWith(".dex"))
-                continue;
-            var entry = dexContainer.getEntry(entryName);
-            if (entry == null)
-                continue;
-            DexBackedDexFile dexFile = entry.getDexFile();
-            for (ClassDef classDef : dexFile.getClasses())
+            ClassDef classDef = findClassDef(clazz);
+            if (classDef == null)
+                return new ArrayList<>();
+            for (com.android.tools.smali.dexlib2.iface.Method method : classDef.getMethods())
             {
-                if (!classDef.getType().equals(GetDescriptor(clazz)))
+                if (!method.getName().equals(methodName))
                     continue;
-                for (com.android.tools.smali.dexlib2.iface.Method method : classDef.getMethods())
-                {
-                    if (!method.getName().equals(methodName))
-                        continue;
-                    MethodImplementation impl = method.getImplementation();
-                    if (impl == null)
-                        continue;
-                    ArrayList<Instruction> result = new ArrayList<>();
-                    impl.getInstructions().forEach(result::add);
-                    return result;
-                }
+                MethodImplementation impl = method.getImplementation();
+                if (impl == null)
+                    continue;
+                ArrayList<Instruction> result = new ArrayList<>();
+                impl.getInstructions().forEach(result::add);
+                return result;
             }
+            return new ArrayList<>();
+        } 
+        finally 
+        {
+            long endTime = System.currentTimeMillis();
+            Logger.d("Disassemble " + clazz.getName() + "->" + methodName + " finished in " + (endTime - startTime) + "ms");
         }
-        return new ArrayList<>();
     }
 
     public static String GetDescriptor(Class<?> clazz)

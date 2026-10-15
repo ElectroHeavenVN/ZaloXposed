@@ -55,6 +55,29 @@ public class ResourceHook extends BaseHook
         }
     }
 
+    public static void replace(int targetResId, String moduleDrawableName)
+    {
+        synchronized (sDrawableMap)
+        {
+            sDrawableMap.put(targetResId, moduleDrawableName);
+        }
+    }
+
+    public static void replace(String targetDrawableName, String moduleDrawableName)
+    {
+        if (targetDrawableName == null || targetDrawableName.isEmpty())
+            return;
+        int targetId = Utils.GetDrawableResourceIdByName(targetDrawableName);
+        if (targetId != 0)
+        {
+            replace(targetId, moduleDrawableName);
+        }
+        else
+        {
+            Logger.e("Cannot resolve target drawable ID for name: " + targetDrawableName);
+        }
+    }
+
     public static void unmap(int customId)
     {
         synchronized (sDrawableMap)
