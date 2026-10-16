@@ -1,4 +1,4 @@
 minApiVersion=100
 targetApiVersion=101
-staticScope=false
+staticScope=true
 exceptionMode=protective

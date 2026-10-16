@@ -1,7 +1,20 @@
 package com.ehvn.zaloxposed;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.ehvn.zaloxposed.hooks.*;
 import com.ehvn.zaloxposed.hooks.functional.*;
@@ -27,6 +40,7 @@ public class ZaloXposedLoader extends XposedModule
 {
     private static DexKitBridge bridge;
     private static final ArrayList<BaseHook> hooks = new ArrayList<>();
+    private View customSplash = null;
 
     static
     {
@@ -73,6 +87,65 @@ public class ZaloXposedLoader extends XposedModule
         }
     }
 
+    @SuppressWarnings("deprecation")
+    @SuppressLint({"DiscouragedApi", "SetTextI18n"})
+    private void hookDisplayCustomSplash(ClassLoader classLoader, AssetManager assetManager) throws ClassNotFoundException, NoSuchMethodException
+    {
+        Class<?> clazz = Class.forName("com.zing.zalo.ui.ZaloLauncherActivity", false, classLoader);
+        Method onCreate = clazz.getDeclaredMethod("onCreate", Bundle.class);
+        hook(onCreate).setPriority(5).intercept(chain ->
+        {
+            Object result = chain.proceed();
+            Activity activity = (Activity)chain.getThisObject();
+            try
+            {
+                if (assetManager == null)
+                    return result;
+                var zaloRes = activity.getResources();
+                Resources modRes = new Resources(assetManager, zaloRes.getDisplayMetrics(), zaloRes.getConfiguration());
+                String modulePkg = "com.ehvn.zaloxposed";
+                int layoutId = modRes.getIdentifier("custom_splash", "layout", modulePkg);
+                if (layoutId == 0)
+                    return result;
+                Context modContext = new ContextThemeWrapper(activity, 0)
+                {
+                    @Override
+                    public Resources getResources()
+                    {
+                        return modRes;
+                    }
+
+                    @Override
+                    public AssetManager getAssets()
+                    {
+                        return modRes.getAssets();
+                    }
+                };
+                LayoutInflater inflater = activity.getLayoutInflater().cloneInContext(modContext);
+                customSplash = inflater.inflate(layoutId, null, false);
+                if (customSplash == null)
+                    return result;
+                var textViewId = modRes.getIdentifier("tv_custom", "id", modulePkg);
+                if (textViewId != 0)
+                {
+                    var textView = customSplash.findViewById(textViewId);
+                    if (textView instanceof TextView)
+                        ((TextView)textView).setText(MorpheConstants.getModuleName() + " by ElectroHeavenVN");
+                }
+                View decor = activity.getWindow() != null ? activity.getWindow().getDecorView() : null;
+                if (!(decor instanceof ViewGroup))
+                    return result;
+                var lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+                ((ViewGroup)decor).addView(customSplash, lp);
+            }
+            catch (Throwable t)
+            {
+                Logger.e(t);
+            }
+            return result;
+        });
+    }
+
     @Override
     public void onModuleLoaded(ModuleLoadedParam param)
     {
@@ -85,7 +158,7 @@ public class ZaloXposedLoader extends XposedModule
     public void onPackageReady(PackageReadyParam param)
     {
         if (!param.getPackageName().startsWith("com.zing.zalo"))
-            return;    
+            return;
         long startTime = System.currentTimeMillis();
         Logger.i("Loading ZaloXposed");
         try
@@ -95,6 +168,7 @@ public class ZaloXposedLoader extends XposedModule
         catch (Exception e)
         {
             Logger.e(e);
+            return;
         }
         try
         {
@@ -114,6 +188,7 @@ public class ZaloXposedLoader extends XposedModule
             AssetManager assetManager = AssetManager.class.getDeclaredConstructor().newInstance();
             Method addAssetPath = AssetManager.class.getMethod("addAssetPath", String.class);
             addAssetPath.invoke(assetManager, getModuleApplicationInfo().sourceDir);
+            hookDisplayCustomSplash(param.getClassLoader(), assetManager);
             for (BaseHook hook : hooks)
             {
                 try
@@ -121,8 +196,7 @@ public class ZaloXposedLoader extends XposedModule
                     long startHookTime = System.currentTimeMillis();
                     hook.init(this, bridge, param, assetManager);
                     hook.hook();
-                    long endHookTime = System.currentTimeMillis();
-                    Logger.d(hook.getClass().getSimpleName() + " finished in " + (endHookTime - startHookTime) + "ms");
+                    Logger.d(hook.getClass().getSimpleName() + " finished in " + (System.currentTimeMillis() - startHookTime) + "ms");
                 }
                 catch (Throwable e)
                 {
@@ -134,7 +208,11 @@ public class ZaloXposedLoader extends XposedModule
         {
             Logger.e(e);
         }
-        long endTime = System.currentTimeMillis();
-        Logger.d("ZaloXposed loaded in " + (endTime - startTime) + "ms");
+        new Handler(Looper.getMainLooper()).postDelayed(()->
+        {
+            if (customSplash != null && customSplash.getParent() != null)
+                ((ViewGroup)customSplash.getParent()).removeView(customSplash);
+        }, 2000);
+        Logger.d("ZaloXposed loaded in " + (System.currentTimeMillis() - startTime) + "ms");
     }
 }

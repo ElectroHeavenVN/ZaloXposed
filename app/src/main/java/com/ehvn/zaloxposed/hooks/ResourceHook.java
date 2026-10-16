@@ -125,12 +125,12 @@ public class ResourceHook extends BaseHook
         Logger.i("Hooking: " + method);
         module.hook(method).setPriority(5).intercept(chain ->
         {
-            int resId = (int) chain.getArg(0);
+            int resId = (int)chain.getArg(0);
             if (!isMapped(resId))
                 return chain.proceed();
             try
             {
-                ImageView iv = (ImageView) chain.getThisObject();
+                ImageView iv = (ImageView)chain.getThisObject();
                 Drawable d = getMappedDrawable(iv.getContext().getResources(), iv.getContext().getTheme(), resId);
                 if (d != null)
                 {
@@ -161,14 +161,14 @@ public class ResourceHook extends BaseHook
             Logger.i("Hooking: " + method);
             module.hook(method).setPriority(5).intercept(chain ->
             {
-                int resId = (int) chain.getArg(0);
+                int resId = (int)chain.getArg(0);
                 if (!isMapped(resId))
                     return chain.proceed();
                 if (!isDrawable)
                     return redirectGetValue(chain, resId);
                 try
                 {
-                    Resources zaloRes = (Resources) chain.getThisObject();
+                    Resources zaloRes = (Resources)chain.getThisObject();
                     Resources.Theme theme = findTheme(chain);
                     Drawable d = getMappedDrawable(zaloRes, theme, resId);
                     if (d != null)
@@ -204,7 +204,7 @@ public class ResourceHook extends BaseHook
                 int idIndex = findCustomIdIndex(arr);
                 if (idIndex < 0)
                     return chain.proceed();
-                int resId = (Integer) arr[idIndex];
+                int resId = (Integer)arr[idIndex];
                 if (!isLoad)
                     return redirectWithRewrittenId(chain, arr, 0, resId);
                 try
@@ -240,7 +240,7 @@ public class ResourceHook extends BaseHook
             Logger.i("Hooking: " + method);
             module.hook(method).setPriority(5).intercept(chain ->
             {
-                int resId = (int) chain.getArg(0);
+                int resId = (int)chain.getArg(0);
                 if (!isMapped(resId))
                     return chain.proceed();
                 Object[] arr = chain.getArgs().toArray();
@@ -253,7 +253,7 @@ public class ResourceHook extends BaseHook
     {
         for (int i = 0; i < args.length; i++)
         {
-            if (args[i] instanceof Integer && isMapped((Integer) args[i]))
+            if (args[i] instanceof Integer && isMapped((Integer)args[i]))
                 return i;
         }
         return -1;
@@ -264,7 +264,7 @@ public class ResourceHook extends BaseHook
         for (Object arg : chain.getArgs().toArray())
         {
             if (arg instanceof Resources.Theme)
-                return (Resources.Theme) arg;
+                return (Resources.Theme)arg;
         }
         return null;
     }
@@ -274,11 +274,11 @@ public class ResourceHook extends BaseHook
         for (Object arg : args)
         {
             if (arg instanceof Resources)
-                return (Resources) arg;
+                return (Resources)arg;
         }
         Object a0 = chain.getArg(0);
         if (a0 instanceof Resources)
-            return (Resources) a0;
+            return (Resources)a0;
         return null;
     }
 
@@ -313,7 +313,7 @@ public class ResourceHook extends BaseHook
             int fallbackId = getFallbackId(customId);
             if (fallbackId == 0)
                 return chain.proceed();
-            Resources zaloRes = (Resources) chain.getThisObject();
+            Resources zaloRes = (Resources)chain.getThisObject();
             Resources.Theme theme = findTheme(chain);
             return zaloRes.getDrawable(fallbackId, theme);
         }
@@ -331,7 +331,7 @@ public class ResourceHook extends BaseHook
             int fallbackId = getFallbackId(resId);
             if (fallbackId != 0)
             {
-                ImageView iv = (ImageView) chain.getThisObject();
+                ImageView iv = (ImageView)chain.getThisObject();
                 iv.setImageResource(fallbackId);
                 return null;
             }
