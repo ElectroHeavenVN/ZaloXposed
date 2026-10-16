@@ -2,12 +2,16 @@ package com.ehvn.zaloxposed.hooks.custommenu;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.TypedValue;
 import android.view.View;
@@ -18,6 +22,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ehvn.zaloxposed.MorpheConstants;
 import com.ehvn.zaloxposed.hooks.BaseHook;
@@ -32,6 +37,7 @@ import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
 import org.luckypray.dexkit.result.MethodData;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -44,6 +50,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
 {
     private static final String CUSTOM_ITEM_MARKER = "zalo_xposed_settings";
     private static final int CUSTOM_DRAWABLE_ID = -6767;
+    private static final int REQUEST_CODE_IMPORT_CONFIG = 3636;
     private static boolean isOpenZaloXposedSettings1 = false;
     private static boolean isOpenZaloXposedSettings2 = false;
     @SuppressLint("StaticFieldLeak")
@@ -452,14 +459,37 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setShowMoreTab);
 
 
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "Configuration backup & restore" : "Sao lưu & Khôi phục cấu hình");
+        rootLayout.addView(headerTitle);
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Export configuration file" : "Xuất tệp cấu hình");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Save to Downloads/ZaloXposed" : "Lưu vào thư mục Downloads/ZaloXposed");
+        ListItemSettingHelper.SetOnClickListener(listItemSetting, v -> exportConfigFile(context));
+
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Import configuration from file" : "Nhập cấu hình từ tệp");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Choose a JSON file" : "Chọn tệp JSON từ bộ nhớ");
+        ListItemSettingHelper.SetOnClickListener(listItemSetting, v -> openFilePickerForImport(context));
+
+
         Object restartButton = ZButtonHelper.CreateNew(context);
-        rootLayout.addView((View) restartButton);
+        rootLayout.addView((View)restartButton);
         ZButtonHelper.SetText(restartButton, Utils.IsEnglish() ? "Restart app" : "Khởi động lại ứng dụng");
         ZButtonHelper.SetOnClickListener(restartButton, v -> restartApp(context));
         LinearLayout.LayoutParams restartLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         int pad16 = dp(context, 16);
         restartLp.setMargins(pad16, pad16, pad16, 0);
-        ((View) restartButton).setLayoutParams(restartLp);
+        ((View)restartButton).setLayoutParams(restartLp);
 
 
         for (int i = 0; i < 5; i++)
@@ -478,6 +508,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         TabMeSettingItemHelper.Init(bridge, classLoader);
         hookTabMeView();
         hookSettingPrivateView();
+        hookActivityForFilePicker();
         List<MethodData> methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.maintab.me.TabMeView")
@@ -500,6 +531,178 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
     }
 
+    private void exportConfigFile(Context context)
+    {
+        try
+        {
+            String jsonString = Config.getConfigJsonString();
+            boolean success = false;
+            String exportedPath = "";
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            {
+                ContentResolver resolver = context.getContentResolver();
+                Uri collection = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+                String fileName = "zaloxposed_config.json";
+                String relativePath = android.os.Environment.DIRECTORY_DOWNLOADS + "/ZaloXposed/";
+                try
+                {
+                    String selection = MediaStore.MediaColumns.DISPLAY_NAME + " = ?";
+                    String[] selectionArgs = new String[]{fileName};
+                    resolver.delete(collection, selection, selectionArgs);
+                }
+                catch (Exception ignored) { }
+                android.content.ContentValues contentValues = new android.content.ContentValues();
+                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "application/json");
+                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath);
+                Uri uri = resolver.insert(collection, contentValues);
+                if (uri != null)
+                {
+                    try (java.io.OutputStream os = resolver.openOutputStream(uri, "rwt"))
+                    {
+                        if (os != null)
+                        {
+                            os.write(jsonString.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                            os.flush();
+                            success = true;
+                            exportedPath = "Download/ZaloXposed/" + fileName;
+                        }
+                    }
+                }
+            }
+            if (!success)
+            {
+                File downloadDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS);
+                File exportDir = new File(downloadDir, "ZaloXposed");
+                if (!exportDir.exists())
+                    exportDir.mkdirs();
+                File targetFile = new File(exportDir, "zaloxposed_config.json");
+                success = Config.exportToFile(targetFile);
+                if (success)
+                    exportedPath = targetFile.getAbsolutePath();
+            }
+            boolean finalSuccess = success;
+            String finalPath = exportedPath;
+            new Handler(Looper.getMainLooper()).post(() ->
+            {
+                if (finalSuccess)
+                    Toast.makeText(context, Utils.IsEnglish() ? "Exported config file to: " + finalPath : "Đã xuất tệp cấu hình ra: " + finalPath, Toast.LENGTH_LONG).show();
+                else
+                    Toast.makeText(context, Utils.IsEnglish() ? "Export failed (permission denied)!" : "Xuất cấu hình thất bại (không có quyền bộ nhớ)!", Toast.LENGTH_SHORT).show();
+            });
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
+    }
+
+    private void openFilePickerForImport(Context context)
+    {
+        try
+        {
+            Activity activity = null;
+            Context ctx = context;
+            while (ctx instanceof ContextWrapper)
+            {
+                if (ctx instanceof Activity)
+                {
+                    activity = (Activity)ctx;
+                    break;
+                }
+                ctx = ((ContextWrapper)ctx).getBaseContext();
+            }
+            if (activity == null)
+            {
+                new Handler(Looper.getMainLooper()).post(() ->
+                {
+                    Toast.makeText(context, Utils.IsEnglish() ? "Cannot find activity to open file picker!" : "Không tìm thấy Activity để mở trình chọn file!", Toast.LENGTH_SHORT).show();
+                });
+                return;
+            }
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            String[] extraMimeTypes = new String[]{"application/json", "text/*"};
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, extraMimeTypes);
+            activity.startActivityForResult(intent, REQUEST_CODE_IMPORT_CONFIG);
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+            try
+            {
+                // Fallback to direct ACTION_GET_CONTENT
+                if (context instanceof Activity)
+                {
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.setType("*/*");
+                    ((Activity)context).startActivityForResult(intent, REQUEST_CODE_IMPORT_CONFIG);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.e(ex);
+            }
+        }
+    }
+
+    private void hookActivityForFilePicker()
+    {
+        try
+        {
+            Method onActivityResultMethod = Activity.class.getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
+            Logger.i("Hooking: " + onActivityResultMethod);
+            module.hook(onActivityResultMethod).setPriority(10).intercept(chain ->
+            {
+                int requestCode = (int)chain.getArg(0);
+                if (requestCode == REQUEST_CODE_IMPORT_CONFIG)
+                {
+                    int resultCode = (int)chain.getArg(1);
+                    Intent data = (Intent)chain.getArg(2);
+                    Activity activity = (Activity)chain.getThisObject();
+                    if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null)
+                        handleImportUri(activity, data.getData());
+                    return null;
+                }
+                return chain.proceed();
+            });
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
+    }
+
+    private void handleImportUri(Context context, Uri uri)
+    {
+        try
+        {
+            boolean success = false;
+            try (java.io.InputStream inputStream = context.getContentResolver().openInputStream(uri))
+            {
+                if (inputStream != null)
+                    success = Config.importFromStream(inputStream);
+            }
+            boolean finalSuccess = success;
+            new Handler(Looper.getMainLooper()).post(() ->
+            {
+                if (finalSuccess)
+                    Toast.makeText(context, Utils.IsEnglish() ? "Configuration imported successfully, restart app to apply." : "Đã nhập cấu hình, khởi động lại app để áp dụng.", Toast.LENGTH_LONG).show();
+                else
+                    Toast.makeText(context, Utils.IsEnglish() ? "Failed to read or parse configuration file!" : "Không thể đọc tệp hoặc định dạng JSON không hợp lệ!", Toast.LENGTH_SHORT).show();
+            });
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+            new Handler(Looper.getMainLooper()).post(() ->
+            {
+                Toast.makeText(context, Utils.IsEnglish() ? "Error importing: " + e.getMessage() : "Lỗi khi nhập tệp: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+        }
+    }
+
     private void restartApp(Context context)
     {
         try
@@ -510,7 +713,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             context.startActivity(intent);
             if (Activity.class.isAssignableFrom(context.getClass()))
-                ((Activity) context).finish();
+                ((Activity)context).finish();
             new Handler(Looper.getMainLooper()).postDelayed(() -> Runtime.getRuntime().exit(0), 0);
         }
         catch (Exception e)
@@ -549,7 +752,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             {
                 String moduleName = MorpheConstants.getModuleName();
                 Object separatorItem = null;
-                ArrayList<Object> items = (ArrayList<Object>) result;
+                ArrayList<Object> items = (ArrayList<Object>)result;
                 for (int i = items.size() - 1; i >= 0; i--)
                 {
                     Object item = items.get(i);
@@ -741,7 +944,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
 
     private TextView createHeaderTitle(Context context) throws Exception
     {
-        TextView headerTitle = (TextView) headerTextViewClass.getConstructor(Context.class).newInstance(context);
+        TextView headerTitle = (TextView)headerTextViewClass.getConstructor(Context.class).newInstance(context);
         headerTitle.setVisibility(View.VISIBLE);
         if (templateHeader != null)
         {
@@ -763,7 +966,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             }
             if (templateHeader.getLayoutParams() instanceof LinearLayout.LayoutParams)
             {
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams((LinearLayout.LayoutParams) templateHeader.getLayoutParams());
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams((LinearLayout.LayoutParams)templateHeader.getLayoutParams());
                 headerTitle.setLayoutParams(lp);
             }
         }
@@ -795,7 +998,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             catch (Exception ignored) { }
             if (templateSeparator.getLayoutParams() instanceof LinearLayout.LayoutParams)
             {
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams((LinearLayout.LayoutParams) templateSeparator.getLayoutParams());
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams((LinearLayout.LayoutParams)templateSeparator.getLayoutParams());
                 separator.setLayoutParams(lp);
             }
         }
@@ -818,7 +1021,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             if (child.getVisibility() != View.VISIBLE)
                 continue;
             if (templateHeader == null && child.getClass() == headerTextViewClass)
-                templateHeader = (TextView) child;
+                templateHeader = (TextView)child;
             else if (templateSeparator == null && child.getClass() == View.class)
                 templateSeparator = child;
         }
@@ -836,7 +1039,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
 
     private void hideKeyboard(View view)
     {
-        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null)
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
@@ -859,7 +1062,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .newDrawable()
                 .mutate());
         }
-        catch (Exception ignored) { } 
+        catch (Exception ignored) { }
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         editText.setLayoutParams(lp);
     }

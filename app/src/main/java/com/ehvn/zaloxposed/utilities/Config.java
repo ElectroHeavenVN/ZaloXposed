@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,9 +21,16 @@ public final class Config
 
     private static final List<OnConfigChangedListener> listeners = new ArrayList<>();
 
-    private static final File file = new File(Utils.GetZaloXposedDir(), "config.json");
+    private static File file = null;
 
     private static JSONObject config = new JSONObject();
+
+    public static File getConfigFile()
+    {
+        if (file == null)
+            file = new File(Utils.GetZaloXposedDir(), "config.json");
+        return file;
+    }
 
     public static void addOnConfigChangedListener(OnConfigChangedListener listener)
     {
@@ -53,14 +61,18 @@ public final class Config
     {
         try 
         {
-            if (!file.exists())
+            File configFile = getConfigFile();
+            if (!configFile.exists())
             {
-                FileWriter fw = new FileWriter(file);
+                File parent = configFile.getParentFile();
+                if (parent != null && !parent.exists())
+                    parent.mkdirs();
+                FileWriter fw = new FileWriter(configFile);
                 fw.write("{}");
                 fw.close();
             }
             StringBuilder content = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+            BufferedReader reader = new BufferedReader(new FileReader(configFile));
             String line;
             while ((line = reader.readLine()) != null)
                 content.append(line).append("\n");
@@ -77,13 +89,107 @@ public final class Config
     {
         try 
         {
-            FileWriter fw = new FileWriter(file);
+            File configFile = getConfigFile();
+            File parent = configFile.getParentFile();
+            if (parent != null && !parent.exists())
+                parent.mkdirs();
+            FileWriter fw = new FileWriter(configFile);
             fw.write(config.toString());
             fw.close();
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             Logger.e(e);
+        }
+    }
+
+    public static String getConfigJsonString()
+    {
+        try
+        {
+            return config.toString(4);
+        }
+        catch (Exception e)
+        {
+            return config.toString();
+        }
+    }
+
+    public static boolean exportToFile(File targetFile)
+    {
+        try
+        {
+            File parent = targetFile.getParentFile();
+            if (parent != null && !parent.exists())
+                parent.mkdirs();
+            try (FileWriter fw = new FileWriter(targetFile))
+            {
+                fw.write(config.toString(4));
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+            return false;
+        }
+    }
+
+    public static boolean importFromFile(File sourceFile)
+    {
+        try
+        {
+            if (!sourceFile.exists() || !sourceFile.isFile())
+                return false;
+            StringBuilder content = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new FileReader(sourceFile)))
+            {
+                String line;
+                while ((line = reader.readLine()) != null)
+                    content.append(line).append("\n");
+            }
+            config = new JSONObject(content.toString());
+            save();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+            return false;
+        }
+    }
+
+    public static boolean exportToStream(java.io.OutputStream outputStream)
+    {
+        try (outputStream)
+        {
+            outputStream.write(config.toString(4).getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+            return false;
+        }
+    }
+
+    public static boolean importFromStream(java.io.InputStream inputStream)
+    {
+        try (inputStream; BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(inputStream, StandardCharsets.UTF_8)))
+        {
+            StringBuilder content = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null)
+                content.append(line).append("\n");
+            config = new JSONObject(content.toString());
+            save();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+            return false;
         }
     }
 

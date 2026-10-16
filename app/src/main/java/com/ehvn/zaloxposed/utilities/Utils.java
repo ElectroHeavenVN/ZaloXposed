@@ -31,6 +31,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ public final class Utils
     private static ClassLoader sClassLoader;
     private static String externalFilesDir = "";
     private static String packageName = "";
+    private static String appDataDir = "";
     private static Class<?> cfgClass;
     private static Method getCurrentUserInfoMethod;
     private static MultiDexContainer<? extends DexBackedDexFile> dexContainer;
@@ -72,6 +74,7 @@ public final class Utils
     {
         sClassLoader = classLoader;
         packageName = appInfo.packageName;
+        appDataDir = appInfo.dataDir;
         File apkFile = new File(appInfo.sourceDir);
         dexContainer = DexFileFactory.loadDexContainer(apkFile, Opcodes.getDefault());
         List<MethodData> methods = bridge.findMethod(FindMethod.create()
@@ -485,6 +488,11 @@ public final class Utils
         return descriptor.replace('/', '.');
     }
 
+    public static String GetAppDataDir()
+    {
+        return appDataDir;
+    }
+
     public static String GetExternalFilesDir()
     {
         if (externalFilesDir.isEmpty())
@@ -510,13 +518,38 @@ public final class Utils
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static String GetZaloXposedDir()
     {
-        String externalFilesDir = GetExternalFilesDir();
-        if (externalFilesDir.isEmpty())
+        File targetDir = null;
+        if (appDataDir != null && !appDataDir.isEmpty())
+            targetDir = new File(appDataDir, "files/ZaloXposed");
+        else
+        {
+            String externalFilesDir = GetExternalFilesDir();
+            if (!externalFilesDir.isEmpty())
+                targetDir = new File(externalFilesDir, "ZaloXposed");
+        }
+        if (targetDir == null)
             return "";
-        File dir = new File(externalFilesDir, "ZaloXposed");
-        if (!dir.exists())
-            dir.mkdirs();
-        return dir.getAbsolutePath();
+        if (!targetDir.exists())
+            targetDir.mkdirs();
+        // Migrate legacy config if exists
+        try
+        {
+            File newConfigFile = new File(targetDir, "config.json");
+            if (!newConfigFile.exists() && !packageName.isEmpty())
+            {
+                File legacyConfigFile = new File("/storage/emulated/0/Android/data/" + packageName + "/files/ZaloXposed/config.json");
+                if (legacyConfigFile.exists() && legacyConfigFile.isFile())
+                {
+                    Files.copy(legacyConfigFile.toPath(), newConfigFile.toPath());
+                    Logger.i("Migrated legacy config from " + legacyConfigFile.getAbsolutePath() + " to " + newConfigFile.getAbsolutePath());
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.e("Failed to migrate legacy config: " + e.getMessage());
+        }
+        return targetDir.getAbsolutePath();
     }
 
     public static int GetDrawableResourceIdByName(String resourceName)
