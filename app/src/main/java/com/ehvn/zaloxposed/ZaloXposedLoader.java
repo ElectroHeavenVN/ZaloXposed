@@ -142,6 +142,15 @@ public class ZaloXposedLoader extends XposedModule
             {
                 Logger.e(t);
             }
+            new Handler(Looper.getMainLooper()).postDelayed(()->
+            {
+                try
+                {
+                    if (customSplash != null && customSplash.getParent() != null)
+                        ((ViewGroup)customSplash.getParent()).removeView(customSplash);
+                }
+                catch (Throwable ignored) { }
+            }, 2100);
             return result;
         });
     }
@@ -210,8 +219,12 @@ public class ZaloXposedLoader extends XposedModule
         }
         new Handler(Looper.getMainLooper()).postDelayed(()->
         {
-            if (customSplash != null && customSplash.getParent() != null)
-                ((ViewGroup)customSplash.getParent()).removeView(customSplash);
+            try
+            {
+                if (customSplash != null && customSplash.getParent() != null)
+                    ((ViewGroup)customSplash.getParent()).removeView(customSplash);
+            }
+            catch (Throwable ignored) { }
         }, 2000);
         Logger.d("ZaloXposed loaded in " + (System.currentTimeMillis() - startTime) + "ms");
     }
