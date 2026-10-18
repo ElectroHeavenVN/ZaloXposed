@@ -26,6 +26,7 @@ import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
+import org.luckypray.dexkit.query.matchers.base.OpCodesMatcher;
 import org.luckypray.dexkit.result.ClassData;
 import org.luckypray.dexkit.result.MethodData;
 
@@ -321,24 +322,25 @@ public class EnableChatHeadHook extends BaseHook
             Logger.i("Hooking [9]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .name("run")
-                .returnType("void")
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .paramCount(0)
-                .addUsingString("MAIN_CHAT_HEAD", StringMatchType.Equals)
-                .addUsingString("MiniChatController", StringMatchType.Equals)
-                .addUsingField(FieldMatcher.create().name("logo_zalo_chathead"))
-            ));
-        if (methods.isEmpty())
-            Logger.e("Target method not found 10");
-        for (MethodData m : methods)
-        {
-            Method method = m.getMethodInstance(classLoader);
-            Logger.i("Hooking [10]: " + method);
-            module.hook(method).intercept(spoofHook);
-        }
+        // 13(12 now) already included the same method
+        // methods = bridge.findMethod(FindMethod.create()
+        //     .matcher(MethodMatcher.create()
+        //         .name("run")
+        //         .returnType("void")
+        //         .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+        //         .paramCount(0)
+        //         .addUsingString("MAIN_CHAT_HEAD", StringMatchType.Equals)
+        //         .addUsingString("MiniChatController", StringMatchType.Equals)
+        //         .addUsingField(FieldMatcher.create().name("logo_zalo_chathead"))
+        //     ));
+        // if (methods.isEmpty())
+        //     Logger.e("Target method not found 10");
+        // for (MethodData m : methods)
+        // {
+        //     Method method = m.getMethodInstance(classLoader);
+        //     Logger.i("Hooking [10]: " + method);
+        //     module.hook(method).intercept(spoofHook);
+        // }
         List<ClassData> classes = bridge.findClass(FindClass.create()
             .matcher(ClassMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -357,7 +359,7 @@ public class EnableChatHeadHook extends BaseHook
                 )
             ));
         if (classes.isEmpty())
-            Logger.e("Target class not found 11");
+            Logger.e("Target class not found 10");
         Class<?> clazz = classes.get(0).getInstance(classLoader);
         methods = bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -365,11 +367,11 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
             ));
         if (methods.isEmpty())
-            Logger.e("Target method not found 11");
+            Logger.e("Target method not found 10");
         for (MethodData m : methods)
         {
             Method method = m.getMethodInstance(classLoader);
-            Logger.i("Hooking [11]: " + method);
+            Logger.i("Hooking [10]: " + method);
             module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
@@ -380,11 +382,11 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("SETTING_ENABLE_CHAT_HEAD_SERVER", StringMatchType.Equals)
             ));
         if (methods.isEmpty())
-            Logger.e("Target method not found 12");
+            Logger.e("Target method not found 11");
         for (MethodData m : methods)
         {
             Method method = m.getMethodInstance(classLoader);
-            Logger.i("Hooking [12]: " + method);
+            Logger.i("Hooking [11]: " + method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getEnableChatHead())
@@ -398,18 +400,21 @@ public class EnableChatHeadHook extends BaseHook
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
-                .addUsingString("ZaloBubbleActivity", StringMatchType.Contains)
-                .addUsingString("table_block_chat_info", StringMatchType.Contains)
-                .addUsingString("FIRST_TIME_OPEN_BRUSH_MODE", StringMatchType.Equals)
-                .addUsingString("FIRST_TIME_OPEN_SHAPE_MODE", StringMatchType.Equals)
                 .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
+                .addInvoke(MethodMatcher.create()
+                    .name("run")
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .returnType("void")
+                    .addUsingString("MiniChatController", StringMatchType.Equals)
+                    .addUsingString("ChatHeadManager", StringMatchType.Equals))
+                .addInvoke("Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z")
             ));
         if (methods.isEmpty())
-            Logger.e("Target method not found 13.1 (13.2 should be found)");
+            Logger.e("Target method not found 12");
         for (MethodData m : methods)
         {
             Method method = m.getMethodInstance(classLoader);
-            Logger.i("Hooking [13.1]: " + method);
+            Logger.i("Hooking [12]: " + method);
             module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
@@ -418,66 +423,35 @@ public class EnableChatHeadHook extends BaseHook
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
-                .addUsingString("conversation_common_info2", StringMatchType.Contains)
-                .addUsingString("SELECT * FROM", StringMatchType.Contains)
-                .addUsingString("PC_TRANSFER", StringMatchType.Equals)
-                .addUsingString("ZaloLauncherActivity", StringMatchType.Equals)
-                .addUsingString("DatabaseChatHelper", StringMatchType.Equals)
-                .addUsingString("event_alarm_manager_v1", StringMatchType.Equals)
-                .addUsingNumber(604800000)
+                .addInvoke("Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z")
                 .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
+                .addUsingField(FieldMatcher.create().declaredClass("com.zing.zalo.ui.WebViewMPActivity").name("Companion"))
             ));
         if (methods.isEmpty())
-            Logger.e("Target method not found 13.2 (13.1 should be found)");
+            Logger.e("Target method not found 13");
         for (MethodData m : methods)
         {
             Method method = m.getMethodInstance(classLoader);
-            Logger.i("Hooking [13.2]: " + method);
+            Logger.i("Hooking [13]: " + method);
             module.hook(method).intercept(spoofHook);
         }
         methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .name("run")
-                .returnType("void")
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .paramCount(0)
-                .addUsingString("timeout_next_qr", StringMatchType.Equals)
-                .addUsingString("stickerGifInfo", StringMatchType.Equals)
-                .addUsingString("ai_sticker_panel", StringMatchType.Equals)
-                .addUsingString("gallery_save_photo_when_post_feed", StringMatchType.Equals)
-                .addUsingString("social_timeline", StringMatchType.Equals)
-                .addUsingString("ownerId", StringMatchType.Equals)
-                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
-            ));
+        .matcher(MethodMatcher.create()
+            .name("run")
+            .returnType("void")
+            .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+            .paramCount(0) 
+            .addInvoke("Landroid/widget/Toast;->show()V")
+            .addInvoke("Landroid/view/LayoutInflater;->from(Landroid/content/Context;)Landroid/view/LayoutInflater;")
+            .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
+            .addUsingField(FieldMatcher.create().declaredClass("com.zing.zalo.comm.chathead.bubblechat.ui.ZaloBubbleActivity").name("Companion"))
+        ));
         if (methods.isEmpty())
-            Logger.e("Target method not found 14.1 (14.2 should be found)");
+            Logger.e("Target method not found 14");
         for (MethodData m : methods)
         {
             Method method = m.getMethodInstance(classLoader);
-            Logger.i("Hooking [14.1]: " + method);
-            module.hook(method).intercept(spoofHook);
-        }
-        methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .name("run")
-                .returnType("void")
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .paramCount(0)
-                .addUsingString("/zalo/theme/", StringMatchType.Equals)
-                .addUsingString("aQuery", StringMatchType.Equals)
-                .addUsingString("defaultLanguage", StringMatchType.Equals)
-                .addUsingString("name", StringMatchType.Equals)
-                .addUsingString("PROGRESS", StringMatchType.Equals)
-                .addUsingString("content", StringMatchType.Equals)
-                .addUsingString("Path not exist", StringMatchType.Equals)
-                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
-            ));
-        if (methods.isEmpty())
-            Logger.e("Target method not found 14.2 (14.1 should be found)");
-        for (MethodData m : methods)
-        {
-            Method method = m.getMethodInstance(classLoader);
-            Logger.i("Hooking [14.2]: " + method);
+            Logger.i("Hooking [14]: " + method);
             module.hook(method).intercept(spoofHook);
         }
         Method method = Class.forName("com.zing.zalo.ui.maintab.group.GroupTabView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);

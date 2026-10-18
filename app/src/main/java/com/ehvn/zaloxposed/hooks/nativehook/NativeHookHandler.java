@@ -15,8 +15,15 @@ public class NativeHookHandler implements InvocationHandler
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
     {
-        if ("intercept".equals(method.getName()) && args != null && args.length > 0)
+        String methodName = method.getName();
+        if ("intercept".equals(methodName) && args != null && args.length > 0)
             return dispatch(nativePtr, args[0]);
+        if ("hashCode".equals(methodName)) 
+            return System.identityHashCode(proxy);
+        if ("equals".equals(methodName)) 
+            return proxy == args[0];
+        if ("toString".equals(methodName)) 
+            return "NativeHookHandlerProxy";
         return null;
     }
 

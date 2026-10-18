@@ -27,9 +27,7 @@ public class ExtendedGroupRightMenuHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("java.util.ArrayList")
                 .paramCount(0)
-                .addUsingString("tip.csc.rightmenu.addmember", StringMatchType.Equals)
                 .addUsingString("E2EE_BETA", StringMatchType.Equals)
-                .addUsingString("tip.group.summary", StringMatchType.Equals)
                 .addUsingString("ENABLE_TOOL_STORAGE_RIGHT_MENU_${UserID}", StringMatchType.Contains)
             ));
         if (methods.isEmpty())
