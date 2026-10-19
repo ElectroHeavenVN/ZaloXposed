@@ -12,7 +12,7 @@ public final class Logger
 
     private static XposedModule module;
 
-    private static final String TAG = MorpheConstants.getModuleName();
+    private static final String TAG = "ZaloXposed";
 
     public static void Init(XposedModule xposedModule)
     {

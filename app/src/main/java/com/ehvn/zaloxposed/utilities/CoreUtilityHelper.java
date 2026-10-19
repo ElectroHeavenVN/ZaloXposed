@@ -1,5 +1,7 @@
 package com.ehvn.zaloxposed.utilities;
 
+import android.content.Context;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -52,6 +54,20 @@ public final class CoreUtilityHelper
             Logger.e(e);
         }
         return "";
+    }
+
+    public static Context GetAppContext()
+    {
+        try
+        {
+            loadCoreUtility();
+            return (Context)coreUtility.getDeclaredMethod("getAppContext").invoke(null);
+        }
+        catch (Exception e)
+        {
+            Logger.e(e);
+        }
+        return null;
     }
 
     private static void loadCoreUtility() throws ClassNotFoundException, IllegalAccessException

@@ -28,7 +28,11 @@ public class TestHook extends BaseHook
 {
     @Override
     public void hook() throws Throwable
-    {
+    { 
+        // new Handler(Looper.getMainLooper()).postDelayed(() ->
+        // {
+        // }, 30000);
+
         // module.hook(System.class.getDeclaredMethod("exit", int.class)).intercept(chain ->
         // {
             // Logger.i("Exit stack trace: " + Utils.GetStackTrace());
