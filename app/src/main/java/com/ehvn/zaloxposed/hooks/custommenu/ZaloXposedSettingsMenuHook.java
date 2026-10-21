@@ -312,14 +312,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Enable extended group settings menu" : "Kích hoạt menu cài đặt nhóm mở rộng");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGroupSettingMenu());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGroupSettingMenu);
-        listItemSetting = ListItemSettingHelper.CreateNew(context);
-        rootLayout.addView(listItemSetting);
-        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Show Chat Protection in group right menu" : "Hiển thị Bảo vệ trò chuyện trong menu nhóm");
-        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Replace the \"Disappear messages\" menu when activated" : "Thay thế menu \"Tin nhắn tự xoá\" khi được kích hoạt");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableChatProtection());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableChatProtection);
 
 
         separator = createSeparator(context);

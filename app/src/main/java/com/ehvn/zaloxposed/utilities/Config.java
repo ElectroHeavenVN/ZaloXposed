@@ -344,18 +344,6 @@ public final class Config
         set(KEY_ENABLE_SHARE_HIDDEN_STICKER_PACK, value);
     }
 
-    public static final String KEY_ENABLE_CHAT_PROTECTION = "enable_chat_protection";
-
-    public static boolean getEnableChatProtection()
-    {
-        return (boolean)get(KEY_ENABLE_CHAT_PROTECTION, false);
-    }
-
-    public static void setEnableChatProtection(boolean value)
-    {
-        set(KEY_ENABLE_CHAT_PROTECTION, value);
-    }
-
     public static final String KEY_ENABLE_EXTENDED_GROUP_SETTING_MENU = "enable_extended_group_setting_menu";
 
     public static boolean getEnableExtendedGroupSettingMenu()
