@@ -27,8 +27,14 @@ public class ExtendedGroupRightMenuHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("java.util.ArrayList")
                 .paramCount(0)
-                .addUsingString("E2EE_BETA", StringMatchType.Equals)
-                .addUsingString("ENABLE_TOOL_STORAGE_RIGHT_MENU_${UserID}", StringMatchType.Contains)
+                .addUsingString("tip.csc.rightmenu.addmember", StringMatchType.Equals)
+                .addUsingNumber(58) // change owner
+                .addUsingNumber(40) // disband
+                .addUsingNumber(74) // about communities
+                .addUsingNumber(75) // upgrade to community
+                // Wrong subtype (for user, not group), maybe adding back disappearing messages for user?
+                // .addUsingString("E2EE_BETA", StringMatchType.Equals)
+                // .addUsingString("ENABLE_TOOL_STORAGE_RIGHT_MENU_${UserID}", StringMatchType.Equals)
             ));
         if (methods.isEmpty())
         {
@@ -48,10 +54,9 @@ public class ExtendedGroupRightMenuHook extends BaseHook
                 Class<?> clazz = element.getClass();
                 Constructor<?> ctor = clazz.getConstructor(int.class, int.class, int.class, boolean.class, boolean.class);
                 // [id] [drawable icon] [title] [show line separator] [show blank separator]
-                result.add(ctor.newInstance(67, Utils.GetDrawableResourceIdByName("ic_trophy"), Utils.GetResourceIdByName("str_group_summary"), false, true));
+                result.add(ctor.newInstance(68, Utils.GetDrawableResourceIdByName("ic_countdown"), Utils.GetResourceIdByName("str_disappear_messages"), false, true));
                 result.add(ctor.newInstance(23, Utils.GetDrawableResourceIdByName("ic_group"), Utils.GetResourceIdByName("str_nickname_in_group"), true, false));
                 result.add(ctor.newInstance(75, Utils.GetDrawableResourceIdByName("ic_right_menu_chevron_double_up_line_24"), Utils.GetResourceIdByName("str_right_menu_upgrade_to_community"), true, false));
-                //result.add(ctor.newInstance(81, Utils.GetDrawableResourceIdByName("zds_ic_shield_line_24"), Utils.GetResourceIdByName("chat_protection_title"), true, false));
                 result.add(ctor.newInstance(40, Utils.GetDrawableResourceIdByName("ic_disband"), Utils.GetResourceIdByName("str_community_settings_delete_community"), true, false));
                 return result;
             });
