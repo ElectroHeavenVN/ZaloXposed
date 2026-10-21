@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.ehvn.zaloxposed.hooks.*;
 import com.ehvn.zaloxposed.hooks.functional.*;
@@ -40,7 +39,9 @@ public class ZaloXposedLoader extends XposedModule
 {
     private static DexKitBridge bridge;
     private static final ArrayList<BaseHook> hooks = new ArrayList<>();
-    private View customSplash = null;
+    @SuppressLint("StaticFieldLeak")
+    private static View customSplash = null;
+    private static boolean customSplashShown = false;
 
     static
     {
@@ -96,58 +97,66 @@ public class ZaloXposedLoader extends XposedModule
         hook(onCreate).setPriority(5).intercept(chain ->
         {
             Object result = chain.proceed();
-            Activity activity = (Activity)chain.getThisObject();
-            try
+            if (!customSplashShown)
             {
-                if (assetManager == null)
-                    return result;
-                var zaloRes = activity.getResources();
-                Resources modRes = new Resources(assetManager, zaloRes.getDisplayMetrics(), zaloRes.getConfiguration());
-                String modulePkg = "com.ehvn.zaloxposed";
-                int layoutId = modRes.getIdentifier("custom_splash", "layout", modulePkg);
-                if (layoutId == 0)
-                    return result;
-                Context modContext = new ContextThemeWrapper(activity, 0)
+                Activity activity = (Activity)chain.getThisObject();
+                try
                 {
-                    @Override
-                    public Resources getResources()
+                    if (assetManager == null)
+                        return result;
+                    var zaloRes = activity.getResources();
+                    Resources modRes = new Resources(assetManager, zaloRes.getDisplayMetrics(), zaloRes.getConfiguration());
+                    String modulePkg = "com.ehvn.zaloxposed";
+                    String name = "custom_splash_xposed";
+                    if (MorpheConstants.isPatchedByMorphe())
+                        name = "custom_splash_morphe";
+                    int layoutId = modRes.getIdentifier(name, "layout", modulePkg);
+                    if (layoutId == 0)
                     {
-                        return modRes;
+                        System.exit(1);
+                        return result;
                     }
+                    Context modContext = new ContextThemeWrapper(activity, 0)
+                    {
+                        @Override
+                        public Resources getResources()
+                        {
+                            return modRes;
+                        }
 
-                    @Override
-                    public AssetManager getAssets()
-                    {
-                        return modRes.getAssets();
-                    }
-                };
-                LayoutInflater inflater = activity.getLayoutInflater().cloneInContext(modContext);
-                customSplash = inflater.inflate(layoutId, null, false);
-                if (customSplash == null)
-                    return result;
-                var textViewId = modRes.getIdentifier("tv_custom", "id", modulePkg);
-                if (textViewId != 0)
-                {
-                    var textView = customSplash.findViewById(textViewId);
-                    if (textView instanceof TextView)
-                        ((TextView)textView).setText(MorpheConstants.getModuleName() + " by ElectroHeavenVN");
+                        @Override
+                        public AssetManager getAssets()
+                        {
+                            return modRes.getAssets();
+                        }
+                    };
+                    LayoutInflater inflater = activity.getLayoutInflater()
+                        .cloneInContext(modContext);
+                    customSplash = inflater.inflate(layoutId, null, false);
+                    if (customSplash == null)
+                        return result;
+                    View decor = activity.getWindow() != null ? activity.getWindow()
+                        .getDecorView() : null;
+                    if (!(decor instanceof ViewGroup))
+                        return result;
+                    var lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+                    ((ViewGroup)decor).addView(customSplash, lp);
                 }
-                View decor = activity.getWindow() != null ? activity.getWindow().getDecorView() : null;
-                if (!(decor instanceof ViewGroup))
-                    return result;
-                var lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                ((ViewGroup)decor).addView(customSplash, lp);
+                catch (Throwable t)
+                {
+                    Logger.e(t);
+                }
             }
-            catch (Throwable t)
-            {
-                Logger.e(t);
-            }
+            customSplashShown = true;
             new Handler(Looper.getMainLooper()).postDelayed(()->
             {
                 try
                 {
                     if (customSplash != null && customSplash.getParent() != null)
+                    {
                         ((ViewGroup)customSplash.getParent()).removeView(customSplash);
+                        customSplash = null;
+                    }
                 }
                 catch (Throwable ignored) { }
             }, 2100);
@@ -222,7 +231,10 @@ public class ZaloXposedLoader extends XposedModule
             try
             {
                 if (customSplash != null && customSplash.getParent() != null)
+                {
                     ((ViewGroup)customSplash.getParent()).removeView(customSplash);
+                    customSplash = null;
+                }
             }
             catch (Throwable ignored) { }
         }, 2000);

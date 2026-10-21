@@ -3,19 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ff0068ff"
+    android:background="#0068ff"
     android:visibility="visible"
     tools:visibility="visible">
 
     <ImageView
-        android:id="@+id/splash_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/splash_logo_centered_mod" />
+        android:src="@drawable/splash_logo_centered_xposed" />
 
     <TextView
-        android:id="@+id/tv_custom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_horizontal"
@@ -24,9 +22,10 @@
         android:shadowDx="0"
         android:shadowDy="1"
         android:shadowRadius="2"
-        android:text="ZaloXposed by ElectroHeavenVN"
+        android:text="Developed by ElectroHeavenVN"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        tools:ignore="HardcodedText" />
 
 </FrameLayout>
