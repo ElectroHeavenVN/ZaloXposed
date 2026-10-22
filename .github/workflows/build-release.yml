@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   build-release:
-    if: !github.event.release.prerelease
+    if: ${{ !github.event.release.prerelease }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
