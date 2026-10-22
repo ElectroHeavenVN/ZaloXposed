@@ -2,8 +2,6 @@ package io.github.electroheavenvn.zaloxposed.utilities;
 
 import android.util.Log;
 
-import io.github.electroheavenvn.zaloxposed.MorpheConstants;
-
 import io.github.libxposed.api.XposedModule;
 
 public final class Logger

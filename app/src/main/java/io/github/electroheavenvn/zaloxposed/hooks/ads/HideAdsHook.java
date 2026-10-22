@@ -1,7 +1,6 @@
 package io.github.electroheavenvn.zaloxposed.hooks.ads;
 
 import android.view.View;
-import android.view.ViewGroup;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
