@@ -58,7 +58,9 @@ jobs:
       - name: Build signed release APK
         run: |
           chmod +x ./gradlew
-          ./gradlew --no-daemon --stacktrace assembleRelease
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          VERSION_NAME="${TAG_NAME#v}"
+          ./gradlew --no-daemon --stacktrace assembleRelease -PversionName="$VERSION_NAME"
 
       - name: Collect APK
         shell: bash
