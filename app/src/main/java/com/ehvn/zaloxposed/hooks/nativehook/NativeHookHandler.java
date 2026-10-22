@@ -1,4 +1,4 @@
-package com.ehvn.zaloxposed.hooks.nativehook;
+package io.github.electroheavenvn.zaloxposed.hooks.nativehook;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

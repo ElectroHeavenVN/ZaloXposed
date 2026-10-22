@@ -1,11 +1,11 @@
-package com.ehvn.zaloxposed.hooks.morphe;
+package io.github.electroheavenvn.zaloxposed.hooks.morphe;
 
 import android.content.UriMatcher;
 import android.net.Uri;
 
-import com.ehvn.zaloxposed.Common;
-import com.ehvn.zaloxposed.hooks.BaseHook;
-import com.ehvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.Common;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 import java.lang.reflect.Field;
 

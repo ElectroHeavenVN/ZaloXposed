@@ -1,6 +1,6 @@
-package com.ehvn.zaloxposed.hooks.morphe;
+package io.github.electroheavenvn.zaloxposed.hooks.morphe;
 
-import com.ehvn.zaloxposed.hooks.nativehook.BaseNativeHook;
+import io.github.electroheavenvn.zaloxposed.hooks.nativehook.BaseNativeHook;
 
 public class SpoofPackageNameHook extends BaseNativeHook
 {

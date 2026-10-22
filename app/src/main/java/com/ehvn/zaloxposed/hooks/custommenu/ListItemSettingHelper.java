@@ -1,4 +1,4 @@
-package com.ehvn.zaloxposed.hooks.custommenu;
+package io.github.electroheavenvn.zaloxposed.hooks.custommenu;
 
 import android.content.Context;
 import android.view.View;

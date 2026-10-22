@@ -1,4 +1,4 @@
 -dontobfuscate
 -dontoptimize
--keep class com.ehvn.zaloxposed.** { *; }
+-keep class io.github.electroheavenvn.zaloxposed.** { *; }
 -keepattributes *Annotation*, Signature, InnerClasses

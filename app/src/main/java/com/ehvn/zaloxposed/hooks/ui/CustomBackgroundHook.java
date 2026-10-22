@@ -1,4 +1,4 @@
-package com.ehvn.zaloxposed.hooks.ui;
+package io.github.electroheavenvn.zaloxposed.hooks.ui;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.ehvn.zaloxposed.hooks.BaseHook;
-import com.ehvn.zaloxposed.utilities.Config;
-import com.ehvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;

@@ -1,6 +1,6 @@
-package com.ehvn.zaloxposed.utilities;
+package io.github.electroheavenvn.zaloxposed.utilities;
 
-import com.ehvn.zaloxposed.MorpheConstants;
+import io.github.electroheavenvn.zaloxposed.MorpheConstants;
 
 import android.annotation.SuppressLint;
 import android.content.pm.ApplicationInfo;

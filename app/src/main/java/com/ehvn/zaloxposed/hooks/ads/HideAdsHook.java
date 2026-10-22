@@ -1,12 +1,12 @@
-package com.ehvn.zaloxposed.hooks.ads;
+package io.github.electroheavenvn.zaloxposed.hooks.ads;
 
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.ehvn.zaloxposed.hooks.BaseHook;
-import com.ehvn.zaloxposed.utilities.Config;
-import com.ehvn.zaloxposed.utilities.Logger;
-import com.ehvn.zaloxposed.utilities.Utils;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;

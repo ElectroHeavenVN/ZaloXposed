@@ -1,4 +1,4 @@
-package com.ehvn.zaloxposed.hooks.permanent;
+package io.github.electroheavenvn.zaloxposed.hooks.permanent;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,8 +9,8 @@ import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 
-import com.ehvn.zaloxposed.hooks.BaseHook;
-import com.ehvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 import org.json.JSONObject;
 import org.luckypray.dexkit.query.FindClass;

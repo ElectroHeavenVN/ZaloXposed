@@ -1,8 +1,8 @@
-package com.ehvn.zaloxposed.hooks.functional;
+package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
-import com.ehvn.zaloxposed.hooks.BaseHook;
-import com.ehvn.zaloxposed.utilities.Config;
-import com.ehvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.FindMethod;

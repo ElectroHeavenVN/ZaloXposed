@@ -1,4 +1,4 @@
-package com.ehvn.zaloxposed;
+package io.github.electroheavenvn.zaloxposed;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -15,18 +15,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.ehvn.zaloxposed.hooks.*;
-import com.ehvn.zaloxposed.hooks.functional.*;
-import com.ehvn.zaloxposed.hooks.morphe.*;
-import com.ehvn.zaloxposed.hooks.privacy.*;
-import com.ehvn.zaloxposed.hooks.permanent.*;
-import com.ehvn.zaloxposed.hooks.tracking.*;
-import com.ehvn.zaloxposed.hooks.ui.*;
-import com.ehvn.zaloxposed.hooks.ads.*;
-import com.ehvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
-import com.ehvn.zaloxposed.utilities.Config;
-import com.ehvn.zaloxposed.utilities.Logger;
-import com.ehvn.zaloxposed.utilities.Utils;
+import io.github.electroheavenvn.zaloxposed.hooks.*;
+import io.github.electroheavenvn.zaloxposed.hooks.functional.*;
+import io.github.electroheavenvn.zaloxposed.hooks.morphe.*;
+import io.github.electroheavenvn.zaloxposed.hooks.privacy.*;
+import io.github.electroheavenvn.zaloxposed.hooks.permanent.*;
+import io.github.electroheavenvn.zaloxposed.hooks.tracking.*;
+import io.github.electroheavenvn.zaloxposed.hooks.ui.*;
+import io.github.electroheavenvn.zaloxposed.hooks.ads.*;
+import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.DexKitBridge;
 
@@ -105,7 +105,7 @@ public class ZaloXposedLoader extends XposedModule
                         return result;
                     var zaloRes = activity.getResources();
                     Resources modRes = new Resources(assetManager, zaloRes.getDisplayMetrics(), zaloRes.getConfiguration());
-                    String modulePkg = "com.ehvn.zaloxposed";
+                    String modulePkg = "io.github.electroheavenvn.zaloxposed";
                     String name = "custom_splash_xposed";
                     if (MorpheConstants.isPatchedByMorphe())
                         name = "custom_splash_morphe";

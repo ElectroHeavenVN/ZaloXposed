@@ -1,4 +1,4 @@
-package com.ehvn.zaloxposed.utilities;
+package io.github.electroheavenvn.zaloxposed.utilities;
 
 import android.content.Context;
 

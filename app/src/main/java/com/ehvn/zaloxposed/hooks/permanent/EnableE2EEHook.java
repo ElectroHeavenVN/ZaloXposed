@@ -1,7 +1,7 @@
-package com.ehvn.zaloxposed.hooks.permanent;
+package io.github.electroheavenvn.zaloxposed.hooks.permanent;
 
-import com.ehvn.zaloxposed.hooks.BaseHook;
-import com.ehvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;

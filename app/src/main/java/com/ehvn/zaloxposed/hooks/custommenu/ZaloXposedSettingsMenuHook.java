@@ -1,4 +1,4 @@
-package com.ehvn.zaloxposed.hooks.custommenu;
+package io.github.electroheavenvn.zaloxposed.hooks.custommenu;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -24,12 +24,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ehvn.zaloxposed.MorpheConstants;
-import com.ehvn.zaloxposed.hooks.BaseHook;
-import com.ehvn.zaloxposed.hooks.ResourceHook;
-import com.ehvn.zaloxposed.utilities.Config;
-import com.ehvn.zaloxposed.utilities.Logger;
-import com.ehvn.zaloxposed.utilities.Utils;
+import io.github.electroheavenvn.zaloxposed.MorpheConstants;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.ResourceHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;

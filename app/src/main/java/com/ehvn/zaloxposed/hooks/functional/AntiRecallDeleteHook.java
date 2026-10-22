@@ -1,10 +1,10 @@
-package com.ehvn.zaloxposed.hooks.functional;
+package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
-import com.ehvn.zaloxposed.MorpheConstants;
-import com.ehvn.zaloxposed.hooks.BaseHook;
-import com.ehvn.zaloxposed.utilities.Config;
-import com.ehvn.zaloxposed.utilities.CoreUtilityHelper;
-import com.ehvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.MorpheConstants;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.CoreUtilityHelper;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -1,8 +1,8 @@
-package com.ehvn.zaloxposed.utilities;
+package io.github.electroheavenvn.zaloxposed.utilities;
 
 import android.util.Log;
 
-import com.ehvn.zaloxposed.MorpheConstants;
+import io.github.electroheavenvn.zaloxposed.MorpheConstants;
 
 import io.github.libxposed.api.XposedModule;
 

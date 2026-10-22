@@ -9,7 +9,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace 'com.ehvn.zaloxposed'
+    namespace 'io.github.electroheavenvn.zaloxposed'
     compileSdk {
         version = release(37) {
             minorApiLevel = 1
@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.ehvn.zaloxposed"
+        applicationId "io.github.electroheavenvn.zaloxposed"
         minSdk 26
         targetSdk 37
         versionCode 1

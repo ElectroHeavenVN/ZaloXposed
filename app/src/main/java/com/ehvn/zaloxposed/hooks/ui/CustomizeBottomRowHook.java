@@ -1,8 +1,8 @@
-package com.ehvn.zaloxposed.hooks.ui;
+package io.github.electroheavenvn.zaloxposed.hooks.ui;
 
-import com.ehvn.zaloxposed.hooks.BaseHook;
-import com.ehvn.zaloxposed.utilities.Config;
-import com.ehvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 import org.json.JSONObject;
 import org.luckypray.dexkit.query.FindMethod;

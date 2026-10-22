@@ -1,4 +1,4 @@
-package com.ehvn.zaloxposed.hooks;
+package io.github.electroheavenvn.zaloxposed.hooks;
 
 import android.content.res.AssetManager;
 

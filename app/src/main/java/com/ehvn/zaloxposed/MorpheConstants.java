@@ -1,4 +1,4 @@
-package com.ehvn.zaloxposed;
+package io.github.electroheavenvn.zaloxposed;
 
 public final class MorpheConstants
 {

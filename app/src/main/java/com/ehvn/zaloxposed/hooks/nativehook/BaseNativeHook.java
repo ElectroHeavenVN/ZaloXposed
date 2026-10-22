@@ -1,6 +1,6 @@
-package com.ehvn.zaloxposed.hooks.nativehook;
+package io.github.electroheavenvn.zaloxposed.hooks.nativehook;
 
-import com.ehvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 
 import java.lang.reflect.Executable;
 

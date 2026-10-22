@@ -1,6 +1,6 @@
-package com.ehvn.zaloxposed.hooks;
+package io.github.electroheavenvn.zaloxposed.hooks;
 
-import com.ehvn.zaloxposed.utilities.*;
+import io.github.electroheavenvn.zaloxposed.utilities.*;
 
 import org.json.*;
 import org.luckypray.dexkit.query.*;

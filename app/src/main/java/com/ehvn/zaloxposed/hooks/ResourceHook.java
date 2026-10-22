@@ -1,4 +1,4 @@
-package com.ehvn.zaloxposed.hooks;
+package io.github.electroheavenvn.zaloxposed.hooks;
 
 import android.annotation.SuppressLint;
 import android.content.res.AssetManager;
@@ -6,8 +6,8 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
-import com.ehvn.zaloxposed.utilities.Logger;
-import com.ehvn.zaloxposed.utilities.Utils;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -405,7 +405,7 @@ public class ResourceHook extends BaseHook
                 Integer cached = sResolvedIds.get(customId);
                 if (cached == null)
                 {
-                    cached = modRes.getIdentifier(name, "drawable", "com.ehvn.zaloxposed");
+                    cached = modRes.getIdentifier(name, "drawable", "io.github.electroheavenvn.zaloxposed");
                     sResolvedIds.put(customId, cached);
                 }
                 modId = cached;
