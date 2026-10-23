@@ -83,3 +83,82 @@ jobs:
         with:
           tag_name: ${{ github.event.release.tag_name }}
           files: release/*.apk
+
+      - name: Sync README to Xposed Modules Repo
+        env:
+          GH_TOKEN: ${{ secrets.XPOSED_REPO_TOKEN }}
+          TARGET_REPO: Xposed-Modules-Repo/io.github.electroheavenvn.zaloxposed
+        run: |
+          set -euo pipefail
+
+          TARGET_BRANCH="main"
+          FILE_PATH="README.md"
+          API_URL="repos/${TARGET_REPO}/contents/${FILE_PATH}"
+
+          NEW_CONTENT_BASE64="$(base64 -w 0 "$FILE_PATH")"
+
+          EXISTING_PAYLOAD="$(gh api "$API_URL?ref=${TARGET_BRANCH}" 2>/dev/null || true)"
+          EXISTING_SHA=""
+          EXISTING_CONTENT_BASE64=""
+
+          if [ -n "$EXISTING_PAYLOAD" ]; then
+            EXISTING_SHA="$(printf '%s' "$EXISTING_PAYLOAD" | jq -r '.sha // empty')"
+            EXISTING_CONTENT_BASE64="$(printf '%s' "$EXISTING_PAYLOAD" | jq -r '.content // empty' | tr -d '\r\n')"
+          fi
+
+          if [ "$EXISTING_CONTENT_BASE64" = "$NEW_CONTENT_BASE64" ]; then
+            echo "README is identical. Skipping sync."
+            exit 0
+          fi
+
+          COMMIT_MSG="Sync README.md from ${GITHUB_REPOSITORY}@${{ github.event.release.tag_name }}"
+
+          if [ -n "$EXISTING_SHA" ]; then
+            gh api \
+              --method PUT \
+              "$API_URL" \
+              -f message="$COMMIT_MSG" \
+              -f content="$NEW_CONTENT_BASE64" \
+              -f branch="$TARGET_BRANCH" \
+              -f sha="$EXISTING_SHA"
+          else
+            gh api \
+              --method PUT \
+              "$API_URL" \
+              -f message="$COMMIT_MSG" \
+              -f content="$NEW_CONTENT_BASE64" \
+              -f branch="$TARGET_BRANCH"
+          fi
+
+      - name: Publish APK to Xposed Modules Repo
+        env:
+          GH_TOKEN: ${{ secrets.XPOSED_REPO_TOKEN }}
+          TARGET_REPO: Xposed-Modules-Repo/io.github.electroheavenvn.zaloxposed
+          SOURCE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          set -euo pipefail
+
+          VERSION_NAME="${SOURCE_TAG#v}"
+          VERSION_CODE="$(git rev-list --count HEAD)"
+          TARGET_TAG="${VERSION_CODE}-${VERSION_NAME}"
+
+          APK="$(find release -maxdepth 1 -type f -name '*.apk' | sort | head -n1)"
+          if [ -z "$APK" ]; then
+            echo "Release APK not found" >&2
+            exit 1
+          fi
+
+          NOTES_FILE="$RUNNER_TEMP/xposed-release-notes.md"
+          printf '%s' "$RELEASE_BODY" > "$NOTES_FILE"
+
+          gh release create "$TARGET_TAG" "$APK" \
+            --repo "$TARGET_REPO" \
+            --target main \
+            --title "$VERSION_NAME" \
+            --notes-file "$NOTES_FILE" \
+            --draft
+
+          gh release edit "$TARGET_TAG" \
+            --repo "$TARGET_REPO" \
+            --draft=false
