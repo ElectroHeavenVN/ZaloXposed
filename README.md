@@ -43,7 +43,7 @@ Settings are stored in the Zalo's app-specific external storage directory (Andro
 ## License
 This project is licensed under the AGPL-3.0 License. See the [LICENSE](https://github.com/ElectroHeavenVN/ZaloXposed/blob/main/LICENSE) file for details.
 
-The native library `libZaloXposedNative.so` source code remains private to avoid Zalo patching detection methods and to prevent potential abuse. The native library only used when [patching Zalo with Morphe](https://github.com/ElectroHeavenVN/morphe-patches).
+The native library `libZaloXposedNative.so` source code remains private to avoid Zalo patching detection methods and to prevent potential abuse. The native library is only used when [patching Zalo with Morphe](https://github.com/ElectroHeavenVN/morphe-patches).
 
 ## Credits
 
