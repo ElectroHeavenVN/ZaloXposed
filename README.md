@@ -1,7 +1,7 @@
 # ZaloXposed
 <!-- TODO: translate to Vietnamese -->
 
-An **experimental** Xposed module for [Zalo](https://play.google.com/store/apps/details?id=com.zing.zalo) that provides various functionalities and enhancements.
+An Xposed module for [Zalo](https://play.google.com/store/apps/details?id=com.zing.zalo) that provides various functionalities and enhancements.
 
 > [!NOTE]
 > **This project is in active development.** Some features may not work as expected. Please report any issues you encounter.
