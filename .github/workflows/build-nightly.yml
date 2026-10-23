@@ -6,6 +6,16 @@ on:
       - 'main'
     tags-ignore:
       - '**'
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'ZaloXposedNative/Output/**'
+      - 'build.gradle'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'settings.gradle'
+      - '.github/workflows/build-nightly.yml'
   workflow_dispatch:
 
 permissions:
