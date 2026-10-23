@@ -62,7 +62,10 @@ jobs:
         run: |
           chmod +x ./gradlew
           SHORT_SHA=$(git rev-parse --short HEAD)
-          ./gradlew --no-daemon --stacktrace assembleRelease -PversionName="nightly-${SHORT_SHA}"
+          VERSION_CODE=$(git rev-list --count HEAD)
+          ./gradlew --no-daemon --stacktrace assembleRelease \
+            -PversionCode="$VERSION_CODE" \
+            -PversionName="nightly-${SHORT_SHA}"
 
       - name: Collect APK
         shell: bash

@@ -60,7 +60,10 @@ jobs:
           chmod +x ./gradlew
           TAG_NAME="${{ github.event.release.tag_name }}"
           VERSION_NAME="${TAG_NAME#v}"
-          ./gradlew --no-daemon --stacktrace assembleRelease -PversionName="$VERSION_NAME"
+          VERSION_CODE=$(git rev-list --count HEAD)
+          ./gradlew --no-daemon --stacktrace assembleRelease \
+            -PversionCode="$VERSION_CODE" \
+            -PversionName="$VERSION_NAME"
 
       - name: Collect APK
         shell: bash

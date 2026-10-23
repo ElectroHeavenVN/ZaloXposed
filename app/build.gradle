@@ -9,16 +9,14 @@ if (keystorePropertiesFile.exists()) {
 }
 
 def getGitCommitCount = { ->
-    try {
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'rev-list', '--count', 'HEAD'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim().toInteger()
-    } catch (Exception ignored) {
-        return 1
+    def propertyValue = project.findProperty("versionCode")
+    if (propertyValue != null) {
+        return propertyValue.toString().toInteger()
     }
+
+    return providers.exec {
+        commandLine 'git', 'rev-list', '--count', 'HEAD'
+    }.standardOutput.asText.get().trim().toInteger()
 }
 
 android {
