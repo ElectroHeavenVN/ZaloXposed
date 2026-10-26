@@ -76,6 +76,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new SilentTypingHook());
         hooks.add(new BlockSendSeenHook());
         hooks.add(new ExtendedGroupRightMenuHook());
+        hooks.add(new UnlockZStyleHook());
 
         hooks.add(new TestHook());
 

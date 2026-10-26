@@ -316,7 +316,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         separator = createSeparator(context);
         rootLayout.addView(separator);
         headerTitle = createHeaderTitle(context);
-        headerTitle.setText("ZCloud");
+        headerTitle.setText(Utils.IsEnglish() ? "Paid features" : "Chức năng trả phí");
         rootLayout.addView(headerTitle);
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
@@ -326,6 +326,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Does not increase My Documents capacity" : "Không tăng dung lượng bộ nhớ My Documents");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getUnlockZCloud());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setUnlockZCloud);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Unlock ZStyle" : "Mở khoá ZStyle");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Does not unlock the profile customization feature exclusive to ZStyle" : "Không mở khóa tính năng tùy chỉnh hồ sơ dành riêng cho ZStyle");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getUnlockZStyle());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setUnlockZStyle);
 
 
         separator = createSeparator(context);

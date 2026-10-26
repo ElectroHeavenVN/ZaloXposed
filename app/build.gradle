@@ -32,7 +32,7 @@ android {
         minSdk 26
         targetSdk 37
         versionCode getGitCommitCount()
-        versionName project.findProperty("versionName") ?: "1.0"
+        versionName project.findProperty("versionName") ?: "dev"
     }
 
     signingConfigs {
