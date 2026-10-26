@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class ExtendedGroupRightMenuHook extends BaseHook
 {
@@ -38,9 +39,32 @@ public class ExtendedGroupRightMenuHook extends BaseHook
             ));
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 1");
             return;
         }
+        if (methods.size() > 1)
+            Logger.w("Multiple target method found");
+        List<MethodData> methods2 = bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .name(methods.get(0).getName())
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("java.util.ArrayList")
+                .paramCount(0)
+                .addUsingString("<this>", StringMatchType.Equals)
+                .addUsingString("<set-?>", StringMatchType.Equals)
+                .addUsingNumber(84)
+                .addUsingNumber(82)
+                .addUsingNumber(10)
+                .addUsingNumber(0)
+                .addUsingNumber(2)
+                .addInvoke("Landroid/text/SpannableString;-><init>(Ljava/lang/CharSequence;)V")
+            ));
+        if (methods2.isEmpty())
+        {
+            Logger.e("Target method not found 2");
+            return;
+        }
+        methods.addAll(methods2);
         for (MethodData methodData : methods)
         {
             Method method = methodData.getMethodInstance(classLoader);
