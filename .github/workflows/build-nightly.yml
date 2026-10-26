@@ -3,7 +3,7 @@ name: Build and publish APK
 on:
   push:
     branches:
-      - 'main'
+      - 'dev'
     tags-ignore:
       - '**'
     paths:
