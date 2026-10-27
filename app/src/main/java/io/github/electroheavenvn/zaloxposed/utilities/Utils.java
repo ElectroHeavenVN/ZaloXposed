@@ -1,7 +1,5 @@
 package io.github.electroheavenvn.zaloxposed.utilities;
 
-import io.github.electroheavenvn.zaloxposed.MorpheConstants;
-
 import android.annotation.SuppressLint;
 import android.content.pm.ApplicationInfo;
 import android.view.View;
@@ -21,8 +19,6 @@ import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.ClassData;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,13 +27,14 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.github.electroheavenvn.zaloxposed.MorpheConstants;
 
 public final class Utils
 {
@@ -56,6 +53,7 @@ public final class Utils
     private static final ArrayList<Class<?>> drawableResourceClasses = new ArrayList<>();
     private static final ArrayList<Class<?>> resourceClasses = new ArrayList<>();
     private static Method getIsVietnameseMethod;
+    private static int appVersionCode = 0;
 
     static
     {
@@ -70,35 +68,36 @@ public final class Utils
         PRIMITIVE_MAP.put(void.class, "V");
     }
 
-    public static void Init(ApplicationInfo appInfo, ClassLoader classLoader, DexKitBridge bridge) throws NoSuchMethodException, IOException
+    public static void Init(ApplicationInfo appInfo, ClassLoader classLoader, DexKitBridge bridge) throws Exception
     {
         sClassLoader = classLoader;
         packageName = appInfo.packageName;
         appDataDir = appInfo.dataDir;
+        Class<?> buildConfig = Class.forName("com.zing.zalo.BuildConfig", false, classLoader);
+        Field versionCodeField = buildConfig.getDeclaredField("VERSION_CODE");
+        appVersionCode = versionCodeField.getInt(null);
         File apkFile = new File(appInfo.sourceDir);
         dexContainer = DexFileFactory.loadDexContainer(apkFile, Opcodes.getDefault());
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .paramCount(0)
-                .returnType("int")
-                .addUsingString("PRIVACY_SETTINGS_SETTING_VIEW_DOB_%s", StringMatchType.Equals)
-                .addUsingString("%s", StringMatchType.Equals)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Config method not found");
+        cfgClass = DexKitCache.GetClass("Utils_Config", () -> bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
+                .addUsingString("VERIFY_ACCOUNT_WITH_IDENTIFY_CARD_%s", StringMatchType.Equals)
+                .addUsingString("HUAWEI_TOKEN_%s", StringMatchType.Equals)
+                .addMethod(MethodMatcher.create()
+                    .paramCount(0)
+                    .returnType("int")
+                    .addUsingString("PRIVACY_SETTINGS_SETTING_VIEW_DOB_%s", StringMatchType.Equals)
+                    .addUsingString("%s", StringMatchType.Equals))
+            )), classLoader);
+        if (cfgClass == null)
             return;
-        }
-        cfgClass = methods.get(0).getMethodInstance(sClassLoader).getDeclaringClass();
-        methods = bridge.findMethod(FindMethod.create()
+        getCurrentUserInfoMethod = DexKitCache.GetMethod("Utils_Config_GetCurrentUserInfo", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass(cfgClass)
                 .paramCount(0)
                 .returnType("java.lang.String")
                 .addUsingString("UserInfo", StringMatchType.Equals)
-            ));
-        getCurrentUserInfoMethod = methods.isEmpty() ? null : methods.get(0).getMethodInstance(sClassLoader);
-        methods = bridge.findMethod(FindMethod.create()
+            )), classLoader);
+            getIsVietnameseMethod = DexKitCache.GetMethod("Utils_Config_GetIsVietnamese", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .paramCount(0)
@@ -113,55 +112,32 @@ public final class Utils
                     .addUsingString("@en", StringMatchType.Equals)
                     .addUsingString("my", StringMatchType.Equals)
                 )
-            ));
-        getIsVietnameseMethod = methods.isEmpty() ? null : methods.get(0).getMethodInstance(sClassLoader);
-        if (getIsVietnameseMethod == null)
-            Logger.e("Cannot find language check method");
+            )), classLoader);
         LoadResourceClasses(bridge, classLoader);
     }
 
     private static void LoadResourceClasses(DexKitBridge bridge, ClassLoader classLoader)
     {
-        List<ClassData> classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("zds_ic_storage_line_24")));
-        for (ClassData classData : classes)
-        {
-            try
-            {
-                Class<?> clazz = classData.getInstance(classLoader);
-                drawableResourceClasses.add(clazz);
-            }
-            catch (Throwable ignored) { }
-        }
-        classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("bg_btn_postfeed")));
-        for (ClassData classData : classes)
-        {
-            try
-            {
-                Class<?> clazz = classData.getInstance(classLoader);
-                drawableResourceClasses.add(clazz);
-            }
-            catch (Throwable ignored) { }
-        }
-        classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("signup_gender_female")));
-        for (ClassData classData : classes)
-        {
-            try
-            {
-                Class<?> clazz = classData.getInstance(classLoader);
-                resourceClasses.add(clazz);
-            }
-            catch (Throwable ignored) { }
-        }
-        classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("str_group_invite_link")));
-        for (ClassData classData : classes)
-        {
-            try
-            {
-                Class<?> clazz = classData.getInstance(classLoader);
-                resourceClasses.add(clazz);
-            }
-            catch (Throwable ignored) { }
-        }
+        List<Class<?>> classes = DexKitCache.GetClasses("Utils_Config_DrawableResourceClasses_1", () -> bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
+                .addFieldForName("zds_ic_storage_line_24")
+            )), classLoader);
+        drawableResourceClasses.addAll(classes);
+        classes = DexKitCache.GetClasses("Utils_Config_DrawableResourceClasses_2", () -> bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
+                .addFieldForName("bg_btn_postfeed")
+            )), classLoader);
+        drawableResourceClasses.addAll(classes);
+        classes = DexKitCache.GetClasses("Utils_Config_ResourceClasses_1", () -> bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
+                .addFieldForName("signup_gender_female")
+            )), classLoader);
+        resourceClasses.addAll(classes);
+        classes = DexKitCache.GetClasses("Utils_Config_ResourceClasses_2", () -> bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
+                .addFieldForName("str_group_invite_link")
+            )), classLoader);
+        resourceClasses.addAll(classes);
     }
 
     public static Class<?> GetConfigClass()
@@ -201,10 +177,7 @@ public final class Utils
             if (userInfo != null)
                 return userInfo.toString();
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
         return "";
     }
 
@@ -531,24 +504,16 @@ public final class Utils
             return "";
         if (!targetDir.exists())
             targetDir.mkdirs();
-        // Migrate legacy config if exists
-        try
-        {
-            File newConfigFile = new File(targetDir, "config.json");
-            if (!newConfigFile.exists() && !packageName.isEmpty())
-            {
-                File legacyConfigFile = new File("/storage/emulated/0/Android/data/" + packageName + "/files/ZaloXposed/config.json");
-                if (legacyConfigFile.exists() && legacyConfigFile.isFile())
-                {
-                    Files.copy(legacyConfigFile.toPath(), newConfigFile.toPath());
-                    Logger.i("Migrated legacy config from " + legacyConfigFile.getAbsolutePath() + " to " + newConfigFile.getAbsolutePath());
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Logger.e("Failed to migrate legacy config: " + e.getMessage());
-        }
+        return targetDir.getAbsolutePath();
+    }
+
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static String GetZaloXposedDir(String appdataDir)
+    {
+        File targetDir = new File(appdataDir, "files/ZaloXposed");
+        if (!targetDir.exists())
+            targetDir.mkdirs();
         return targetDir.getAbsolutePath();
     }
 
@@ -577,10 +542,7 @@ public final class Utils
             }
             return field.getInt(null);
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
         return 0;
     }
 
@@ -609,10 +571,7 @@ public final class Utils
             }
             return field.getInt(null);
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
         return 0;
     }
 
@@ -645,12 +604,17 @@ public final class Utils
             return true;
         try
         {
-            return !((boolean)getIsVietnameseMethod.invoke(null));
+            Boolean bool = (Boolean)getIsVietnameseMethod.invoke(null);
+            if (bool == null)
+                return false;
+            return !bool;
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
         return true;
+    }
+
+    public static int GetAppVersionCode()
+    {
+        return appVersionCode;
     }
 }

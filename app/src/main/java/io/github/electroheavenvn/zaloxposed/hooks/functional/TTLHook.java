@@ -1,25 +1,25 @@
 package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 public class TTLHook extends BaseHook
 {
     @Override
     public void hook() throws Throwable
     {
-        List<MethodData> ttlMethods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("TTL_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass(ClassMatcher.create()
                     .addMethod(MethodMatcher.create()
@@ -42,15 +42,14 @@ public class TTLHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("long")
                 .paramTypes("java.lang.String")
-            ));
-        if (ttlMethods.isEmpty())
+            )), classLoader);
+        if (methods.isEmpty())
         {
             Logger.e("Target method not found");
             return;
         }
-        for (MethodData md : ttlMethods)
+        for (Method method : methods)
         {
-            Method method = md.getMethodInstance(classLoader);
             Logger.i("Hooking: " + method);
             module.hook(method).intercept(chain ->
             {

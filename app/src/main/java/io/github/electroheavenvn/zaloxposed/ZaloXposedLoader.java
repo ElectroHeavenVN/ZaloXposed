@@ -25,6 +25,7 @@ import io.github.electroheavenvn.zaloxposed.hooks.ui.*;
 import io.github.electroheavenvn.zaloxposed.hooks.ads.*;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
@@ -190,6 +191,11 @@ public class ZaloXposedLoader extends XposedModule
         }
         try
         {
+            DexKitCache.Load(param.getClassLoader(), param.getApplicationInfo().dataDir);
+        }
+        catch (Exception e) { Logger.e(e); }
+        try
+        {
             if (bridge == null)
                 bridge = DexKitBridge.create(param.getApplicationInfo().sourceDir);
             Utils.Init(param.getApplicationInfo(), param.getClassLoader(), bridge);
@@ -214,18 +220,19 @@ public class ZaloXposedLoader extends XposedModule
                     long startHookTime = System.currentTimeMillis();
                     hook.init(this, bridge, param, assetManager);
                     hook.hook();
-                    Logger.d(hook.getClass().getSimpleName() + " finished in " + (System.currentTimeMillis() - startHookTime) + "ms");
+                    long time = System.currentTimeMillis() - startHookTime;
+                    if (time > 10)
+                        Logger.d(hook.getClass().getSimpleName() + " finished in " + time + "ms");
                 }
-                catch (Throwable e)
-                {
-                    Logger.e(e);
-                }
+                catch (Throwable t) { Logger.e(t); }
             }
         }
-        catch (Exception e)
+        catch (Exception e) { Logger.e(e); }
+        try
         {
-            Logger.e(e);
+            DexKitCache.Save();
         }
+        catch (Exception e) { Logger.e(e); }
         new Handler(Looper.getMainLooper()).postDelayed(()->
         {
             try
@@ -239,5 +246,6 @@ public class ZaloXposedLoader extends XposedModule
             catch (Throwable ignored) { }
         }, 2000);
         Logger.d("ZaloXposed loaded in " + (System.currentTimeMillis() - startTime) + "ms");
+        DexKitCache.AutoSave();
     }
 }

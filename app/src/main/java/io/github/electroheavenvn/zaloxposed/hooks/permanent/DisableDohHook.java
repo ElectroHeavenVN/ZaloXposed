@@ -1,9 +1,9 @@
 package io.github.electroheavenvn.zaloxposed.hooks.permanent;
 
+import java.lang.reflect.Method;
+
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-
-import java.lang.reflect.Method;
 
 public class DisableDohHook extends BaseHook
 {

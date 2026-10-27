@@ -7,16 +7,12 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-
 import org.json.JSONObject;
 import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.ClassData;
 import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Field;
@@ -24,6 +20,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 public class AntiRecallDeleteChatRowHook extends BaseHook
 {
@@ -36,7 +36,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
     @Override
     public void hook() throws Throwable
     {
-        List<ClassData> msgClasses = bridge.findClass(FindClass.create()
+        Class<?> msgClass = DexKitCache.GetClass("AntiRecallDeleteChatRow_MsgClass", () -> bridge.findClass(FindClass.create()
             .matcher(ClassMatcher.create()
                 .addUsingString("gallery_save_video_detail", StringMatchType.Equals)
                 .addUsingString("video_download", StringMatchType.Equals)
@@ -52,52 +52,54 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
                 .addUsingString("globalMsgId", StringMatchType.Equals)
                 .addUsingString("mentions", StringMatchType.Equals)
                 .addUsingString("reference", StringMatchType.Equals)
-            ));
-        if (msgClasses.isEmpty())
-        {
-            Logger.e("Target class not found");
+            )), classLoader);
+        if (msgClass == null)
             return;
-        }
-        Class<?> msgClass = msgClasses.get(0).getInstance(classLoader);
         Class<?> chatRow = Class.forName("com.zing.zalo.ui.chat.chatrow.ChatRow", false, classLoader);
         for (Field field : chatRow.getDeclaredFields())
         {
-            if (field.getType().equals(msgClass)) 
-                msgFields.add(field); 
+            if (!field.getType().equals(msgClass))
+                continue;
+            field.setAccessible(true);
+            msgFields.add(field);
         }
         if (msgFields.isEmpty())
         {
             Logger.e("Target field not found");
             return;
         }
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .declaredClass(msgClass)
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .returnType("boolean")
-                .paramCount(0)
-                .addUsingNumber(36)
-            ));
-        if (methods.isEmpty())
+        msgTypeField = DexKitCache.GetFieldRaw("AntiRecallDeleteChatRow_MsgClass_MsgType", classLoader);
+        if (msgTypeField == null)
         {
-            Logger.e("Target method not found 1");
-            return;
+            List<MethodData> methodsData = bridge.findMethod(FindMethod.create()
+                .matcher(MethodMatcher.create()
+                    .declaredClass(msgClass)
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .returnType("boolean")
+                    .paramCount(0)
+                    .addUsingNumber(36)
+                ));
+            if (methodsData.isEmpty())
+            {
+                Logger.e("Target method not found");
+                return;
+            }
+            if (methodsData.size() > 1)
+                Logger.w("Multiple target methods found");
+            msgTypeField = methodsData.get(0).getUsingFields().get(0).getField().getFieldInstance(classLoader);
+            msgTypeField.setAccessible(true);
+            DexKitCache.SetFieldRaw("AntiRecallDeleteChatRow_MsgClass_MsgType", msgTypeField);
         }
-        msgTypeField = methods.get(0).getUsingFields().get(0).getField().getFieldInstance(classLoader); 
-        methods = bridge.findMethod(FindMethod.create()
+        Method drawMethod = DexKitCache.GetMethod("AntiRecallDeleteChatRow_ChatRow_DrawMsgBubble", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass(chatRow)
                 .modifiers(Modifier.PUBLIC)
                 .returnType("void")
                 .paramCount(5)
                 .paramTypes("android.graphics.Canvas", "int", "int", "int", "int")
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found 2");
+            )), classLoader);
+        if (drawMethod == null)
             return;
-        }
-        Method drawMethod = methods.get(0).getMethodInstance(classLoader);
         Logger.i("Hooking: " + drawMethod);
         module.hook(drawMethod).intercept(chain ->
         {

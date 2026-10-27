@@ -3,19 +3,19 @@ package io.github.electroheavenvn.zaloxposed.hooks.permanent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 @SuppressWarnings("unused")
 public class RestoreDevToolsMenuHook extends BaseHook
@@ -56,17 +56,16 @@ public class RestoreDevToolsMenuHook extends BaseHook
             Logger.e(t);
             return;
         }
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("RestoreDevToolsMenu_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(3)
                 .returnType("android.view.View")
                 .addUsingString("Missing required view with ID: ", StringMatchType.Equals)
                 .declaredClass(aboutViewClass)
-            ));
-        for (MethodData md : methods)
+            )), classLoader);
+        for (Method method : methods)
         {
-            Method method = md.getMethodInstance(classLoader);
             Logger.i("Hooking: " + method);
             module.hook(method).intercept(chain ->
             {
@@ -83,10 +82,10 @@ public class RestoreDevToolsMenuHook extends BaseHook
     private static void unlockTree(View view, View.OnClickListener listener)
     {
         if (view == null)
-            return;   
+            return;
         if (view instanceof ViewGroup)
         {
-            ViewGroup group = (ViewGroup) view;
+            ViewGroup group = (ViewGroup)view;
             for (int i = 0; i < group.getChildCount(); i++)
                 unlockTree(group.getChildAt(i), listener);
         }

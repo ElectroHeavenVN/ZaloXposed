@@ -50,10 +50,7 @@ public final class Config
             {
                 listener.onConfigChanged(key, oldValue, newValue);
             }
-            catch (Exception e)
-            {
-                Logger.e(e);
-            }
+            catch (Exception e) { Logger.e(e); }
         }
     }
 
@@ -79,10 +76,7 @@ public final class Config
             reader.close();
             config = new JSONObject(content.toString());
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
     }
 
     private static void save()
@@ -97,10 +91,7 @@ public final class Config
             fw.write(config.toString());
             fw.close();
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
     }
 
     public static String getConfigJsonString()
@@ -203,10 +194,7 @@ public final class Config
                 return config.getLong(key);
             return config.get(key);
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
         return defaultValue;
     }
 
@@ -219,10 +207,7 @@ public final class Config
             save();
             notifyConfigChanged(key, oldValue, value);
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
     }
 
     public static final String KEY_ENABLE_BACKGROUND = "enable_bg";

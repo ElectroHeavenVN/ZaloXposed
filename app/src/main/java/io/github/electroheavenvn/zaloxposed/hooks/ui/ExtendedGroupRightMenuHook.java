@@ -2,20 +2,19 @@ package io.github.electroheavenvn.zaloxposed.hooks.ui;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class ExtendedGroupRightMenuHook extends BaseHook
 {
@@ -23,7 +22,7 @@ public class ExtendedGroupRightMenuHook extends BaseHook
     @Override
     public void hook() throws Throwable
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("ExtendedGroupRightMenu_GetItems", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("java.util.ArrayList")
@@ -36,17 +35,17 @@ public class ExtendedGroupRightMenuHook extends BaseHook
                 // Wrong subtype (for user, not group), maybe adding back disappearing messages for user?
                 // .addUsingString("E2EE_BETA", StringMatchType.Equals)
                 // .addUsingString("ENABLE_TOOL_STORAGE_RIGHT_MENU_${UserID}", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found 1");
             return;
         }
         if (methods.size() > 1)
-            Logger.w("Multiple target method found");
-        List<MethodData> methods2 = bridge.findMethod(FindMethod.create()
+            Logger.w("Multiple target methods found 1");
+        List<Method> methods2 = DexKitCache.GetMethods("ExtendedGroupRightMenu_GetItemsNewVer", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
-                .name(methods.get(0).getName())
+                .name(methods.get(0).getName()) // override the same method in the parent class
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("java.util.ArrayList")
                 .paramCount(0)
@@ -58,16 +57,15 @@ public class ExtendedGroupRightMenuHook extends BaseHook
                 .addUsingNumber(0)
                 .addUsingNumber(2)
                 .addInvoke("Landroid/text/SpannableString;-><init>(Ljava/lang/CharSequence;)V")
-            ));
+            )), classLoader);
         if (methods2.isEmpty())
         {
             Logger.e("Target method not found 2");
             return;
         }
         methods.addAll(methods2);
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
             Logger.i("Hooking: " + method);
             module.hook(method).intercept(chain ->
             {

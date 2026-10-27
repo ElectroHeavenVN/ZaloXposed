@@ -3,7 +3,6 @@ package io.github.electroheavenvn.zaloxposed.hooks.functional;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -12,6 +11,7 @@ import java.util.List;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 public class UnlockZStyleHook extends BaseHook
@@ -21,7 +21,8 @@ public class UnlockZStyleHook extends BaseHook
     @Override
     public void hook() throws Throwable
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        zStylePackageIdField = DexKitCache.GetFieldRaw("UnlockZStyle_ZStylePackageId", classLoader);
+        List<Method> methods = DexKitCache.GetMethods("UnlockZStyle_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .paramCount(0)
@@ -30,15 +31,14 @@ public class UnlockZStyleHook extends BaseHook
                     .returnType("boolean")
                     .paramCount(0)
                     .addUsingString("subscribePackageIdConfig", StringMatchType.Equals))
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
             module.hook(method).intercept(chain ->
             {
                 Object result = chain.proceed();
@@ -64,6 +64,7 @@ public class UnlockZStyleHook extends BaseHook
                         {
                             zStylePackageIdField = field;
                             zStylePackageIdField.setInt(result, 1);
+                            DexKitCache.SetFieldRaw("UnlockZStyle_ZStylePackageId", zStylePackageIdField);
                             break;
                         }
                     }

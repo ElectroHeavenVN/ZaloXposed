@@ -1,24 +1,24 @@
 package io.github.electroheavenvn.zaloxposed.hooks.privacy;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 public class SilentTypingHook extends BaseHook
 {
     @Override
     public void hook() throws Throwable
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("SilentTyping_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("void")
@@ -29,15 +29,14 @@ public class SilentTypingHook extends BaseHook
                 .addUsingNumber(10000)
                 .addUsingNumber(3000)
                 .addUsingNumber(3600001)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
             Logger.i("Hooking: " + method);
             module.hook(method).intercept(chain ->
             {

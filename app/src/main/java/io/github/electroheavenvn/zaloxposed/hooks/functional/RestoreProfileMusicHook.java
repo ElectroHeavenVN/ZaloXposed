@@ -1,39 +1,38 @@
 package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 public class RestoreProfileMusicHook extends BaseHook
 {
     @Override
     public void hook() throws Throwable
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("RestoreProfileMusic_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("boolean")
                 .paramCount(4)
                 .paramTypes("java.lang.String", "boolean", "boolean", "boolean")
                 .addUsingString("get XML preference -> force to db, need clean code: %s", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
             Logger.i("Hooking: " + method);
             module.hook(method).intercept(chain ->
             {

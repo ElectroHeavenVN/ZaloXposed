@@ -1,68 +1,60 @@
 package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 public class UnlockZCloudHook extends BaseHook
 {
     @Override
     public void hook() throws Throwable
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        Method targetMethod = DexKitCache.GetMethod("UnlockZCloud_SMLZCloudSubscription_GetZCloudPlan", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("int")
                 .paramCount(0)
                 .addUsingString("ZALO_CLOUD_SUBSCRIPTION_PLAN_", StringMatchType.Equals)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found 1");
+            )), classLoader);
+        if (targetMethod == null)
             return;
-        }
-        Method method = methods.get(0).getMethodInstance(classLoader);
-        Class<?> clazz = method.getDeclaringClass();
-        Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain -> 
+        Class<?> smlZCloudSubscription = targetMethod.getDeclaringClass();
+        Logger.i("Hooking: " + targetMethod);
+        module.hook(targetMethod).intercept(chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
             return 0;
         });
-        methods = bridge.findMethod(FindMethod.create()
+        targetMethod = DexKitCache.GetMethod("UnlockZCloud_SMLZCloudSubscription_GetSubscriptionTime_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("int")
                 .paramCount(0)
                 .addUsingField(FieldMatcher.create().name("MILLISECONDS"))
                 .addInvoke(MethodMatcher.create().name("toDays"))
-                .declaredClass(clazz)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found 2");
+                .declaredClass(smlZCloudSubscription)
+            )), classLoader);
+        if (targetMethod == null)
             return;
-        }
-        method = methods.get(0).getMethodInstance(classLoader);
-        Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain -> 
+        Logger.i("Hooking: " + targetMethod);
+        module.hook(targetMethod).intercept(chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
             return Integer.MAX_VALUE;
         });
-        methods = bridge.findMethod(FindMethod.create()
+        targetMethod = DexKitCache.GetMethod("UnlockZCloud_SMLZCloudSubscription_GetSubscriptionTime_2", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("long")
@@ -70,107 +62,83 @@ public class UnlockZCloudHook extends BaseHook
                 .addUsingField(FieldMatcher.create().name("MILLISECONDS"))
                 .addUsingField(FieldMatcher.create().name("DAYS"))
                 .addInvoke(MethodMatcher.create().name("toDays"))
-                .declaredClass(clazz)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found 3");
+                .declaredClass(smlZCloudSubscription)
+            )), classLoader);
+        if (targetMethod == null)
             return;
-        }
-        method = methods.get(0).getMethodInstance(classLoader);
-        Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain -> 
+        Logger.i("Hooking: " + targetMethod);
+        module.hook(targetMethod).intercept(chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
-            return Integer.MAX_VALUE;
+            return Long.MAX_VALUE;
         });
-        methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .returnType("boolean")
-                .paramCount(0)
-                .addUsingNumber(-1)
-                .declaredClass(clazz)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found 4");
-            return;
-        }
-        MethodData methodData = methods.get(0);
-        method = methodData.getMethodInstance(classLoader);
-        Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain -> 
-        {
-            if (!Config.getUnlockZCloud())
-                return chain.proceed();
-            return true;
-        });
-        methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .returnType("boolean")
-                .paramCount(0)
-                .addCaller(methodData.getDescriptor())
-                .declaredClass(clazz)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found 5");
-            return;
-        }
-        method = methods.get(0).getMethodInstance(classLoader);
-        Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain -> 
-        {
-            if (!Config.getUnlockZCloud())
-                return chain.proceed();
-            return true;
-        });
-        methods = bridge.findMethod(FindMethod.create()
+        targetMethod = DexKitCache.GetMethod("UnlockZCloud_SMLZCloudSubscription_CheckPlanValid_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("void")
                 .paramCount(3)
                 .paramTypes(null, "int", "int")
                 .addUsingString("ZALO_CLOUD_SUBSCRIPTION_PLAN_", StringMatchType.Equals)
-                .declaredClass(clazz)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found 6");
+                .declaredClass(smlZCloudSubscription)
+            )), classLoader);
+        if (targetMethod == null)
             return;
-        }
-        method = methods.get(0).getMethodInstance(classLoader);
-        Logger.i("Hooking: " + method);
-        module.hook(method).intercept(chain -> 
+        Logger.i("Hooking: " + targetMethod);
+        module.hook(targetMethod).intercept(chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
-            return 0;
+            return null;
         });
-        methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("UnlockZCloud_SMLZCloudSubscription_GetIsSubscriptionWorking", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("boolean")
+                .paramCount(0)
+                .declaredClass(smlZCloudSubscription)
+            )), classLoader);
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 1");
+            return;
+        }
+        for (Method method : methods)
+        {
+            Logger.i("Hooking: " + method);
+            module.hook(method).intercept(chain ->
+            {
+                if (!Config.getUnlockZCloud())
+                    return chain.proceed();
+                return true;
+            });
+        }
+        methods = DexKitCache.GetMethods("UnlockZCloud_SMLZCloudSubscription_CheckPlanValid_2", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("java.lang.Object")
                 .paramCount(1)
-                .declaredClass(clazz)
-            ));
+                .declaredClass(smlZCloudSubscription)
+                .not(MethodMatcher.create()
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .returnType("java.lang.Object")
+                    .paramCount(1)
+                    .declaredClass(smlZCloudSubscription)
+                    .addUsingString("createFamily", StringMatchType.Contains))
+            )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found 7");
+            Logger.e("Target method not found 2");
             return;
         }
-        for (MethodData methodData2 : methods)
+        for (Method method : methods)
         {
-            Method method2 = methodData2.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + method2);
-            module.hook(method2).intercept(chain ->
+            Logger.i("Hooking: " + method);
+            module.hook(method).intercept(chain ->
             {
                 if (!Config.getUnlockZCloud())
                     return chain.proceed();
-                return Integer.MAX_VALUE;
+                return Boolean.TRUE;
             });
         }
     }

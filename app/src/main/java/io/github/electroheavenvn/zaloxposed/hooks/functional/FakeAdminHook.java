@@ -1,39 +1,41 @@
 package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.CoreUtilityHelper;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-import io.github.electroheavenvn.zaloxposed.utilities.Utils;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.luckypray.dexkit.query.FindMethod;
+import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.enums.StringMatchType;
-import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
+import org.luckypray.dexkit.query.matchers.ClassMatcher;
 
 import java.lang.reflect.Method;
 import java.util.List;
+
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.CoreUtilityHelper;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 public class FakeAdminHook extends BaseHook
 {
     @Override
     public void hook() throws Throwable
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .paramCount(2)
-                .paramTypes("org.json.JSONObject", "java.lang.String")
+        Class<?> groupDAO = DexKitCache.GetClass("FakeAdmin_GroupDAO", () -> bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
                 .addUsingString("isNoised", StringMatchType.Equals)
                 .addUsingString("data", StringMatchType.Equals)
-                .addUsingString("getGroupListFromServer decrypt data fail.", StringMatchType.Equals)));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found");
+                .addUsingString("getGroupListFromServer decrypt data fail.", StringMatchType.Equals)
+                .addUsingString("timestampGetGroupList", StringMatchType.Equals)
+                .addUsingString("groupMemberInfo", StringMatchType.Equals)
+                .addUsingString("group_", StringMatchType.Equals)
+                .addUsingString("group_list_sync_failed", StringMatchType.Equals)
+                .addUsingString("adminIds", StringMatchType.Equals)
+                .addUsingString("memberIds", StringMatchType.Equals)
+                .addUsingString("currentMems", StringMatchType.Equals)
+            )), classLoader);
+        if (groupDAO == null)
             return;
-        }
-        Class<?> clazz = methods.get(0).getMethodInstance(classLoader).getDeclaringClass();
         Method method = JSONObject.class.getMethod("optJSONArray", String.class);
         Logger.i("Hooking: " + method);
         module.hook(method).intercept(chain ->
@@ -50,7 +52,7 @@ public class FakeAdminHook extends BaseHook
             for (StackTraceElement element : stackTrace)
             {
                 String className = element.getClassName();
-                if (className.equals(clazz.getName()))
+                if (className.equals(groupDAO.getName()))
                 {
                     calledFromClazz = true;
                     break;

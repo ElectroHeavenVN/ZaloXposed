@@ -2,44 +2,55 @@ package io.github.electroheavenvn.zaloxposed.hooks.ui;
 
 import android.util.SparseArray;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+
 public class ExtendedGridMenuHook extends BaseHook
 {
     @Override
     public void hook() throws Throwable
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("ExtendedGridMenu_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(8)
                 .addUsingString("CHAT_TYPO_FEATURE_ENABLE", StringMatchType.Equals)
-            ));
-        Class<?> clazz = methods.get(0).getMethodInstance(classLoader).getDeclaringClass();
-        List<MethodData> sparseArrayMethods = bridge.findMethod(FindMethod.create()
+            )), classLoader);
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 1");
+            return;
+        }
+        if (methods.size() > 1)
+            Logger.w("Multiple target methods found 1");
+        Class<?> clazz = methods.get(0).getDeclaringClass();
+        List<Method> sparseArrayMethods = DexKitCache.GetMethods("ExtendedGridMenu_2", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
                 .returnType("android.util.SparseArray")
                 .declaredClass(clazz)
-            ));
-        for (MethodData md : methods)
+            )), classLoader);
+        if (sparseArrayMethods.isEmpty())
         {
-            Method method = md.getMethodInstance(classLoader);
+            Logger.e("Target method not found 2");
+            return;
+        }
+        for (Method method : methods)
+        {
             Logger.i("Hooking: " + method);
             module.hook(method).intercept(chain ->
             {
@@ -49,10 +60,9 @@ public class ExtendedGridMenuHook extends BaseHook
                 if (result != null)
                     return result;
                 ArrayList<SparseArray<?>> arrays = new ArrayList<>();
-                for (MethodData sparseArr : sparseArrayMethods)
+                for (Method sparseArr : sparseArrayMethods)
                 {
-                    Method spareArrM = sparseArr.getMethodInstance(classLoader);
-                    SparseArray<?> arr = (SparseArray<?>)spareArrM.invoke(chain.getThisObject());
+                    SparseArray<?> arr = (SparseArray<?>)sparseArr.invoke(chain.getThisObject());
                     arrays.add(arr);
                 }
                 int num = (int) chain.getArg(0);
@@ -99,8 +109,8 @@ public class ExtendedGridMenuHook extends BaseHook
                 for (int i = 1; i <= 50; i++)
                     sectionMore.put(i);
                 boolean isChatDirect = key.equals("chat_1_1");
-                boolean isChatGroup = key.equals("chat_group");
-                boolean isChatCommunityGroup = key.equals("community");
+                // boolean isChatGroup = key.equals("chat_group");
+                // boolean isChatCommunityGroup = key.equals("community");
                 sectionMore.put(101);
                 if (isChatDirect)
                     sectionMore.put(102);

@@ -9,6 +9,7 @@ import android.widget.ImageView;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 import org.luckypray.dexkit.query.FindMethod;
@@ -32,7 +33,7 @@ public class CustomBackgroundHook extends BaseHook
     public void hook() throws Throwable
     {
         Class<?> msgViewCls = Class.forName("com.zing.zalo.ui.maintab.MainTabView", false, classLoader);
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("CustomBackground_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass(msgViewCls)
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -40,17 +41,16 @@ public class CustomBackgroundHook extends BaseHook
                 .paramCount(3)
                 .paramTypes("android.view.LayoutInflater", "android.view.ViewGroup", "android.os.Bundle")
                 .addUsingString("onCreateView", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found");
             return;
         }
-        for (MethodData method : methods)
+        for (Method method : methods)
         {
-            Method m = method.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + m);
-            module.hook(m).intercept(chain ->
+            Logger.i("Hooking: " + method);
+            module.hook(method).intercept(chain ->
             {
                 Object result = chain.proceed();
                 if (!Config.getEnableBackground())

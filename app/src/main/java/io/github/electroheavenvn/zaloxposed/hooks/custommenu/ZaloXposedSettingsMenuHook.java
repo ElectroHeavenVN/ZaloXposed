@@ -24,17 +24,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import io.github.electroheavenvn.zaloxposed.MorpheConstants;
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.hooks.ResourceHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-import io.github.electroheavenvn.zaloxposed.utilities.Utils;
-
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -43,6 +35,14 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import io.github.electroheavenvn.zaloxposed.MorpheConstants;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.ResourceHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 @SuppressLint("SetTextI18n")
 public class ZaloXposedSettingsMenuHook extends BaseHook
@@ -129,10 +129,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                     long ttlValue = Long.parseLong(textView.getText().toString());
                     Config.setTTL(ttlValue);
                 }
-                catch (Exception e)
-                {
-                    Logger.e(e);
-                }
+                catch (Exception e) { Logger.e(e); }
                 textView.clearFocus();
                 return true;
             }
@@ -149,10 +146,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                     Config.setTTL(ttlValue);
                     hideKeyboard(editText);
                 }
-                catch (Exception e)
-                {
-                    Logger.e(e);
-                }
+                catch (Exception e) { Logger.e(e); }
             }
         });
         rootLayout.setOnClickListener(v -> input.clearFocus());
@@ -395,10 +389,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             {
                 ListItemSettingHelper.SetStateSetting(listItemSettingFakeRole, newFakeRole);
             }
-            catch (Exception e)
-            {
-                Logger.e(e);
-            }
+            catch (Exception e) { Logger.e(e); }
         });
 
     
@@ -481,12 +472,27 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetOnClickListener(listItemSetting, v -> openFilePickerForImport(context));
 
 
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        int pad16 = dp(context, 16);
+
+        Object reloadCacheButton = ZButtonHelper.CreateNew(context);
+        rootLayout.addView((View)reloadCacheButton);
+        ZButtonHelper.SetText(reloadCacheButton, Utils.IsEnglish() ? "Force reload DexKit cache" : "Buộc tải lại bộ nhớ đệm DexKit");
+        ZButtonHelper.SetOnClickListener(reloadCacheButton, v ->
+        {
+            DexKitCache.ClearCache();
+            restartApp(context);
+        });
+        LinearLayout.LayoutParams reloadCacheLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        reloadCacheLp.setMargins(pad16, dp(context, 8), pad16, 0);
+        ((View)reloadCacheButton).setLayoutParams(reloadCacheLp);
+
         Object restartButton = ZButtonHelper.CreateNew(context);
         rootLayout.addView((View)restartButton);
         ZButtonHelper.SetText(restartButton, Utils.IsEnglish() ? "Restart app" : "Khởi động lại ứng dụng");
         ZButtonHelper.SetOnClickListener(restartButton, v -> restartApp(context));
         LinearLayout.LayoutParams restartLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        int pad16 = dp(context, 16);
         restartLp.setMargins(pad16, pad16, pad16, 0);
         ((View)restartButton).setLayoutParams(restartLp);
 
@@ -508,7 +514,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         hookTabMeView();
         hookSettingPrivateView();
         hookActivityForFilePicker();
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("ZaloXposedSettingsMenu_TabMeView_EnableFullZInstant", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.maintab.me.TabMeView")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -516,15 +522,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .addUsingString("features@tabme@fullzins@enable", StringMatchType.Equals)
                 .addUsingNumber(0)
                 .addUsingNumber(1)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found 5");
+            Logger.e("Target method not found 6");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
             Logger.i("Hooking: " + method);
             module.hook(method).setPriority(10).intercept(chain -> false);
         }
@@ -590,10 +595,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                     Toast.makeText(context, Utils.IsEnglish() ? "Export failed (permission denied)!" : "Xuất cấu hình thất bại (không có quyền bộ nhớ)!", Toast.LENGTH_SHORT).show();
             });
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
     }
 
     private void openFilePickerForImport(Context context)
@@ -639,10 +641,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                     ((Activity)context).startActivityForResult(intent, REQUEST_CODE_IMPORT_CONFIG);
                 }
             }
-            catch (Exception ex)
-            {
-                Logger.e(ex);
-            }
+            catch (Exception ex) { Logger.e(ex); }
         }
     }
 
@@ -655,22 +654,17 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             module.hook(onActivityResultMethod).setPriority(10).intercept(chain ->
             {
                 int requestCode = (int)chain.getArg(0);
-                if (requestCode == REQUEST_CODE_IMPORT_CONFIG)
-                {
-                    int resultCode = (int)chain.getArg(1);
-                    Intent data = (Intent)chain.getArg(2);
-                    Activity activity = (Activity)chain.getThisObject();
-                    if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null)
-                        handleImportUri(activity, data.getData());
-                    return null;
-                }
-                return chain.proceed();
+                if (requestCode != REQUEST_CODE_IMPORT_CONFIG)
+                    return chain.proceed();
+                int resultCode = (int)chain.getArg(1);
+                Intent data = (Intent)chain.getArg(2);
+                Activity activity = (Activity)chain.getThisObject();
+                if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null)
+                    handleImportUri(activity, data.getData());
+                return null;
             });
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
     }
 
     private void handleImportUri(Context context, Uri uri)
@@ -715,17 +709,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 ((Activity)context).finish();
             new Handler(Looper.getMainLooper()).postDelayed(() -> Runtime.getRuntime().exit(0), 0);
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
     }
 
     @SuppressLint("PrivateApi")
     @SuppressWarnings("unchecked")
     private void hookTabMeView() throws Exception
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("ZaloXposedSettingsMenu_TabMeView_GetItemList", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.maintab.me.TabMeView")
                 .modifiers(Modifier.STATIC)
@@ -734,48 +725,46 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .addUsingString("tab_me_tool_storage", StringMatchType.Equals)
                 .addUsingString("tab_me_account_and_security", StringMatchType.Equals)
                 .addUsingString("tab_me_business_tools", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found 1");
             return;
         }
-        Method method = methods.get(0).getMethodInstance(classLoader);
-        Logger.i("Hooking: " + method);
-        module.hook(method).setPriority(10).intercept(chain ->
+        for (Method method : methods)
         {
-            Object result = chain.proceed();
-            if (!(result instanceof ArrayList))
-                return result;
-            try
+            Logger.i("Hooking: " + method);
+            module.hook(method).setPriority(10).intercept(chain ->
             {
-                String moduleName = MorpheConstants.getModuleName();
-                Object separatorItem = null;
-                ArrayList<Object> items = (ArrayList<Object>)result;
-                for (int i = items.size() - 1; i >= 0; i--)
+                Object result = chain.proceed();
+                if (!(result instanceof ArrayList))
+                    return result;
+                try
                 {
-                    Object item = items.get(i);
-                    if (!item.toString().contains("SettingData(id="))
+                    String moduleName = MorpheConstants.getModuleName();
+                    Object separatorItem = null;
+                    ArrayList<Object> items = (ArrayList<Object>)result;
+                    for (int i = items.size() - 1; i >= 0; i--)
                     {
+                        Object item = items.get(i);
+                        if (item.toString().contains("SettingData(id="))
+                            continue;
                         separatorItem = Utils.Clone(item);
                         break;
                     }
+                    Object customItem = TabMeSettingItemHelper.CreateNew(SettingItemID.PRIVACY, CUSTOM_DRAWABLE_ID, moduleName);
+                    TabMeSettingItemHelper.SetDescription(customItem, Utils.IsEnglish() ? moduleName + " settings" : "Cài đặt " + moduleName);
+                    TabMeSettingItemHelper.SetTracking(customItem, CUSTOM_ITEM_MARKER);
+                    items.add(2, customItem);
+                    items.add(3, separatorItem);
+                    return items;
                 }
-                Object customItem = TabMeSettingItemHelper.CreateNew(SettingItemID.PRIVACY, CUSTOM_DRAWABLE_ID, moduleName);
-                TabMeSettingItemHelper.SetDescription(customItem, Utils.IsEnglish() ? moduleName + " settings" : "Cài đặt " + moduleName);
-                TabMeSettingItemHelper.SetTracking(customItem, CUSTOM_ITEM_MARKER);
-                items.add(2, customItem);
-                items.add(3, separatorItem);
-                return items;
-            }
-            catch (Throwable t)
-            {
-                Logger.e(t);
-            }
-            return result;
-        });
+                catch (Throwable t) { Logger.e(t); }
+                return result;
+            });
+        }
 
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("ZaloXposedSettingsMenu_OnClickSettingData", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC)
                 .paramCount(1)
@@ -788,35 +777,35 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .addUsingString("features@business_account@item_promotion@open_action@action_name", StringMatchType.Equals)
                 .addUsingString("tab_me_open_item", StringMatchType.Equals)
                 // .addUsingString("https://h5.zdn.vn/zapps/220259427665569271/", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target onClick method not found");
+            Logger.e("Target method not found 2");
             return;
         }
-        method = methods.get(0).getMethodInstance(classLoader);
-        Logger.i("Hooking: " + method);
-        module.hook(method).setPriority(10).intercept(chain ->
+        for (Method method : methods)
         {
-            Object tabMeItem = chain.getArg(0);
-            if (tabMeItem == null)
-                return chain.proceed();
-            try
-            { 
-                isOpenZaloXposedSettings1 = isOpenZaloXposedSettings2 = CUSTOM_ITEM_MARKER.equals(TabMeSettingItemHelper.GetTracking(tabMeItem));
-            }
-            catch (Throwable t)
+            Logger.i("Hooking: " + method);
+            module.hook(method).setPriority(10).intercept(chain ->
             {
-                Logger.e(t);
-            }
-            return chain.proceed();
-        });
+                Object tabMeItem = chain.getArg(0);
+                if (tabMeItem == null)
+                    return chain.proceed();
+                try
+                {
+                    isOpenZaloXposedSettings1 = isOpenZaloXposedSettings2 = CUSTOM_ITEM_MARKER.equals(TabMeSettingItemHelper.GetTracking(tabMeItem));
+                }
+                catch (Throwable t) { Logger.e(t); }
+                return chain.proceed();
+            });
+        }
     }
 
     private void hookSettingPrivateView() throws Exception
     {
         headerTextViewClass = Class.forName("com.zing.zalo.ui.widget.RobotoTextView", false, classLoader);
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+
+        List<Method> methods = DexKitCache.GetMethods("ZaloXposedSettingsMenu_SettingPrivateView_Inflate", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.settings.SettingPrivateV2View")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -824,24 +813,29 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .paramCount(3)
                 .paramTypes("android.view.LayoutInflater", "android.widget.LinearLayout", "android.os.Bundle")
                 .addUsingString("inflater", StringMatchType.Equals)
-                .addUsingString("EXTRA_CURRENT_SEEN_SETTING", StringMatchType.Equals)));
+                .addUsingString("EXTRA_CURRENT_SEEN_SETTING", StringMatchType.Equals)
+            )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found 2");
+            Logger.e("Target method not found 3");
             return;
         }
-        Method method = methods.get(0).getMethodInstance(classLoader);
-        Logger.i("Hooking: " + method);
-        module.hook(method).setPriority(10).intercept(chain ->
+        if (methods.size() > 1)
+            Logger.w("Multiple target methods found 3");
+        for (Method method : methods)
         {
-            Object result = chain.proceed();
-            if (isOpenZaloXposedSettings1 || isOpenZaloXposedSettings2)
-                rootLayout = (LinearLayout)chain.getArg(1);
-            else 
-                rootLayout = null;
-            return result;
-        });
-        methods = bridge.findMethod(FindMethod.create()
+            Logger.i("Hooking: " + method);
+            module.hook(method).setPriority(10).intercept(chain ->
+            {
+                Object result = chain.proceed();
+                if (isOpenZaloXposedSettings1 || isOpenZaloXposedSettings2)
+                    rootLayout = (LinearLayout)chain.getArg(1);
+                else
+                    rootLayout = null;
+                return result;
+            });
+        }
+        methods = DexKitCache.GetMethods("ZaloXposedSettingsMenu_SettingPrivateV2View_InitUI", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.settings.SettingPrivateV2View")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -853,36 +847,37 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .addUsingString("accept_stranger_call", StringMatchType.Equals)
                 .addUsingString("allow_auto_friend_click", StringMatchType.Equals)
                 .addUsingString("SETTING_PRIVACY_APP", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found 3");
+            Logger.e("Target method not found 4");
             return;
         }
-        method = methods.get(0).getMethodInstance(classLoader);
-        Logger.i("Hooking: " + method);
-        module.hook(method).setPriority(10).intercept(chain ->
+        if (methods.size() > 1)
+            Logger.w("Multiple target methods found 4");
+        for (Method method : methods)
         {
-            Object result = chain.proceed();
-            if (!isOpenZaloXposedSettings1)
-                return result;
-            if (rootLayout == null)
-                return result;
-            isOpenZaloXposedSettings1 = false; 
-            templateHeader = null;
-            templateSeparator = null;
-            try
+            Logger.i("Hooking: " + method);
+            module.hook(method).setPriority(10).intercept(chain ->
             {
-                loadTemplates();
-                createCustomMenu();
-            }
-            catch (Exception e)
-            {
-                Logger.e(e);
-            }
-            return result;
-        });
-        methods = bridge.findMethod(FindMethod.create()
+                Object result = chain.proceed();
+                if (!isOpenZaloXposedSettings1)
+                    return result;
+                if (rootLayout == null)
+                    return result;
+                isOpenZaloXposedSettings1 = false;
+                templateHeader = null;
+                templateSeparator = null;
+                try
+                {
+                    loadTemplates();
+                    createCustomMenu();
+                }
+                catch (Exception e) { Logger.e(e); }
+                return result;
+            });
+        }
+        methods = DexKitCache.GetMethods("ZaloXposedSettingsMenu_SettingPrivateV2View_SetViewTitle", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.settings.SettingPrivateV2View")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -896,39 +891,45 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                     .returnType("void")
                     .name("setMiddleTitle")
                 )
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found 4");
+            Logger.e("Target method not found 5");
             return;
         }
-        method = methods.get(0).getMethodInstance(classLoader);
-        // Field actionBarField = Utils.FindFieldByType(Class.forName("com.zing.zalo.ui.settings.SettingPrivateV2View", false, classLoader), "com.zing.zalo.zdesign.component.header.ZdsActionBar");
-        Field actionBarField = Utils.FindFieldByType(Class.forName("com.zing.zalo.ui.zviews.ZaloViewNewActionBar", false, classLoader), "com.zing.zalo.zdesign.component.header.ZdsActionBar");
-        Logger.i("Hooking: " + method);
-        module.hook(method).setPriority(10).intercept(chain ->
+        if (methods.size() > 1)
+            Logger.w("Multiple target methods found 5");
+        for (Method method : methods)
         {
-            Object result = chain.proceed();
-            if (!isOpenZaloXposedSettings2)
-                return result;
-            if (actionBarField == null)
-                return result;
-            isOpenZaloXposedSettings2 = false;
-            try
+            Logger.i("Hooking: " + method);
+            module.hook(method).setPriority(10).intercept(chain ->
             {
-                Object actionBar = actionBarField.get(chain.getThisObject());
-                if (actionBar == null)
+                Field actionBarField = DexKitCache.GetFieldRaw("ZaloXposedSettingsMenu_SettingPrivateV2View_ActionBar", classLoader);
+                if (actionBarField == null)
+                {
+                    actionBarField = Utils.FindFieldByType(Class.forName("com.zing.zalo.ui.zviews.ZaloViewNewActionBar", false, classLoader), "com.zing.zalo.zdesign.component.header.ZdsActionBar");
+                    if (actionBarField != null)
+                        DexKitCache.SetFieldRaw("ZaloXposedSettingsMenu_SettingPrivateV2View_ActionBar", actionBarField);
+                }
+                Object result = chain.proceed();
+                if (!isOpenZaloXposedSettings2)
                     return result;
-                Method setMiddleTitle = actionBar.getClass().getMethod("setMiddleTitle", String.class);
-                String moduleName = MorpheConstants.getModuleName();
-                setMiddleTitle.invoke(actionBar, Utils.IsEnglish() ? moduleName + " Settings" : "Cài đặt " + moduleName);
-            }
-            catch (Exception t)
-            {
-                Logger.e(t);
-            }
-            return result;
-        });
+                if (actionBarField == null)
+                    return result;
+                isOpenZaloXposedSettings2 = false;
+                try
+                {
+                    Object actionBar = actionBarField.get(chain.getThisObject());
+                    if (actionBar == null)
+                        return result;
+                    Method setMiddleTitle = actionBar.getClass().getMethod("setMiddleTitle", String.class);
+                    String moduleName = MorpheConstants.getModuleName();
+                    setMiddleTitle.invoke(actionBar, Utils.IsEnglish() ? moduleName + " Settings" : "Cài đặt " + moduleName);
+                }
+                catch (Exception t) { Logger.e(t); }
+                return result;
+            });
+        }
     }
 
     private static String getFakeRoleName(int roleLevel)

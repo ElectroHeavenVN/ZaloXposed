@@ -18,13 +18,13 @@ public class NativeHookHandler implements InvocationHandler
         String methodName = method.getName();
         if ("intercept".equals(methodName) && args != null && args.length > 0)
             return dispatch(nativePtr, args[0]);
-        if ("hashCode".equals(methodName)) 
-            return System.identityHashCode(proxy);
-        if ("equals".equals(methodName)) 
-            return proxy == args[0];
-        if ("toString".equals(methodName)) 
-            return "NativeHookHandlerProxy";
-        return null;
+        return switch (methodName)
+        {
+            case "hashCode" -> System.identityHashCode(proxy);
+            case "equals" -> proxy == args[0];
+            case "toString" -> "NativeHookHandlerProxy";
+            default -> null;
+        };
     }
 
     private static native Object dispatch(long ptr, Object chain);

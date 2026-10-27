@@ -15,10 +15,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction;
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction;
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference;
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.FindMethod;
@@ -26,8 +22,6 @@ import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.ClassData;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -36,15 +30,19 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 import io.github.libxposed.api.XposedInterface;
 
 // It would be great if we can patch dex...
 public class EnableChatHeadHook extends BaseHook
 {
-    static Field isAndroid10FullOrOlder = null;
-    static Field isAndroid11OrNewerFull = null;
+    static Field isAdr10OrOld = null;
+    static Field isAdr11OrNew = null;
     static Field chatHeadUnavailable = null;
     static boolean chatHeadUnavailableOriginalValue = false;
     static Class<?> androidVersionCheckClass = null;
@@ -57,7 +55,8 @@ public class EnableChatHeadHook extends BaseHook
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
             return;
         fixMiniChatAndroid13();
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        // Very long method that do something with JSON data, related to domains
+        Method targetMethod = DexKitCache.GetMethod("EnableChatHead_ClassContainsChatHeadUnavailableConfig", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
@@ -66,48 +65,29 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("MALICIOUS_MIME_TYPE", StringMatchType.Equals)
                 .addUsingString("NOTIFICATION_MANAGER_CONFIG", StringMatchType.Equals)
                 .addUsingString("ACTION_FOR_SKIP_JUMP_DOMAIN", StringMatchType.Equals)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found 1");
+            )), classLoader);
+        if (targetMethod == null)
             return;
-        }
-        Method targetMethod = methods.get(0).getMethodInstance(classLoader);
         classContainsChatHeadUnavailableConfig = targetMethod.getDeclaringClass();
-        methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .name("<clinit>")
-                .addUsingNumber(26)
-                .addUsingNumber(29)
-                .addUsingNumber(30)
-                .addUsingNumber(33)
-                .addUsingField(FieldMatcher.create().name("SDK_INT"))
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found 2");
-            return;
-        }
-        for (MethodData m : methods)
-        {
-            Class<?> tempandroidVersionCheckClass = Objects.requireNonNull(m.getDeclaredClass()).getInstance(classLoader);
-            if (!Modifier.isAbstract(tempandroidVersionCheckClass.getModifiers()))
-                continue;
-            androidVersionCheckClass = tempandroidVersionCheckClass;
-            break;
-        }
+        androidVersionCheckClass = DexKitCache.GetClass("EnableChatHead_AndroidVersionCheckClass", () -> bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.ABSTRACT)
+                .addField(FieldMatcher.create()
+                    .modifiers(Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL)
+                    .type(boolean.class))
+                .addMethod(MethodMatcher.create()
+                    .name("<clinit>")
+                    .addUsingNumber(26)
+                    .addUsingNumber(29)
+                    .addUsingNumber(30)
+                    .addUsingNumber(33)
+                    .addUsingField(FieldMatcher.create().name("SDK_INT")))
+            )), classLoader);
         if (androidVersionCheckClass == null)
-        {
-            Logger.e("Target class not found 3");
             return;
-        }
         Logger.i("Hooking [0]: " + targetMethod);
         module.hook(targetMethod).intercept(chain ->
         {
-            loadFields();
-            if (isAndroid10FullOrOlder == null || isAndroid11OrNewerFull == null || chatHeadUnavailable == null)
-                return chain.proceed();
-            doHook(new SpoofAndroidVersionCheckFields());
             Object result = chain.proceed();
             Config.addOnConfigChangedListener((key, oldValue, newValue) ->
             {
@@ -136,30 +116,31 @@ public class EnableChatHeadHook extends BaseHook
             catch (Exception ignored) { }
             return result;
         });
+        loadFields();
+        doHook(new SpoofAndroidVersionCheckFields());
     }
 
     private void doHook(SpoofAndroidVersionCheckFields spoofHook) throws NoSuchMethodException, ClassNotFoundException
     {
         if (hooked)
             return;
-        List<MethodData> methods;
-        methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods;
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.settings.SettingMessageV2View")
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
                 .addUsingString("QUICK_MESSAGE_FEATURE_ENABLE", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 1");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [1]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_2", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.maintab.MainTabView")
                 .returnType("void")
@@ -170,16 +151,15 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("CONFIG_POPUP_BA_PURCHASE_SUCCESS_${UserID}", StringMatchType.Equals)
                 .addUsingString("SHOULD_REMIND_UPDATE_MINI_CHAT_PERMISSION", StringMatchType.Equals)
                 .addUsingString("LAST_TIME_SHOW_REMIND_UPDATE_MINI_CHAT_PERMISSION", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 2");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [2]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_3", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.maintab.group.GroupTabView")
                 .returnType("void")
@@ -195,16 +175,15 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingField(FieldMatcher.create().name("str_leave_community"))
                 .addUsingField(FieldMatcher.create().name("str_open_bubble_chat"))
                 .addUsingField(FieldMatcher.create().name("str_open_chat_head"))
-            ));
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 3");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [3]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_4", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.maintab.group.GroupTabView")
                 .returnType("void")
@@ -215,16 +194,15 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingNumber(59)
                 .addUsingNumber(6074)
                 .addUsingField(FieldMatcher.create().name("Companion"))
-            ));
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 4");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [4]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_5", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.maintab.msg.MessagesView")
                 .returnType("void")
@@ -238,33 +216,31 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("ConversationLabel", StringMatchType.Equals)
                 .addUsingString("checkRetrySyncTabReddot ", StringMatchType.Equals)
                 .addUsingField(FieldMatcher.create().name("Companion"))
-            ));
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 5");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [5]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_6", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.ui.maintab.msg.TabMsgContextMenuView")
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(1)
                 .paramTypes("java.util.ArrayList")
-                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
-            ));
+                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 6");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [6]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_7", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .returnType("boolean")
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
@@ -275,33 +251,31 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("my", StringMatchType.Equals)
                 .addUsingString("DEACTIVATE_ACCOUNT_SETTING_%s", StringMatchType.Equals)
                 .addUsingString("ENABLE_BLOCK_HIDE_PRIVACY_SETTING_${UserID}", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 7");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [7]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_8", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .name("run")
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .paramCount(0) 
+                .paramCount(0)
                 .addUsingString("System Setting not allow to create Bubbles on Screen", StringMatchType.Equals)
                 .addUsingString("ChatView: Open Bubble Chat", StringMatchType.Contains)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 8");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [8]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_9", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .returnType("boolean")
                 .modifiers(Modifier.PUBLIC)
@@ -312,17 +286,16 @@ public class EnableChatHeadHook extends BaseHook
                 .addUsingString("KILL_CHAT_HEAD_DISABLE_TIME", StringMatchType.Equals)
                 .addUsingString("CHAT_HEAD_EXPIRED_SPAM_TIME", StringMatchType.Equals)
                 .addUsingString("KILL_CHAT_HEAD_START_TIME", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 9");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [9]: " + method);
             module.hook(method).intercept(spoofHook);
         }
         // 13(12 now) already included the same method
-        // methods = bridge.findMethod(FindMethod.create()
+        // methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_10", () -> bridge.findMethod(FindMethod.create()
         //     .matcher(MethodMatcher.create()
         //         .name("run")
         //         .returnType("void")
@@ -331,60 +304,52 @@ public class EnableChatHeadHook extends BaseHook
         //         .addUsingString("MAIN_CHAT_HEAD", StringMatchType.Equals)
         //         .addUsingString("MiniChatController", StringMatchType.Equals)
         //         .addUsingField(FieldMatcher.create().name("logo_zalo_chathead"))
-        //     ));
+        //     )), classLoader);
         // if (methods.isEmpty())
         //     Logger.e("Target method not found 10");
-        // for (MethodData m : methods)
+        // for (Method method : methods)
         // {
-        //     Method method = m.getMethodInstance(classLoader);
         //     Logger.i("Hooking [10]: " + method);
         //     module.hook(method).intercept(spoofHook);
         // }
-        List<ClassData> classes = bridge.findClass(FindClass.create()
-            .matcher(ClassMatcher.create()
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .addUsingString("MiniChatController", StringMatchType.Equals)
-                .fieldCount(5)
-                .addMethod(MethodMatcher.create()
-                    .returnType("boolean")
-                    .modifiers(Modifier.PUBLIC | Modifier.STATIC)
-                    .paramCount(0)
-                    .addInvoke(MethodMatcher.create()
-                        .name("canDrawOverlays")
-                        .declaredClass("android.provider.Settings"))
-                    .addInvoke(MethodMatcher.create()
-                        .name("getAppContext")
-                        .declaredClass("com.zing.zalo.MainApplication"))
-                )
-            ));
-        if (classes.isEmpty())
-            Logger.e("Target class not found 10");
-        Class<?> clazz = classes.get(0).getInstance(classLoader);
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_10", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
-                .declaredClass(clazz)
-                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
-            ));
+                .declaredClass(ClassMatcher.create()
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .addUsingString("MiniChatController", StringMatchType.Equals)
+                    .fieldCount(5)
+                    .addMethod(MethodMatcher.create()
+                        .returnType("boolean")
+                        .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                        .paramCount(0)
+                        .addInvoke(MethodMatcher.create()
+                            .name("canDrawOverlays")
+                            .declaredClass("android.provider.Settings"))
+                        .addInvoke(MethodMatcher.create()
+                            .name("getAppContext")
+                            .declaredClass("com.zing.zalo.MainApplication"))
+                    )
+                )
+                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 10");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [10]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_11", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .returnType("boolean")
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .paramCount(0)
                 .addUsingString("SETTING_ENABLE_CHAT_HEAD_SERVER", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 11");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [11]: " + method);
             module.hook(method).intercept(chain ->
             {
@@ -393,13 +358,13 @@ public class EnableChatHeadHook extends BaseHook
                 return true;
             });
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_12", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .name("run")
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
-                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
+                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
                 .addInvoke(MethodMatcher.create()
                     .name("run")
                     .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -407,34 +372,32 @@ public class EnableChatHeadHook extends BaseHook
                     .addUsingString("MiniChatController", StringMatchType.Equals)
                     .addUsingString("ChatHeadManager", StringMatchType.Equals))
                 .addInvoke("Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z")
-            ));
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 12");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [12]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_13", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .name("run")
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
                 .addInvoke("Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z")
-                .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
+                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
                 .addUsingField(FieldMatcher.create().declaredClass("com.zing.zalo.ui.WebViewMPActivity").name("Companion"))
-            ));
+            )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 13");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [13]: " + method);
             module.hook(method).intercept(spoofHook);
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_14", () -> bridge.findMethod(FindMethod.create()
         .matcher(MethodMatcher.create()
             .name("run")
             .returnType("void")
@@ -442,14 +405,13 @@ public class EnableChatHeadHook extends BaseHook
             .paramCount(0) 
             .addInvoke("Landroid/widget/Toast;->show()V")
             .addInvoke("Landroid/view/LayoutInflater;->from(Landroid/content/Context;)Landroid/view/LayoutInflater;")
-            .addUsingField(Utils.GetDescriptor(isAndroid10FullOrOlder))
+            .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
             .addUsingField(FieldMatcher.create().declaredClass("com.zing.zalo.comm.chathead.bubblechat.ui.ZaloBubbleActivity").name("Companion"))
-        ));
+        )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 14");
-        for (MethodData m : methods)
+        for (Method method : methods)
         {
-            Method method = m.getMethodInstance(classLoader);
             Logger.i("Hooking [14]: " + method);
             module.hook(method).intercept(spoofHook);
         }
@@ -487,64 +449,75 @@ public class EnableChatHeadHook extends BaseHook
         module.hook(method).intercept(new FixWindowLayoutComponentImpl());
     }
 
-    private static synchronized void loadFields() throws IOException, NoSuchFieldException
+    private void loadFields() throws IOException, NoSuchFieldException
     {
-        if (androidVersionCheckClass == null || classContainsChatHeadUnavailableConfig == null)
+        isAdr10OrOld = DexKitCache.GetFieldRaw("EnableChatHead_AndroidVersionCheckClass_IsAdr10OrOld", classLoader);
+        isAdr11OrNew = DexKitCache.GetFieldRaw("EnableChatHead_AndroidVersionCheckClass_IsAdr11OrNew", classLoader);
+        chatHeadUnavailable = DexKitCache.GetFieldRaw("EnableChatHead_AndroidVersionCheckClass_ChatHeadUnavailable", classLoader);
+        if (isAdr10OrOld != null && isAdr11OrNew != null && chatHeadUnavailable != null)
             return;
-        if (isAndroid10FullOrOlder != null && isAndroid11OrNewerFull != null && chatHeadUnavailable != null)
-            return;
-        ArrayList<Instruction> instructions = Utils.Disassemble(androidVersionCheckClass, "<clinit>");
-        for (Instruction instruction : instructions)
+        ArrayList<Instruction> instructions;
+        if (isAdr10OrOld == null || isAdr11OrNew == null)
         {
-            if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction oneRegisterInstruction)
+            instructions = Utils.Disassemble(androidVersionCheckClass, "<clinit>");
+            for (Instruction instruction : instructions)
             {
-                FieldReference field = (FieldReference)((ReferenceInstruction)instruction).getReference();
-                String fieldName = field.getName();
-                if (isAndroid10FullOrOlder == null)
-                    isAndroid10FullOrOlder = androidVersionCheckClass.getDeclaredField(fieldName);
-                else if (isAndroid11OrNewerFull == null)
+                if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction oneRegisterInstruction)
                 {
-                    isAndroid11OrNewerFull = androidVersionCheckClass.getDeclaredField(fieldName);
-                    break;
+                    FieldReference field = (FieldReference)((ReferenceInstruction)instruction).getReference();
+                    String fieldName = field.getName();
+                    if (isAdr10OrOld == null)
+                        isAdr10OrOld = androidVersionCheckClass.getDeclaredField(fieldName);
+                    else if (isAdr11OrNew == null)
+                    {
+                        isAdr11OrNew = androidVersionCheckClass.getDeclaredField(fieldName);
+                        break;
+                    }
                 }
             }
-        }
-        if (isAndroid10FullOrOlder == null)
-        {
-            Logger.e("Target field not found 1");
-            return;
-        }
-        if (isAndroid11OrNewerFull == null)
-        {
-            Logger.e("Target field not found 2");
-            return;
-        }
-        instructions = Utils.Disassemble(classContainsChatHeadUnavailableConfig, "<clinit>");
-        for (int i = instructions.size() - 1; i >= 1; i--)
-        {
-            Instruction instruction = instructions.get(i);
-            Instruction prevInstruction = instructions.get(i - 1);
-            if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction oneRegisterInstruction
-                && prevInstruction.getOpcode() == Opcode.SGET_BOOLEAN && prevInstruction instanceof OneRegisterInstruction prevOneRegisterInstruction)
+            if (isAdr10OrOld == null)
             {
-                FieldReference field = (FieldReference)((ReferenceInstruction)prevInstruction).getReference();
-                String fieldName = field.getName();
-                if (!fieldName.equals(isAndroid11OrNewerFull.getName()) || !field.getDefiningClass().equals(Utils.GetDescriptor(isAndroid11OrNewerFull.getDeclaringClass())))
-                    continue;
-                field = (FieldReference)((ReferenceInstruction)instruction).getReference();
-                fieldName = field.getName();
-                chatHeadUnavailable = classContainsChatHeadUnavailableConfig.getDeclaredField(fieldName);
-                break;
+                Logger.e("Target field not found 1");
+                return;
             }
+            if (isAdr11OrNew == null)
+            {
+                Logger.e("Target field not found 2");
+                return;
+            }
+            isAdr10OrOld.setAccessible(true);
+            isAdr11OrNew.setAccessible(true);
+            DexKitCache.SetFieldRaw("EnableChatHead_AndroidVersionCheckClass_IsAdr10OrOld", isAdr10OrOld);
+            DexKitCache.SetFieldRaw("EnableChatHead_AndroidVersionCheckClass_IsAdr11OrNew", isAdr11OrNew);
         }
         if (chatHeadUnavailable == null)
         {
-            Logger.e("Target field not found 3");
-            return;
+            instructions = Utils.Disassemble(classContainsChatHeadUnavailableConfig, "<clinit>");
+            for (int i = instructions.size() - 1; i >= 1; i--)
+            {
+                Instruction instruction = instructions.get(i);
+                Instruction prevInstruction = instructions.get(i - 1);
+                if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction oneRegisterInstruction
+                    && prevInstruction.getOpcode() == Opcode.SGET_BOOLEAN && prevInstruction instanceof OneRegisterInstruction prevOneRegisterInstruction)
+                {
+                    FieldReference field = (FieldReference)((ReferenceInstruction)prevInstruction).getReference();
+                    String fieldName = field.getName();
+                    if (!fieldName.equals(isAdr11OrNew.getName()) || !field.getDefiningClass().equals(Utils.GetDescriptor(isAdr11OrNew.getDeclaringClass())))
+                        continue;
+                    field = (FieldReference)((ReferenceInstruction)instruction).getReference();
+                    fieldName = field.getName();
+                    chatHeadUnavailable = classContainsChatHeadUnavailableConfig.getDeclaredField(fieldName);
+                    break;
+                }
+            }
+            if (chatHeadUnavailable == null)
+            {
+                Logger.e("Target field not found 3");
+                return;
+            }
+            chatHeadUnavailable.setAccessible(true);
+            DexKitCache.SetFieldRaw("EnableChatHead_AndroidVersionCheckClass_ChatHeadUnavailable", chatHeadUnavailable);
         }
-        isAndroid10FullOrOlder.setAccessible(true);
-        isAndroid11OrNewerFull.setAccessible(true);
-        chatHeadUnavailable.setAccessible(true);
     }
 
     static class FixWindowLayoutComponentImpl implements XposedInterface.Hooker
@@ -566,10 +539,7 @@ public class EnableChatHeadHook extends BaseHook
                 Context windowContext = appCtx.createWindowContext(defaultDisplay, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, null);
                 return chain.proceed(new Object[]{windowContext, chain.getArg(1)});
             }
-            catch (Exception e)
-            {
-                Logger.e(e);
-            }
+            catch (Exception e) { Logger.e(e); }
             return chain.proceed();
         }
     }
@@ -580,36 +550,27 @@ public class EnableChatHeadHook extends BaseHook
 
         public Object intercept(XposedInterface.Chain chain) throws Throwable
         {
-            loadFields();
-            if (isAndroid10FullOrOlder == null || isAndroid11OrNewerFull == null || chatHeadUnavailable == null)
-                return chain.proceed();
             if (!Config.getEnableChatHead())
                 return chain.proceed();
             try
             {
                 if (!originalValues.isEmpty())
                     return chain.proceed();
-                Boolean originalValue = (Boolean)isAndroid10FullOrOlder.get(null);
-                Boolean originalValue2 = (Boolean)isAndroid11OrNewerFull.get(null);
+                Boolean originalValue = (Boolean)isAdr10OrOld.get(null);
+                Boolean originalValue2 = (Boolean)isAdr11OrNew.get(null);
                 if (originalValue == null || originalValue2 == null)
                     return chain.proceed();
-                originalValues.put(isAndroid10FullOrOlder, originalValue);
-                originalValues.put(isAndroid11OrNewerFull, originalValue2);
-                isAndroid10FullOrOlder.set(null, !originalValue);
-                isAndroid11OrNewerFull.set(null, !originalValue2);
+                originalValues.put(isAdr10OrOld, originalValue);
+                originalValues.put(isAdr11OrNew, originalValue2);
+                isAdr10OrOld.set(null, !originalValue);
+                isAdr11OrNew.set(null, !originalValue2);
                 Object result = chain.proceed();
                 for (Field f : originalValues.keySet())
-                { 
-                    f.setAccessible(true);
                     f.set(null, originalValues.get(f));
-                }
                 originalValues.clear();
                 return result;
             }
-            catch (Exception e)
-            {
-                Logger.e(e);
-            }
+            catch (Exception e) { Logger.e(e); }
             return chain.proceed();
         }
     }

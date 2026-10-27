@@ -5,15 +5,10 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction;
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference;
 import com.android.tools.smali.dexlib2.iface.reference.StringReference;
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -24,6 +19,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 public class EnableShareHiddenStickerPackHook extends BaseHook
 {
@@ -47,19 +48,15 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
                 Integer originalIsHiddenValue = entry.getValue();
                 try
                 {
-                    loadFields();
                     if (isHiddenField == null)
                         return;
                     isHiddenField.set(sticker, originalIsHiddenValue);
                 }
-                catch (Exception e)
-                {
-                    Logger.e("Error restoring isHidden value for sticker: " + sticker, e);
-                }
+                catch (Exception e) { Logger.e(e); }
             }
         });
 
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        toJsonMethod = DexKitCache.GetMethod("EnableShareHiddenStickerPack_ToJsonString", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
@@ -67,14 +64,10 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
                 .addUsingString(",\"is_hidden\":", StringMatchType.Equals)
                 .addUsingString(",\"iconPreview\":", StringMatchType.Equals)
                 .addUsingString(",\"isFree\":", StringMatchType.Equals)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found");
+            )), classLoader);
+        if (toJsonMethod == null)
             return;
-        }
-        toJsonMethod = methods.get(0).getMethodInstance(classLoader);
-        methods = bridge.findMethod(FindMethod.create()
+        Method onStickerPackOptionsClicked = DexKitCache.GetMethod("EnableShareHiddenStickerPack_OnStickerPackOptionsClicked", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("void")
@@ -84,20 +77,13 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
                 .addUsingString("getChildZaloViewManager(...)", StringMatchType.Equals)
                 .addUsingString("tip.csc.sticker.promotion", StringMatchType.Equals)
                 .addUsingString("null cannot be cast to non-null type com.zing.zalo.ui.picker.stickerpanel.custom.EmojiChatPanelPage", StringMatchType.Equals)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found");
+            )), classLoader);
+        if (onStickerPackOptionsClicked == null)
             return;
-        }
-        Method onStickerPackOptionsClicked = methods.get(0).getMethodInstance(classLoader); 
         Method synchronizedMapClassGet = Class.forName("java.util.Collections$SynchronizedMap", false, classLoader).getDeclaredMethod("get", Object.class);
         Logger.i("Hooking: " + synchronizedMapClassGet);
         module.hook(synchronizedMapClassGet).intercept(chain ->
         {
-            loadFields();
-            if (isHiddenField == null)
-                return chain.proceed();
             if (!Config.getEnableShareHiddenStickerPack())
                 return chain.proceed();
             Object key = chain.getArg(0);
@@ -133,18 +119,15 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
                 stickerInstance = constructor.newInstance();
                 isHiddenField.set(stickerInstance, 0);
             }
-            catch (Exception e)
-            {
-                Logger.e("Error creating sticker instance", e);
-            }
+            catch (Exception e) { Logger.e(e); }
             return null;
-        }); 
+        });
+        loadFields();
     }
 
-    private static synchronized void loadFields() throws NoSuchFieldException, IOException
+    private void loadFields() throws NoSuchFieldException, IOException
     {
-        if (toJsonMethod == null)
-            return;
+        isHiddenField = DexKitCache.GetFieldRaw("EnableShareHiddenStickerPack_StickerIsHidden", classLoader);
         if (isHiddenField != null)
             return;
         ArrayList<Instruction> instructions = Utils.Disassemble(toJsonMethod);
@@ -182,5 +165,6 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
             return;
         }
         isHiddenField.setAccessible(true);
+        DexKitCache.SetFieldRaw("EnableShareHiddenStickerPack_StickerIsHidden", isHiddenField);
     }
 }

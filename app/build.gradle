@@ -33,6 +33,11 @@ android {
         targetSdk 37
         versionCode getGitCommitCount()
         versionName project.findProperty("versionName") ?: "dev"
+        buildConfigField "int", "MODULE_VERSION_CODE", "${getGitCommitCount()}"
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     signingConfigs {

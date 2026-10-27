@@ -1,20 +1,19 @@
 package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-
 import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.ClassData;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 public class RestoreGoogleDriveBackupHook extends BaseHook
 {
@@ -25,12 +24,57 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
         hookShowNewGDriveBackupSection();
     }
 
+    private void hookRestoreOldGDriveBackupSection() throws ClassNotFoundException, NoSuchMethodException
+    {
+        // Restore old Google Drive backup section in Text message backup settings
+        Class<?> smlBackupManager = DexKitCache.GetClass("RestoreGoogleDriveBackup_SMLBackupManager", () -> bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .addUsingString("OLD_BACKUP_THRESHOLD", StringMatchType.Equals)
+                .addUsingString("AUTO_BACKUP_PENDING_TIME", StringMatchType.Equals)
+                .addUsingString("SMLBackupManager", StringMatchType.Equals)
+                .addUsingString("reason", StringMatchType.Equals)
+                .addUsingString("BACKUP_RESTORE_SKIP_REASON_", StringMatchType.Equals)
+                // Matches log strings, may not be reliable
+                .addUsingString("Auto-backup setting: ", StringMatchType.Equals)
+                .addUsingString("Wifi-only mode: ", StringMatchType.Equals)
+                .addUsingString("Backup Info: ", StringMatchType.Equals)
+                .addUsingString("Last restore TS: ", StringMatchType.Equals)
+            )), classLoader);
+        if (smlBackupManager == null)
+            return;
+        List<Method> methods = DexKitCache.GetMethods("RestoreGoogleDriveBackup_SMLBackupManager_ShowGDriveBackup", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .declaredClass(smlBackupManager)
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("boolean")
+                .paramCount(0)
+                .addUsingNumber(2)
+                .addUsingNumber(3)
+            )), classLoader);
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 1");
+            return;
+        }
+        for (Method method : methods)
+        {
+            Logger.i("Hooking: " + method);
+            module.hook(method).intercept(chain ->
+            {
+                if (Config.getRestoreGoogleDriveBackup())
+                    return true;
+                return chain.proceed();
+            });
+        }
+    }
+
     private void hookShowNewGDriveBackupSection() throws ClassNotFoundException, NoSuchMethodException
     {
         // Show new Google Drive backup section in Text message backup settings
         // This section is marked as "Maintenance-only features" ?
         // They tried really hard to push users to buy zCloud subscription!
-        List<ClassData> classes = bridge.findClass(FindClass.create()
+        Class<?> zCloudManager = DexKitCache.GetClass("RestoreGoogleDriveBackup_zCloudManager", () -> bridge.findClass(FindClass.create()
             .matcher(ClassMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.ABSTRACT)
                 .addUsingString("?e2esession=", StringMatchType.Equals)
@@ -42,14 +86,10 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
                 .addUsingString("groupId", StringMatchType.Equals)
                 .addUsingString("SMLZCloud", StringMatchType.Equals)
                 .addUsingString(" failed. Retrying in ", StringMatchType.Equals)
-            ));
-        if (classes.isEmpty())
-        {
-            Logger.e("Target class not found 2");
+            )), classLoader);
+        if (zCloudManager == null)
             return;
-        }
-        Class<?> zCloudManager = classes.get(0).getInstance(classLoader);
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("RestoreGoogleDriveBackup_zCloudManager_ShowGDriveBackup", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass(zCloudManager)
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL)
@@ -73,65 +113,14 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
                         .paramCount(0)
                     )
                 )
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found 2");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain ->
-            {
-                if (Config.getRestoreGoogleDriveBackup())
-                    return true;
-                return chain.proceed();
-            });
-        }
-    }
-
-    private void hookRestoreOldGDriveBackupSection() throws ClassNotFoundException, NoSuchMethodException
-    {
-        // Restore old Google Drive backup section in Text message backup settings
-        List<ClassData> classes = bridge.findClass(FindClass.create()
-            .matcher(ClassMatcher.create()
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .addUsingString("OLD_BACKUP_THRESHOLD", StringMatchType.Equals)
-                .addUsingString("AUTO_BACKUP_PENDING_TIME", StringMatchType.Equals)
-                .addUsingString("SMLBackupManager", StringMatchType.Equals)
-                .addUsingString("reason", StringMatchType.Equals)
-                .addUsingString("BACKUP_RESTORE_SKIP_REASON_", StringMatchType.Equals)
-                // Matches log strings, may not be reliable
-                .addUsingString("Auto-backup setting: ", StringMatchType.Equals)
-                .addUsingString("Wifi-only mode: ", StringMatchType.Equals)
-                .addUsingString("Backup Info: ", StringMatchType.Equals)
-                .addUsingString("Last restore TS: ", StringMatchType.Equals)
-            ));
-        if (classes.isEmpty())
-        {
-            Logger.e("Target class not found 1");
-            return;
-        }
-        Class<?> smlBackupManager = classes.get(0).getInstance(classLoader);
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .declaredClass(smlBackupManager)
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .returnType("boolean")
-                .paramCount(0)
-                .addUsingNumber(2)
-                .addUsingNumber(3)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Target method not found 1");
-            return;
-        }
-        for (MethodData methodData : methods)
-        {
-            Method method = methodData.getMethodInstance(classLoader);
             Logger.i("Hooking: " + method);
             module.hook(method).intercept(chain ->
             {
