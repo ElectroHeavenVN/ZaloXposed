@@ -9,7 +9,7 @@ on:
     paths:
       - 'app/**'
       - 'gradle/**'
-      - 'ZaloXposedNative/Output/**'
+      - 'ZaloXposedNative/**'
       - 'build.gradle'
       - 'gradle.properties'
       - 'gradlew'

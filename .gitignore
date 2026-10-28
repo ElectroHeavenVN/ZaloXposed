@@ -44,5 +44,5 @@ google-services.json
 
 ZaloXposedNative/**
 !ZaloXposedNative/**/
-!ZaloXposedNative/Output/**/*.so
+!ZaloXposedNative/**/*.so
 build-install.bat

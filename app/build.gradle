@@ -64,7 +64,7 @@ android {
 
     sourceSets {
         main {
-            jniLibs.srcDirs = ["$rootDir/ZaloXposedNative/Output"]
+            jniLibs.srcDirs = ["$rootDir/ZaloXposedNative"]
         }
     }
 }
