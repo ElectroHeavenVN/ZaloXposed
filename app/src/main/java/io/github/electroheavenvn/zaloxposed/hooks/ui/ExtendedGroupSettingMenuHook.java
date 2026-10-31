@@ -51,7 +51,7 @@ public class ExtendedGroupSettingMenuHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain -> 
             {
                 if (!Config.getEnableExtendedGroupSettingMenu())

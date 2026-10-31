@@ -49,7 +49,7 @@ public class CustomBackgroundHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 Object result = chain.proceed();

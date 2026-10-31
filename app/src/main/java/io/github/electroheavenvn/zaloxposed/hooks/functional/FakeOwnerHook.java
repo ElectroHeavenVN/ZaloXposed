@@ -15,7 +15,7 @@ public class FakeOwnerHook extends BaseHook
     public void hook() throws Throwable
     {
         Constructor<?> constructor = JSONObject.class.getConstructor(String.class);
-        Logger.i("Hooking: " + constructor);
+        Logger.h(constructor);
         module.hook(constructor).intercept(chain ->
         {
             if (!Config.getEnableFakeGroupRole())

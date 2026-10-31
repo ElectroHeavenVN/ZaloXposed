@@ -46,9 +46,6 @@ public final class TabMeSettingItemHelper
         tabMeSettingItemClass = DexKitCache.GetClass("TabMeSettingItemHelper_SettingData", () -> bridge.findClass(FindClass.create()
             .matcher(ClassMatcher.create()
                 .addUsingString("", StringMatchType.Equals)
-                .addUsingString("id", StringMatchType.Equals)
-                .addUsingString("title", StringMatchType.Equals)
-                .addUsingString("<set-?>", StringMatchType.Equals)
                 .addUsingString("SettingData(id=", StringMatchType.Equals)
                 .addUsingString(", icon=", StringMatchType.Equals)
                 .addUsingString(", title=", StringMatchType.Equals)
@@ -100,7 +97,6 @@ public final class TabMeSettingItemHelper
                 .returnType("void")
                 .paramCount(1)
                 .paramTypes("java.lang.String")
-                .addUsingString("<set-?>", StringMatchType.Equals)
             )), classLoader);
     }
 

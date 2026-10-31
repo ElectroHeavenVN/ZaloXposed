@@ -24,7 +24,6 @@ public class SilentTypingHook extends BaseHook
                 .returnType("void")
                 .paramCount(4)
                 .paramTypes("java.lang.String", "int", "boolean", "boolean")
-                .addUsingString("uid", StringMatchType.Equals)
                 .addUsingString("MessageRepository", StringMatchType.Equals)
                 .addUsingNumber(10000)
                 .addUsingNumber(3000)
@@ -37,7 +36,7 @@ public class SilentTypingHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (Config.getEnableSilentTyping())

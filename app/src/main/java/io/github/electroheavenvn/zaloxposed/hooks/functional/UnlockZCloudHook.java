@@ -29,7 +29,7 @@ public class UnlockZCloudHook extends BaseHook
         if (targetMethod == null)
             return;
         Class<?> smlZCloudSubscription = targetMethod.getDeclaringClass();
-        Logger.i("Hooking: " + targetMethod);
+        Logger.h(targetMethod);
         module.hook(targetMethod).intercept(chain ->
         {
             if (!Config.getUnlockZCloud())
@@ -41,13 +41,16 @@ public class UnlockZCloudHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("int")
                 .paramCount(0)
-                .addUsingField(FieldMatcher.create().name("MILLISECONDS"))
-                .addInvoke(MethodMatcher.create().name("toDays"))
+                .addAnyOf(MethodMatcher.create().addUsingNumber(86400000))  // 261101901
+                // older vers
+                .addAnyOf(MethodMatcher.create()
+                    .addUsingField(FieldMatcher.create().name("MILLISECONDS"))
+                    .addInvoke(MethodMatcher.create().name("toDays")))
                 .declaredClass(smlZCloudSubscription)
             )), classLoader);
         if (targetMethod == null)
             return;
-        Logger.i("Hooking: " + targetMethod);
+        Logger.h(targetMethod);
         module.hook(targetMethod).intercept(chain ->
         {
             if (!Config.getUnlockZCloud())
@@ -59,14 +62,20 @@ public class UnlockZCloudHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("long")
                 .paramCount(1)
-                .addUsingField(FieldMatcher.create().name("MILLISECONDS"))
-                .addUsingField(FieldMatcher.create().name("DAYS"))
-                .addInvoke(MethodMatcher.create().name("toDays"))
+                // 261101901
+                .addAnyOf(MethodMatcher.create()
+                    .addUsingNumber(86400000)  
+                    .addUsingNumber(2592000000L))
+                // older vers
+                .addAnyOf(MethodMatcher.create()
+                    .addUsingField(FieldMatcher.create().name("MILLISECONDS"))
+                    .addUsingField(FieldMatcher.create().name("DAYS"))
+                    .addInvoke(MethodMatcher.create().name("toDays")))
                 .declaredClass(smlZCloudSubscription)
             )), classLoader);
         if (targetMethod == null)
             return;
-        Logger.i("Hooking: " + targetMethod);
+        Logger.h(targetMethod);
         module.hook(targetMethod).intercept(chain ->
         {
             if (!Config.getUnlockZCloud())
@@ -84,7 +93,7 @@ public class UnlockZCloudHook extends BaseHook
             )), classLoader);
         if (targetMethod == null)
             return;
-        Logger.i("Hooking: " + targetMethod);
+        Logger.h(targetMethod);
         module.hook(targetMethod).intercept(chain ->
         {
             if (!Config.getUnlockZCloud())
@@ -105,7 +114,7 @@ public class UnlockZCloudHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getUnlockZCloud())
@@ -133,7 +142,7 @@ public class UnlockZCloudHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getUnlockZCloud())

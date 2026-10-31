@@ -28,12 +28,11 @@ public class AntiRecallDeleteHook extends BaseHook
                 .returnType("void")
                 .paramCount(8)
                 .paramTypes("java.lang.String", "int", "int", "org.json.JSONObject", "int", "boolean", "long", null)
-                .addUsingString("currentUserUid", StringMatchType.Equals)
-                .addUsingString("jsonData", StringMatchType.Equals)
-                .addUsingString("source", StringMatchType.Equals)
                 .addUsingString("PullMessage", StringMatchType.Equals)
                 .addUsingString("ChatPacketHandler", StringMatchType.Equals)
+                .addUsingString("LAST_TIME_EVICT_GROUP_MESSAGES_OFFLINE_", StringMatchType.Equals)
                 .addUsingNumber(15000)
+                .addUsingNumber(10209)
             )), classLoader);
         if (methods.isEmpty())
         {
@@ -42,7 +41,7 @@ public class AntiRecallDeleteHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getEnableAntiRecall() && !Config.getEnableAntiDelete())

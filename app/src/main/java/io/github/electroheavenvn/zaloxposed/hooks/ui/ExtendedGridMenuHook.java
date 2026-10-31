@@ -51,7 +51,7 @@ public class ExtendedGridMenuHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getEnableExtendedGridMenu())
@@ -76,7 +76,7 @@ public class ExtendedGridMenuHook extends BaseHook
             });
         }
         Method method = JSONObject.class.getMethod("optJSONObject", String.class);
-        Logger.i("Hooking: " + method);
+        Logger.h(method);
         module.hook(method).intercept(chain ->
         {
             if (!Config.getEnableExtendedGridMenu())

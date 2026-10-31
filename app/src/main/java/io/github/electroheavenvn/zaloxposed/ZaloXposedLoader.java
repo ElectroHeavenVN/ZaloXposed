@@ -18,6 +18,7 @@ import android.widget.FrameLayout;
 import io.github.electroheavenvn.zaloxposed.hooks.*;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.*;
 import io.github.electroheavenvn.zaloxposed.hooks.morphe.*;
+import io.github.electroheavenvn.zaloxposed.hooks.nativehook.NativeHook;
 import io.github.electroheavenvn.zaloxposed.hooks.privacy.*;
 import io.github.electroheavenvn.zaloxposed.hooks.permanent.*;
 import io.github.electroheavenvn.zaloxposed.hooks.tracking.*;
@@ -47,12 +48,10 @@ public class ZaloXposedLoader extends XposedModule
     static
     {
         System.loadLibrary("dexkit");
-
+        hooks.add(new NativeHook());
         hooks.add(new ResourceHook());
         hooks.add(new ZaloXposedSettingsMenuHook());
         hooks.add(new CustomBackgroundHook());
-
-        hooks.add(new WatermarkHook());
         hooks.add(new EnableE2EEHook());
         hooks.add(new EnableLabelHook());
         hooks.add(new RestoreGoogleDriveBackupHook());
@@ -82,11 +81,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new TestHook());
 
         if (MorpheConstants.isPatchedByMorphe())
-        {
-            hooks.add(new SpoofAppSignatureHook());
-            hooks.add(new SpoofPackageNameHook());
             hooks.add(new FixProviderHook());
-        }
     }
 
     @SuppressWarnings("deprecation")

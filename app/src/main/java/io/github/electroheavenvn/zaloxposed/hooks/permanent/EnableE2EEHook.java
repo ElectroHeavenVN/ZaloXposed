@@ -27,7 +27,7 @@ public class EnableE2EEHook extends BaseHook
             )), classLoader);
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain -> true);
         }
         methods = DexKitCache.GetMethods("EnableE2EE_2", () -> bridge.findMethod(FindMethod.create()
@@ -36,13 +36,11 @@ public class EnableE2EEHook extends BaseHook
                 .returnType("boolean")
                 .paramCount(3)
                 .paramTypes("java.lang.String", null, null)
-                .addUsingString("threadId", StringMatchType.Equals)
-                .addUsingString("chatKind", StringMatchType.Equals)
                 .addUsingString("E2EE_ALLOW_STRANGER", StringMatchType.Equals)
             )), classLoader);
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain -> true);
         }
     }

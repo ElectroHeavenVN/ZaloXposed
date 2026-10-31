@@ -27,6 +27,7 @@ import android.widget.Toast;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
+import org.luckypray.dexkit.query.matchers.FieldMatcher;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -301,7 +302,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.HideDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Enable extended group settings menu" : "Kích hoạt menu cài đặt nhóm mở rộng");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableExtendedGroupSettingMenu());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableExtendedGroupSettingMenu);
@@ -315,7 +316,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Unlock ZCloud" : "Mở khoá ZCloud");
         ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Does not increase My Documents capacity" : "Không tăng dung lượng bộ nhớ My Documents");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getUnlockZCloud());
@@ -391,21 +392,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             }
             catch (Exception e) { Logger.e(e); }
         });
-
-    
-        separator = createSeparator(context);
-        rootLayout.addView(separator);
-        headerTitle = createHeaderTitle(context);
-        headerTitle.setText(Utils.IsEnglish() ? "Sticker pack" : "Bộ sticker");
-        rootLayout.addView(headerTitle);
-        listItemSetting = ListItemSettingHelper.CreateNew(context);
-        rootLayout.addView(listItemSetting);
-        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
-        ListItemSettingHelper.HideDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Allow sharing hidden sticker packs" : "Cho phép chia sẻ bộ sticker ẩn");
-        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableShareHiddenStickerPack());
-        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableShareHiddenStickerPack);
-
         
         separator = createSeparator(context);
         rootLayout.addView(separator);
@@ -447,6 +433,20 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Show More tab" : "Hiện tab Thêm");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getShowMoreTab());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setShowMoreTab);
+
+
+        separator = createSeparator(context);
+        rootLayout.addView(separator);
+        headerTitle = createHeaderTitle(context);
+        headerTitle.setText(Utils.IsEnglish() ? "Miscellaneous" : "Các tuỳ chọn khác");
+        rootLayout.addView(headerTitle);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.HideDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Allow sharing hidden sticker packs" : "Cho phép chia sẻ bộ sticker ẩn");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableShareHiddenStickerPack());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableShareHiddenStickerPack);
 
 
         separator = createSeparator(context);
@@ -530,7 +530,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).setPriority(10).intercept(chain -> false);
         }
     }
@@ -650,7 +650,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         try
         {
             Method onActivityResultMethod = Activity.class.getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
-            Logger.i("Hooking: " + onActivityResultMethod);
+            Logger.h(onActivityResultMethod);
             module.hook(onActivityResultMethod).setPriority(10).intercept(chain ->
             {
                 int requestCode = (int)chain.getArg(0);
@@ -733,7 +733,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).setPriority(10).intercept(chain ->
             {
                 Object result = chain.proceed();
@@ -769,14 +769,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .modifiers(Modifier.PUBLIC)
                 .paramCount(1)
                 .returnType("void")
-                .addUsingString("settingData", StringMatchType.Equals)
                 .addUsingString("STR_SOURCE_START_VIEW", StringMatchType.Equals)
                 .addUsingString("EXTRA_FEATURE_ID", StringMatchType.Equals)
+                .addUsingString("https://h5.zdn.vn/zapps/220259427665569271/", StringMatchType.Equals)
                 .addUsingString("features@business_account@zinstant@business_tool@enable", StringMatchType.Equals)
                 .addUsingString("EXTRA_SOURCE_OPEN_MA", StringMatchType.Equals)
                 .addUsingString("features@business_account@item_promotion@open_action@action_name", StringMatchType.Equals)
                 .addUsingString("tab_me_open_item", StringMatchType.Equals)
-                // .addUsingString("https://h5.zdn.vn/zapps/220259427665569271/", StringMatchType.Equals)
+                .addUsingNumber(1350)
             )), classLoader);
         if (methods.isEmpty())
         {
@@ -785,7 +785,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).setPriority(10).intercept(chain ->
             {
                 Object tabMeItem = chain.getArg(0);
@@ -812,7 +812,6 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .returnType("android.view.View")
                 .paramCount(3)
                 .paramTypes("android.view.LayoutInflater", "android.widget.LinearLayout", "android.os.Bundle")
-                .addUsingString("inflater", StringMatchType.Equals)
                 .addUsingString("EXTRA_CURRENT_SEEN_SETTING", StringMatchType.Equals)
             )), classLoader);
         if (methods.isEmpty())
@@ -824,7 +823,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             Logger.w("Multiple target methods found 3");
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).setPriority(10).intercept(chain ->
             {
                 Object result = chain.proceed();
@@ -857,7 +856,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             Logger.w("Multiple target methods found 4");
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).setPriority(10).intercept(chain ->
             {
                 Object result = chain.proceed();
@@ -883,8 +882,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("void")
                 .paramCount(0)
-                .addUsingString("getString(...)", StringMatchType.Equals)
-                // .addUsingField(FieldMatcher.create().name("str_title_setting_private"))
+                .addUsingField(FieldMatcher.create().name("str_title_setting_private"))
                 .addInvoke(MethodMatcher.create()
                     .declaredClass("com.zing.zalo.zdesign.component.header.ZdsActionBar")
                     .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -901,7 +899,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
             Logger.w("Multiple target methods found 5");
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).setPriority(10).intercept(chain ->
             {
                 Field actionBarField = DexKitCache.GetFieldRaw("ZaloXposedSettingsMenu_SettingPrivateV2View_ActionBar", classLoader);

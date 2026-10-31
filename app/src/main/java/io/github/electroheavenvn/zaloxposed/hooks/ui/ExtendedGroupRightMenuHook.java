@@ -49,8 +49,6 @@ public class ExtendedGroupRightMenuHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("java.util.ArrayList")
                 .paramCount(0)
-                .addUsingString("<this>", StringMatchType.Equals)
-                .addUsingString("<set-?>", StringMatchType.Equals)
                 .addUsingNumber(84)
                 .addUsingNumber(82)
                 .addUsingNumber(10)
@@ -66,7 +64,7 @@ public class ExtendedGroupRightMenuHook extends BaseHook
         methods.addAll(methods2);
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 ArrayList result = (ArrayList)chain.proceed();

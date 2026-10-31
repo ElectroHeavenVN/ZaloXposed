@@ -30,7 +30,6 @@ public class HideAdsHook extends BaseHook
                 .paramTypes("android.view.ViewGroup", "int")
                 .addUsingString("TAB_MSG_ITEM_MINI_CHAT_KEY", StringMatchType.Equals)
                 .addUsingString("TAB_MSG_ITEM_KEY", StringMatchType.Equals)
-                .addUsingString("context", StringMatchType.Equals)
                 .addUsingField(FieldMatcher.create().name("warning_low_storage_banner"))
                 .addUsingField(FieldMatcher.create().name("latest_mention_description_footer"))
             )), classLoader);
@@ -41,7 +40,7 @@ public class HideAdsHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 Object result = chain.proceed(); 
@@ -77,7 +76,7 @@ public class HideAdsHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 Object result = chain.proceed();
@@ -115,7 +114,7 @@ public class HideAdsHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getBlockAdsEndpoints())

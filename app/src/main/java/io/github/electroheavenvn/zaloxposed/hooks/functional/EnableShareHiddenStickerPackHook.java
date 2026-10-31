@@ -73,15 +73,15 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
                 .returnType("void")
                 .paramCount(1)
                 .paramTypes("java.lang.Object")
-                .addUsingString("dataParam", StringMatchType.Equals)
-                .addUsingString("getChildZaloViewManager(...)", StringMatchType.Equals)
                 .addUsingString("tip.csc.sticker.promotion", StringMatchType.Equals)
-                .addUsingString("null cannot be cast to non-null type com.zing.zalo.ui.picker.stickerpanel.custom.EmojiChatPanelPage", StringMatchType.Equals)
+                .addUsingString("window_animation_type", StringMatchType.Equals)
+                .addUsingString("showArrow", StringMatchType.Equals)
+                .addUsingString("showTitle", StringMatchType.Equals)
             )), classLoader);
         if (onStickerPackOptionsClicked == null)
             return;
         Method synchronizedMapClassGet = Class.forName("java.util.Collections$SynchronizedMap", false, classLoader).getDeclaredMethod("get", Object.class);
-        Logger.i("Hooking: " + synchronizedMapClassGet);
+        Logger.h(synchronizedMapClassGet);
         module.hook(synchronizedMapClassGet).intercept(chain ->
         {
             if (!Config.getEnableShareHiddenStickerPack())

@@ -12,7 +12,7 @@ public class DisableDohHook extends BaseHook
     {
         Class<?> clazz = Class.forName("com.zing.zalocore.connection.socket.NativeSocket", false, classLoader);
         Method method = clazz.getDeclaredMethod("nativeSetDohUrl", String.class);
-        Logger.i("Hooking: " + method);
+        Logger.h(method);
         module.hook(method).intercept(chain ->
         {
             // String dohUrl = (String) chain.getArg(0);

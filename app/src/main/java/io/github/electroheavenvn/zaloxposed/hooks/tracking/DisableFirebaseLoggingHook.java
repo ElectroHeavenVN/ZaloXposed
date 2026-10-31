@@ -20,7 +20,7 @@ public class DisableFirebaseLoggingHook extends BaseHook
     {
         List<Method> methods = DexKitCache.GetMethods("DisableFirebaseLogging_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .modifiers(Modifier.PUBLIC)
                 .returnType("void")
                 .paramCount(2)
                 .addUsingString("Null status", StringMatchType.Equals)
@@ -37,7 +37,7 @@ public class DisableFirebaseLoggingHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (Config.getDisableFirebaseLogging())

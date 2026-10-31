@@ -7,6 +7,7 @@ import org.luckypray.dexkit.query.*;
 import org.luckypray.dexkit.query.enums.*;
 import org.luckypray.dexkit.query.matchers.*;
 import org.luckypray.dexkit.result.*;
+import org.luckypray.dexkit.wrap.DexMethod;
 
 import java.io.*;
 import java.lang.reflect.*;
@@ -28,7 +29,7 @@ public class TestHook extends BaseHook
 {
     @Override
     public void hook() throws Throwable
-    { 
+    {
         // new Handler(Looper.getMainLooper()).postDelayed(() ->
         // {
         // }, 30000);
@@ -84,7 +85,7 @@ public class TestHook extends BaseHook
         // });
 
         // Constructor<?> ctor = JSONObject.class.getConstructor(String.class);
-        // Logger.i("Hooking: " + ctor);
+        // Logger.h(ctor);
         // module.hook(ctor).intercept(chain ->
         // {
         //     Object result = chain.proceed();

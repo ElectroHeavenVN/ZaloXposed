@@ -37,7 +37,7 @@ public class DisableZaloTrackingHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getDisableZaloTracking())
@@ -63,7 +63,6 @@ public class DisableZaloTrackingHook extends BaseHook
                 .addUsingString("multipart/form-data; boundary=ZiNgMeEmAiL", StringMatchType.Equals)
                 .addUsingString("--ZiNgMeEmAiL--\r\n", StringMatchType.Equals)
                 .addUsingString("error_message", StringMatchType.Equals)
-                .addUsingNumber(-11110000)
             )), classLoader);
         if (methods.isEmpty())
         {
@@ -72,7 +71,7 @@ public class DisableZaloTrackingHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getDisableZaloTracking())
@@ -105,7 +104,7 @@ public class DisableZaloTrackingHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (Config.getDisableZaloTracking())
@@ -137,7 +136,7 @@ public class DisableZaloTrackingHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getBlockQoSEndpoints())

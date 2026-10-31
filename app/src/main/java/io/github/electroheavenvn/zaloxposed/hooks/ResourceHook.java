@@ -122,7 +122,7 @@ public class ResourceHook extends BaseHook
     private void hookImageView() throws Throwable
     {
         Method method = ImageView.class.getDeclaredMethod("setImageResource", int.class);
-        Logger.i("Hooking: " + method);
+        Logger.h(method);
         module.hook(method).setPriority(5).intercept(chain ->
         {
             int resId = (int)chain.getArg(0);
@@ -158,7 +158,7 @@ public class ResourceHook extends BaseHook
             Class<?>[] params = method.getParameterTypes();
             if (params.length == 0 || params[0] != int.class)
                 continue;
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).setPriority(5).intercept(chain ->
             {
                 int resId = (int)chain.getArg(0);
@@ -197,7 +197,7 @@ public class ResourceHook extends BaseHook
             Class<?>[] ps = method.getParameterTypes();
             if (isGetValue && (ps.length != 3 || ps[0] != int.class))
                 continue;
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).setPriority(5).intercept(chain ->
             {
                 Object[] arr = chain.getArgs().toArray();
@@ -237,7 +237,7 @@ public class ResourceHook extends BaseHook
             Class<?>[] ps = method.getParameterTypes();
             if (ps.length != 4 || ps[0] != int.class)
                 continue;
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).setPriority(5).intercept(chain ->
             {
                 int resId = (int)chain.getArg(0);

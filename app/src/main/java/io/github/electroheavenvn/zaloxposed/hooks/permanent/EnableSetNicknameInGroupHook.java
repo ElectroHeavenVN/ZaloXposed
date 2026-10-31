@@ -28,7 +28,7 @@ public class EnableSetNicknameInGroupHook extends BaseHook
             )), classLoader);
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain -> 1);
         }
     }

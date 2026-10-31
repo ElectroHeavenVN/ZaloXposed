@@ -35,7 +35,7 @@ public class CustomizeBottomRowHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getEnableCustomizeBottomRow())
@@ -64,7 +64,7 @@ public class CustomizeBottomRowHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getEnableCustomizeBottomRow())
@@ -94,7 +94,7 @@ public class CustomizeBottomRowHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (!Config.getEnableCustomizeBottomRow())

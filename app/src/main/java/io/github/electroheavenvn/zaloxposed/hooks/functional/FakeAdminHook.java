@@ -27,7 +27,6 @@ public class FakeAdminHook extends BaseHook
                 .addUsingString("data", StringMatchType.Equals)
                 .addUsingString("getGroupListFromServer decrypt data fail.", StringMatchType.Equals)
                 .addUsingString("timestampGetGroupList", StringMatchType.Equals)
-                .addUsingString("groupMemberInfo", StringMatchType.Equals)
                 .addUsingString("group_", StringMatchType.Equals)
                 .addUsingString("group_list_sync_failed", StringMatchType.Equals)
                 .addUsingString("adminIds", StringMatchType.Equals)
@@ -37,7 +36,7 @@ public class FakeAdminHook extends BaseHook
         if (groupDAO == null)
             return;
         Method method = JSONObject.class.getMethod("optJSONArray", String.class);
-        Logger.i("Hooking: " + method);
+        Logger.h(method);
         module.hook(method).intercept(chain ->
         {
             if (!Config.getEnableFakeGroupRole())

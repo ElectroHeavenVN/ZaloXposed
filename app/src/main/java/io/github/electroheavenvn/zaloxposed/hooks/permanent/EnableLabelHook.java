@@ -22,17 +22,11 @@ public class EnableLabelHook extends BaseHook
             .matcher(MethodMatcher.create()
                 .declaredClass(ClassMatcher.create()
                     .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                    .addUsingString("observer", StringMatchType.Equals)
-                    .addUsingString("key", StringMatchType.Equals)
-                    .addUsingString("fallback", StringMatchType.Equals)
-                    .addUsingString("uid", StringMatchType.Equals)
-                    .addUsingString("networkProvider", StringMatchType.Equals)
                     .addUsingString("init with uid=", StringMatchType.Equals))
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL)
                 .returnType("int")
                 .paramCount(2)
                 .paramTypes("java.lang.String", "int")
-                .addUsingString("key", StringMatchType.Equals)
             )), classLoader);
         if (methods.isEmpty())
         {
@@ -41,7 +35,7 @@ public class EnableLabelHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 String key = (String)chain.getArg(0);

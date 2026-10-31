@@ -40,7 +40,6 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
             .matcher(ClassMatcher.create()
                 .addUsingString("gallery_save_video_detail", StringMatchType.Equals)
                 .addUsingString("video_download", StringMatchType.Equals)
-                .addUsingString("currentUserId", StringMatchType.Equals)
                 .addUsingString("recommened.link", StringMatchType.Equals)
                 .addUsingString("senderName", StringMatchType.Equals)
                 .addUsingString("platformType", StringMatchType.Equals)
@@ -78,6 +77,15 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
                     .returnType("boolean")
                     .paramCount(0)
                     .addUsingNumber(36)
+                    //261101901 has another method with larger body
+                    .not(MethodMatcher.create()
+                        .addUsingString("recommened.calltime", StringMatchType.Equals)
+                        .addUsingString("recommened.misscall", StringMatchType.Equals)
+                        .addUsingNumber(24)
+                        .addUsingNumber(26)
+                        .addUsingNumber(33)
+                        .addUsingNumber(34)
+)
                 ));
             if (methodsData.isEmpty())
             {
@@ -100,7 +108,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
             )), classLoader);
         if (drawMethod == null)
             return;
-        Logger.i("Hooking: " + drawMethod);
+        Logger.h(drawMethod);
         module.hook(drawMethod).intercept(chain ->
         {
             Object thisObj = chain.getThisObject();

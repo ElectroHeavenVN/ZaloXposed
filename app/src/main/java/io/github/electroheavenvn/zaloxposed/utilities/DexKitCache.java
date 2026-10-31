@@ -83,7 +83,7 @@ public final class DexKitCache
         fw.write(cache.toString());
         fw.close();
         needsUpdate = false;
-        Logger.i("Saved DexKit cache to " + file.getAbsolutePath());
+        Logger.d("Saved DexKit cache to " + file.getAbsolutePath());
     }
 
     public static synchronized boolean ClearCache()
@@ -148,7 +148,7 @@ public final class DexKitCache
         catch (Exception e) { Logger.e(e); }
         try
         {
-            Logger.i("[Ctor] Cache miss for key: " + key);
+            Logger.d("[Ctor] Cache miss for key: " + key);
             List<MethodData> methodDataList = matcher.get();
             if (methodDataList == null)
                 return new ArrayList<>();
@@ -180,11 +180,11 @@ public final class DexKitCache
         List<Constructor<?>> list = GetConstructors(key, matcher, classLoader);
         if (list.isEmpty())
         {
-            LogError("Target constructor not found");
+            LogError("Target constructor not found for key: " + key);
             return null;
         }
         if (list.size() > 1)
-            LogWarn("Multiple constructors found");
+            LogWarn("Multiple constructors found for key: " + key);
         return list.get(0);
     }
 
@@ -196,19 +196,22 @@ public final class DexKitCache
             if (classesObj.has(key))
             {
                 JSONArray cached = classesObj.getJSONArray(key);
-                List<Class<?>> classes = new ArrayList<>();
-                for (int i = 0; i < cached.length(); i++)
+                if (cached.length() > 0)
                 {
-                    String descriptor = cached.getString(i);
-                    classes.add(new DexClass(descriptor).getInstance(classLoader));
+                    List<Class<?>> classes = new ArrayList<>();
+                    for (int i = 0; i < cached.length(); i++)
+                    {
+                        String descriptor = cached.getString(i);
+                        classes.add(new DexClass(descriptor).getInstance(classLoader));
+                    }
+                    return classes;
                 }
-                return classes;
             }
         }
         catch (Exception e) { Logger.e(e); }
         try
         {
-            Logger.i("[Class] Cache miss for key: " + key);
+            Logger.d("[Class] Cache miss for key: " + key);
             List<ClassData> classDataList = matcher.get();
             if (classDataList == null)
                 return new ArrayList<>();
@@ -239,11 +242,11 @@ public final class DexKitCache
         List<Class<?>> list = GetClasses(key, matcher, classLoader);
         if (list.isEmpty())
         {
-            LogError("Target class not found");
+            LogError("Target class not found for key: " + key);
             return null;
         }
         if (list.size() > 1)
-            LogWarn("Multiple classes found");
+            LogWarn("Multiple classes found for key: " + key);
         return list.get(0);
     }
 
@@ -255,21 +258,24 @@ public final class DexKitCache
             if (fieldsObj.has(key))
             {
                 JSONArray cached = fieldsObj.getJSONArray(key);
-                List<Field> fields = new ArrayList<>();
-                for (int i = 0; i < cached.length(); i++)
+                if (cached.length() > 0)
                 {
-                    String descriptor = cached.getString(i);
-                    Field field = new DexField(descriptor).getFieldInstance(classLoader);
-                    field.setAccessible(true);
-                    fields.add(field);
+                    List<Field> fields = new ArrayList<>();
+                    for (int i = 0; i < cached.length(); i++)
+                    {
+                        String descriptor = cached.getString(i);
+                        Field field = new DexField(descriptor).getFieldInstance(classLoader);
+                        field.setAccessible(true);
+                        fields.add(field);
+                    }
+                    return fields;
                 }
-                return fields;
             }
         }
         catch (Exception e) { Logger.e(e); }
         try
         {
-            Logger.i("[Field] Cache miss for key: " + key);
+            Logger.d("[Field] Cache miss for key: " + key);
             List<FieldData> fieldDataList = matcher.get();
             if (fieldDataList == null)
                 return new ArrayList<>();
@@ -301,11 +307,11 @@ public final class DexKitCache
         List<Field> list = GetFields(key, matcher, classLoader);
         if (list.isEmpty())
         {
-            LogError("Target field not found");
+            LogError("Target field not found for key: " + key);
             return null;
         }
         if (list.size() > 1)
-            LogWarn("Multiple fields found");
+            LogWarn("Multiple fields found for key: " + key);
         return list.get(0);
     }
 
@@ -317,21 +323,24 @@ public final class DexKitCache
             if (methodsObj.has(key))
             {
                 JSONArray cached = methodsObj.getJSONArray(key);
-                List<Method> methods = new ArrayList<>();
-                for (int i = 0; i < cached.length(); i++)
+                if (cached.length() > 0)
                 {
-                    String descriptor = cached.getString(i);
-                    Method method = new DexMethod(descriptor).getMethodInstance(classLoader);
-                    method.setAccessible(true);
-                    methods.add(method);
+                    List<Method> methods = new ArrayList<>();
+                    for (int i = 0; i < cached.length(); i++)
+                    {
+                        String descriptor = cached.getString(i);
+                        Method method = new DexMethod(descriptor).getMethodInstance(classLoader);
+                        method.setAccessible(true);
+                        methods.add(method);
+                    }
+                    return methods;
                 }
-                return methods;
             }
         }
         catch (Exception e) { Logger.e(e); }
         try
         {
-            Logger.i("[Method] Cache miss for key: " + key);
+            Logger.d("[Method] Cache miss for key: " + key);
             List<MethodData> methodDataList = matcher.get();
             if (methodDataList == null)
                 return new ArrayList<>();
@@ -363,11 +372,11 @@ public final class DexKitCache
         List<Method> list = GetMethods(key, matcher, classLoader);
         if (list.isEmpty())
         {
-            LogError("Target method not found");
+            LogError("Target method not found for key: " + key);
             return null;
         }
         if (list.size() > 1)
-            LogWarn("Multiple methods found");
+            LogWarn("Multiple methods found for key: " + key);
         return list.get(0);
     }
 
@@ -379,15 +388,18 @@ public final class DexKitCache
             if (constructorsObj.has(key))
             {
                 JSONArray cached = constructorsObj.getJSONArray(key);
-                List<Constructor<?>> constructors = new ArrayList<>();
-                for (int i = 0; i < cached.length(); i++)
+                if (cached.length() > 0)
                 {
-                    String descriptor = cached.getString(i);
-                    Constructor<?> constructor = new DexMethod(descriptor).getConstructorInstance(classLoader);
-                    constructor.setAccessible(true);
-                    constructors.add(constructor);
+                    List<Constructor<?>> constructors = new ArrayList<>();
+                    for (int i = 0; i < cached.length(); i++)
+                    {
+                        String descriptor = cached.getString(i);
+                        Constructor<?> constructor = new DexMethod(descriptor).getConstructorInstance(classLoader);
+                        constructor.setAccessible(true);
+                        constructors.add(constructor);
+                    }
+                    return constructors;
                 }
-                return constructors;
             }
         }
         catch (Exception e) { Logger.e(e); }
@@ -398,12 +410,9 @@ public final class DexKitCache
     {
         List<Constructor<?>> list = GetConstructorsRaw(key, classLoader);
         if (list.isEmpty())   
-        {
-            LogError("Target constructor not found");
             return null;
-        }
         if (list.size() > 1)
-            LogWarn("Multiple constructors found");
+            LogWarn("Multiple constructors found for key: " + key);
         return list.get(0);
     }
 
@@ -455,12 +464,9 @@ public final class DexKitCache
     {
         List<Class<?>> list = GetClassesRaw(key, classLoader);
         if (list.isEmpty())
-        {
-            LogError("Target class not found");
             return null;
-        }
         if (list.size() > 1)
-            LogWarn("Multiple classes found");
+            LogWarn("Multiple classes found for key: " + key);
         return list.get(0);
     }
 
@@ -514,12 +520,9 @@ public final class DexKitCache
     {
         List<Field> list = GetFieldsRaw(key, classLoader);
         if (list.isEmpty())   
-        {
-            LogError("Target field not found");
             return null;
-        }
         if (list.size() > 1)
-            LogWarn("Multiple fields found");
+            LogWarn("Multiple fields found for key: " + key);
         return list.get(0);
     }
 
@@ -573,12 +576,9 @@ public final class DexKitCache
     {
         List<Method> list = GetMethodsRaw(key, classLoader);
         if (list.isEmpty())   
-        {
-            LogError("Target method not found");
             return null;
-        }
         if (list.size() > 1)
-            LogWarn("Multiple methods found");
+            LogWarn("Multiple methods found for key: " + key);
         return list.get(0);
     }
 

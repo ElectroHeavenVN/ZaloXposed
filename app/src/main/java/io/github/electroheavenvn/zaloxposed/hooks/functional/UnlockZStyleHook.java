@@ -2,6 +2,8 @@ package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
+import org.luckypray.dexkit.query.matchers.ClassMatcher;
+import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
 
 import java.lang.reflect.Field;
@@ -26,11 +28,26 @@ public class UnlockZStyleHook extends BaseHook
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .paramCount(0)
+                .declaredClass(ClassMatcher.create()
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .addUsingString("SaveLastTimeAutoLogin", StringMatchType.Equals)
+                    .addUsingString("CurrentUID(mem=", StringMatchType.Equals))
                 .addCaller(MethodMatcher.create()
                     .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                     .returnType("boolean")
                     .paramCount(0)
-                    .addUsingString("subscribePackageIdConfig", StringMatchType.Equals))
+                    .declaredClass(ClassMatcher.create()
+                        .addField(FieldMatcher.create()
+                            .modifiers(Modifier.PUBLIC)
+                            .type(ClassMatcher.create()
+                                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                                .addUsingString("SubscribePackageIdConfig(zStylePackageIds=", StringMatchType.Equals)
+                                .addUsingString(", businessAccountPackageIds=", StringMatchType.Equals)
+                                .addUsingString(", zCloudPlanIds=", StringMatchType.Equals)
+                                .addUsingString(")", StringMatchType.Equals)
+                            )
+                        )
+                    ))
             )), classLoader);
         if (methods.isEmpty())
         {

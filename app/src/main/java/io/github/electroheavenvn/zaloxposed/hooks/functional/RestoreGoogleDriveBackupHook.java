@@ -30,10 +30,8 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
         Class<?> smlBackupManager = DexKitCache.GetClass("RestoreGoogleDriveBackup_SMLBackupManager", () -> bridge.findClass(FindClass.create()
             .matcher(ClassMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .addUsingString("OLD_BACKUP_THRESHOLD", StringMatchType.Equals)
                 .addUsingString("AUTO_BACKUP_PENDING_TIME", StringMatchType.Equals)
                 .addUsingString("SMLBackupManager", StringMatchType.Equals)
-                .addUsingString("reason", StringMatchType.Equals)
                 .addUsingString("BACKUP_RESTORE_SKIP_REASON_", StringMatchType.Equals)
                 // Matches log strings, may not be reliable
                 .addUsingString("Auto-backup setting: ", StringMatchType.Equals)
@@ -59,7 +57,7 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (Config.getRestoreGoogleDriveBackup())
@@ -79,11 +77,6 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.ABSTRACT)
                 .addUsingString("?e2esession=", StringMatchType.Equals)
                 .addUsingString("&version=", StringMatchType.Equals)
-                .addUsingString("provideZaloCloudCriticalCaseManager(...)", StringMatchType.Equals)
-                .addUsingString("getMessageId(...)", StringMatchType.Equals)
-                .addUsingString("provideZaloCloudRepo(...)", StringMatchType.Equals)
-                .addUsingString("quotaUsage", StringMatchType.Equals)
-                .addUsingString("groupId", StringMatchType.Equals)
                 .addUsingString("SMLZCloud", StringMatchType.Equals)
                 .addUsingString(" failed. Retrying in ", StringMatchType.Equals)
             )), classLoader);
@@ -121,7 +114,7 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.i("Hooking: " + method);
+            Logger.h(method);
             module.hook(method).intercept(chain ->
             {
                 if (Config.getRestoreGoogleDriveBackup())

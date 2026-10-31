@@ -110,7 +110,6 @@ public final class Utils
                     .addUsingString("@vi", StringMatchType.Equals)
                     .addUsingString("en", StringMatchType.Equals)
                     .addUsingString("@en", StringMatchType.Equals)
-                    .addUsingString("my", StringMatchType.Equals)
                 )
             )), classLoader);
         LoadResourceClasses(bridge, classLoader);
