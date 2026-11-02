@@ -443,6 +443,14 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         listItemSetting = ListItemSettingHelper.CreateNew(context);
         rootLayout.addView(listItemSetting);
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
+        ListItemSettingHelper.ShowDivider(listItemSetting);
+        ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Hide fullscreen effects" : "Ẩn hiệu ứng toàn màn hình");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Hide fullscreen effects when certain messages are received" : "Ẩn hiệu ứng toàn màn hình khi nhận được một số tin nhắn nhất định");
+        ListItemSettingHelper.SetSwitch(listItemSetting, Config.getHideFullscreenEffects());
+        ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setHideFullscreenEffects);
+        listItemSetting = ListItemSettingHelper.CreateNew(context);
+        rootLayout.addView(listItemSetting);
+        ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.HideDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Allow sharing hidden sticker packs" : "Cho phép chia sẻ bộ sticker ẩn");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableShareHiddenStickerPack());

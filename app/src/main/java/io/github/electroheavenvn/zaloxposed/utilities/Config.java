@@ -341,4 +341,8 @@ public final class Config
     public static final String KEY_RESTORE_GOOGLE_DRIVE_BACKUP = "restore_google_drive_backup";
     public static boolean getRestoreGoogleDriveBackup() { return (boolean)get(KEY_RESTORE_GOOGLE_DRIVE_BACKUP, false); }
     public static void setRestoreGoogleDriveBackup(boolean value) { set(KEY_RESTORE_GOOGLE_DRIVE_BACKUP, value); }
+
+    public static final String KEY_HIDE_FULLSCREEN_EFFECTS = "hide_fullscreen_effects";
+    public static boolean getHideFullscreenEffects() { return (boolean)get(KEY_HIDE_FULLSCREEN_EFFECTS, false); }
+    public static void setHideFullscreenEffects(boolean value) { set(KEY_HIDE_FULLSCREEN_EFFECTS, value); }
 }
