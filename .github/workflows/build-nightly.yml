@@ -107,3 +107,47 @@ jobs:
           prerelease: true
           generate_release_notes: false
           files: release/*.apk
+
+      - name: Publish APK to Xposed Modules Repo
+        env:
+          GH_TOKEN: ${{ secrets.XPOSED_REPO_TOKEN }}
+          TARGET_REPO: Xposed-Modules-Repo/io.github.electroheavenvn.zaloxposed
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "Missing XPOSED_REPO_TOKEN secret" >&2
+            exit 1
+          fi
+
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+          VERSION_NAME="nightly-${SHORT_SHA}"
+          VERSION_CODE="$(git rev-list --count HEAD)"
+          TARGET_TAG="${VERSION_CODE}-${VERSION_NAME}"
+
+          APK="$(find release -maxdepth 1 -type f -name '*.apk' | sort | head -n1)"
+          if [ -z "$APK" ]; then
+            echo "Release APK not found" >&2
+            exit 1
+          fi
+
+          NOTES_FILE="$RUNNER_TEMP/xposed-release-notes.md"
+          git log -1 --pretty=format:"Nightly build (%h)%n%n%B" > "$NOTES_FILE"
+
+          gh release delete "$TARGET_TAG" \
+            --repo "$TARGET_REPO" \
+            --yes \
+            --cleanup-tag 2>/dev/null || true
+
+          gh release create "$TARGET_TAG" "$APK" \
+            --repo "$TARGET_REPO" \
+            --target main \
+            --title "$VERSION_NAME" \
+            --notes-file "$NOTES_FILE" \
+            --prerelease \
+            --draft
+
+          gh release edit "$TARGET_TAG" \
+            --repo "$TARGET_REPO" \
+            --draft=false \
+            --prerelease

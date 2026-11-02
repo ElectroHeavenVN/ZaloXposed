@@ -12,8 +12,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-release:
+  check-latest:
     if: ${{ !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      is_latest: ${{ steps.check.outputs.is_latest }}
+    steps:
+      - name: Verify release is latest
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          CURRENT_TAG="${{ github.event.release.tag_name }}"
+          LATEST_TAG=""
+
+          for i in {1..3}; do
+            LATEST_TAG="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq '.tag_name // empty' 2>/dev/null || true)"
+            if [ "$LATEST_TAG" = "$CURRENT_TAG" ]; then
+              break
+            fi
+            sleep 2
+          done
+
+          if [ "$LATEST_TAG" = "$CURRENT_TAG" ]; then
+            echo "Release $CURRENT_TAG is latest."
+            echo "is_latest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Release $CURRENT_TAG is not latest (latest is '$LATEST_TAG'). Skipping build."
+            echo "is_latest=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-release:
+    needs: check-latest
+    if: ${{ needs.check-latest.outputs.is_latest == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
