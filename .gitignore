@@ -43,6 +43,4 @@ google-services.json
 .DS_Store
 
 ZaloXposedNative/**
-!ZaloXposedNative/**/
-!ZaloXposedNative/**/*.so
 build-install.bat
