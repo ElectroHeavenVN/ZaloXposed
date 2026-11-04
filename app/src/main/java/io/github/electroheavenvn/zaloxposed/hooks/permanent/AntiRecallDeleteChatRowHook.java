@@ -84,8 +84,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
                         .addUsingNumber(24)
                         .addUsingNumber(26)
                         .addUsingNumber(33)
-                        .addUsingNumber(34)
-)
+                        .addUsingNumber(34))
                 ));
             if (methodsData.isEmpty())
             {

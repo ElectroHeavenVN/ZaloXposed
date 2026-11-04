@@ -156,7 +156,7 @@ public class ZaloXposedLoader extends XposedModule
                     }
                 }
                 catch (Throwable ignored) { }
-            }, 2100);
+            }, 1100);
             return result;
         });
     }
@@ -240,7 +240,7 @@ public class ZaloXposedLoader extends XposedModule
                 }
             }
             catch (Throwable ignored) { }
-        }, 2000);
+        }, 1000);
         Logger.d("ZaloXposed loaded in " + (System.currentTimeMillis() - startTime) + "ms");
         DexKitCache.AutoSave();
     }

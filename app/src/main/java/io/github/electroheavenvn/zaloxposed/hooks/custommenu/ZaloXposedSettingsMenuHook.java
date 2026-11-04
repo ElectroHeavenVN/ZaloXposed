@@ -102,6 +102,7 @@ public class ZaloXposedSettingsMenuHook extends BaseHook
         ListItemSettingHelper.SetIDTracking(listItemSetting, "");
         ListItemSettingHelper.ShowDivider(listItemSetting);
         ListItemSettingHelper.SetTitle(listItemSetting, Utils.IsEnglish() ? "Override disappearing messages config" : "Ghi đè cấu hình tin nhắn tự xoá");
+        ListItemSettingHelper.SetSubtitle(listItemSetting, Utils.IsEnglish() ? "Only works for threads that have disappearing messages enabled" : "Chỉ hoạt động với các cuộc trò chuyện đã bật tin nhắn tự xoá");
         ListItemSettingHelper.SetSwitch(listItemSetting, Config.getEnableTTLOverride());
         ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, Config::setEnableTTLOverride);
         headerTitle = createHeaderTitle(context);
