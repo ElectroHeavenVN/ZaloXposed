@@ -249,7 +249,7 @@ public final class Utils
         return null;
     }
 
-    public static Field FindFieldByType(Class<?> clazz, String typeName)
+    public static Field FindFieldByType(Class<?> clazz, String typeName, boolean recursive)
     {
         List<Field> fields = new ArrayList<>();
         Class<?> c = clazz;
@@ -257,6 +257,8 @@ public final class Utils
         {
             fields.addAll(Arrays.asList(c.getDeclaredFields()));
             c = c.getSuperclass();
+            if (!recursive)
+                break;
         }
         for (Field f : fields)
         {

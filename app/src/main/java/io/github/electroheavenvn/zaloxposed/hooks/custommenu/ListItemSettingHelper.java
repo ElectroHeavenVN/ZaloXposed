@@ -25,14 +25,15 @@ public final class ListItemSettingHelper
     }
 
     public static RelativeLayout CreateNew(Context context) throws Exception
-    { 
-        Object listItemSetting = listItemSettingClass.getConstructor(Context.class).newInstance(context);
+    {
+        RelativeLayout listItemSetting = (RelativeLayout)listItemSettingClass.getConstructor(Context.class).newInstance(context);
         Method onFinishInflate = listItemSettingClass.getDeclaredMethod("onFinishInflate");
         onFinishInflate.setAccessible(true);
         onFinishInflate.invoke(listItemSetting);
-        return (RelativeLayout)listItemSetting;
+        SetIDTracking(listItemSetting, "");
+        return listItemSetting;
     }
-    
+
     public static void SetTitle(RelativeLayout listItemSetting, String title) throws Exception
     {
         CheckType(listItemSetting);
@@ -52,7 +53,7 @@ public final class ListItemSettingHelper
     }
 
     public static void SetCheckedChangeListener(RelativeLayout listItemSetting, Consumer<Boolean> onChanged) throws Exception
-    { 
+    {
         CheckType(listItemSetting);
         for (Method m : listItemSetting.getClass().getMethods())
         {
@@ -67,7 +68,7 @@ public final class ListItemSettingHelper
                 {
                     if (arg instanceof Boolean)
                     {
-                        onChanged.accept((Boolean) arg);
+                        onChanged.accept((Boolean)arg);
                         break;
                     }
                 }
@@ -75,7 +76,7 @@ public final class ListItemSettingHelper
             });
             m.invoke(listItemSetting, proxy);
             break;
-        } 
+        }
     }
 
     public static void SetOnClickListener(RelativeLayout listItemSetting, View.OnClickListener onClickListener) throws Exception
@@ -369,79 +370,79 @@ public final class ListItemSettingHelper
     public static CharSequence GetTitle(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (CharSequence) listItemSetting.getClass().getMethod("getTitle").invoke(listItemSetting);
+        return (CharSequence)listItemSetting.getClass().getMethod("getTitle").invoke(listItemSetting);
     }
 
     public static CharSequence GetSubtitle(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (CharSequence) listItemSetting.getClass().getMethod("getSubtitle").invoke(listItemSetting);
+        return (CharSequence)listItemSetting.getClass().getMethod("getSubtitle").invoke(listItemSetting);
     }
 
     public static CharSequence GetBracket(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (CharSequence) listItemSetting.getClass().getMethod("getBracket").invoke(listItemSetting);
+        return (CharSequence)listItemSetting.getClass().getMethod("getBracket").invoke(listItemSetting);
     }
 
     public static String GetViewIdTracking(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (String) listItemSetting.getClass().getMethod("getViewIdTracking").invoke(listItemSetting);
+        return (String)listItemSetting.getClass().getMethod("getViewIdTracking").invoke(listItemSetting);
     }
 
     public static boolean GetDisableSwitch(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (boolean) listItemSetting.getClass().getMethod("getDisableSwitch").invoke(listItemSetting);
+        return (boolean)listItemSetting.getClass().getMethod("getDisableSwitch").invoke(listItemSetting);
     }
 
     public static boolean IsEnabled(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (boolean) listItemSetting.getClass().getMethod("isEnabled").invoke(listItemSetting);
+        return (boolean)listItemSetting.getClass().getMethod("isEnabled").invoke(listItemSetting);
     }
 
     public static ImageView GetIconSetting(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (ImageView) listItemSetting.getClass().getMethod("getIconSetting").invoke(listItemSetting);
+        return (ImageView)listItemSetting.getClass().getMethod("getIconSetting").invoke(listItemSetting);
     }
 
     public static ImageView GetIconTick(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (ImageView) listItemSetting.getClass().getMethod("getIconTick").invoke(listItemSetting);
+        return (ImageView)listItemSetting.getClass().getMethod("getIconTick").invoke(listItemSetting);
     }
 
     public static CompoundButton GetSwitch(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (CompoundButton) listItemSetting.getClass().getMethod("getSwitch").invoke(listItemSetting);
+        return (CompoundButton)listItemSetting.getClass().getMethod("getSwitch").invoke(listItemSetting);
     }
 
     public static CheckBox GetCheckBox(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (CheckBox) listItemSetting.getClass().getMethod("getCheckBox").invoke(listItemSetting);
+        return (CheckBox)listItemSetting.getClass().getMethod("getCheckBox").invoke(listItemSetting);
     }
 
     public static TextView GetTvState(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (TextView) listItemSetting.getClass().getMethod("getTvState").invoke(listItemSetting);
+        return (TextView)listItemSetting.getClass().getMethod("getTvState").invoke(listItemSetting);
     }
 
     public static LinearLayout GetLlRight(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (LinearLayout) listItemSetting.getClass().getMethod("getLlRight").invoke(listItemSetting);
+        return (LinearLayout)listItemSetting.getClass().getMethod("getLlRight").invoke(listItemSetting);
     }
 
     public static ImageView GetIconRemind(RelativeLayout listItemSetting) throws Exception
     {
         CheckType(listItemSetting);
-        return (ImageView) listItemSetting.getClass().getMethod("getIconRemind").invoke(listItemSetting);
+        return (ImageView)listItemSetting.getClass().getMethod("getIconRemind").invoke(listItemSetting);
     }
 
     private static void CheckType(RelativeLayout listItemSetting) throws IllegalArgumentException

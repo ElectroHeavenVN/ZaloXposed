@@ -184,7 +184,7 @@ public final class Config
         }
     }
 
-    private static Object get(String key, Object defaultValue)
+    public static Object get(String key, Object defaultValue)
     {
         try
         {
@@ -198,7 +198,7 @@ public final class Config
         return defaultValue;
     }
 
-    private static void set(String key, Object value)
+    public static void set(String key, Object value)
     {
         try
         {

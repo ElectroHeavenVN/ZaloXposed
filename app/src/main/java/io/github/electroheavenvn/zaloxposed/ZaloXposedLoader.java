@@ -15,6 +15,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import org.luckypray.dexkit.DexKitBridge;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+
 import io.github.electroheavenvn.zaloxposed.hooks.*;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.*;
 import io.github.electroheavenvn.zaloxposed.hooks.morphe.*;
@@ -24,17 +29,9 @@ import io.github.electroheavenvn.zaloxposed.hooks.permanent.*;
 import io.github.electroheavenvn.zaloxposed.hooks.tracking.*;
 import io.github.electroheavenvn.zaloxposed.hooks.ui.*;
 import io.github.electroheavenvn.zaloxposed.hooks.ads.*;
-import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-import io.github.electroheavenvn.zaloxposed.utilities.Utils;
-
-import org.luckypray.dexkit.DexKitBridge;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-
+import io.github.electroheavenvn.zaloxposed.hooks.custommenu.*;
+import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingsMenu;
+import io.github.electroheavenvn.zaloxposed.utilities.*;
 import io.github.libxposed.api.XposedModule;
 
 public class ZaloXposedLoader extends XposedModule
@@ -50,16 +47,24 @@ public class ZaloXposedLoader extends XposedModule
         System.loadLibrary("dexkit");
         hooks.add(new NativeHook());
         hooks.add(new ResourceHook());
-        hooks.add(new ZaloXposedSettingsMenuHook());
-        hooks.add(new CustomBackgroundHook());
         hooks.add(new EnableE2EEHook());
         hooks.add(new EnableLabelHook());
-        hooks.add(new RestoreGoogleDriveBackupHook());
-        hooks.add(new RestoreProfileMusicHook());
         hooks.add(new RestoreDevToolsMenuHook());
         hooks.add(new EnableSetNicknameInGroupHook());
         hooks.add(new DisableDohHook());
         hooks.add(new AntiRecallDeleteChatRowHook());
+        hooks.add(new ConfigImportExportHook());
+        hooks.add(new TestHook());
+        if (MorpheConstants.isPatchedByMorphe())
+            hooks.add(new FixProviderHook());
+
+        hooks.add(new TabMeViewHook());
+        hooks.add(new SettingV2ViewDefacer());
+        hooks.add(new SettingPrivateV2ViewDefacer());
+
+        hooks.add(new CustomBackgroundHook());
+        hooks.add(new RestoreGoogleDriveBackupHook());
+        hooks.add(new RestoreProfileMusicHook());
         hooks.add(new DisableFirebaseLoggingHook());
         hooks.add(new DisableZaloTrackingHook());
         hooks.add(new HideAdsHook());
@@ -78,11 +83,6 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new ExtendedGroupRightMenuHook());
         hooks.add(new UnlockZStyleHook());
         hooks.add(new HideFullscreenEffectsHook());
-
-        hooks.add(new TestHook());
-
-        if (MorpheConstants.isPatchedByMorphe())
-            hooks.add(new FixProviderHook());
     }
 
     @SuppressWarnings("deprecation")
@@ -209,6 +209,7 @@ public class ZaloXposedLoader extends XposedModule
             Method addAssetPath = AssetManager.class.getMethod("addAssetPath", String.class);
             addAssetPath.invoke(assetManager, getModuleApplicationInfo().sourceDir);
             hookDisplayCustomSplash(param.getClassLoader(), assetManager);
+            SettingsMenu.Init(bridge, param.getClassLoader());
             for (BaseHook hook : hooks)
             {
                 try

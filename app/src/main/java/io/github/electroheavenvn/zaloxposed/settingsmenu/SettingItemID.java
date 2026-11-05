@@ -1,4 +1,4 @@
-package io.github.electroheavenvn.zaloxposed.hooks.custommenu;
+package io.github.electroheavenvn.zaloxposed.settingsmenu;
 
 public enum SettingItemID
 {
