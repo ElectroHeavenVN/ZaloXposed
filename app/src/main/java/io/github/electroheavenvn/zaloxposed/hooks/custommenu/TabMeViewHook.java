@@ -31,7 +31,7 @@ public class TabMeViewHook extends BaseHook
     private static final int CUSTOM_DRAWABLE_ID = -6767;
 
     private static Method openView;
-    private static Field viewManager;
+    private static Field activityHost;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -52,7 +52,7 @@ public class TabMeViewHook extends BaseHook
             )), classLoader);
         if (zaloViewActionBar == null)
             return;
-        viewManager = DexKitCache.GetField("ZaloXposedSettings_ZaloViewActionBar_ViewManager", () -> bridge.findField(FindField.create()
+        activityHost = DexKitCache.GetField("ZaloXposedSettings_ZaloViewActionBar_ActivityHost", () -> bridge.findField(FindField.create()
             .matcher(FieldMatcher.create()
                 .modifiers(Modifier.PUBLIC)
                 .declaredClass(zaloViewActionBar)
@@ -68,11 +68,11 @@ public class TabMeViewHook extends BaseHook
                     .addMethod(MethodMatcher.create().name("isDestroyed"))
                     .addInterface("com.zing.zalo.activity.RequestPermissionInterface"))
             )), classLoader);
-        if (viewManager == null)
+        if (activityHost == null)
             return;
         openView = DexKitCache.GetMethod("ZaloXposedSettings_TabMeView_OpenView", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
-                .declaredClass(viewManager.getType())
+                .declaredClass(activityHost.getType())
                 .returnType("void")
                 .paramCount(3)
                 .paramTypes(Class.class, Bundle.class, int.class)
@@ -185,12 +185,12 @@ public class TabMeViewHook extends BaseHook
                 }
                 if (tabMeViewInst == null)
                     return chain.proceed();
-                Object viewManagerInst = viewManager.get(tabMeViewInst);
-                if (viewManagerInst != null)
+                Object activityHostInst = activityHost.get(tabMeViewInst);
+                if (activityHostInst != null)
                 {
                     ZaloXposedSettingsMenu.isOpening = true;
                     Class<?> settingV2ViewClass = Class.forName("com.zing.zalo.ui.settings.SettingV2View", false, classLoader);
-                    openView.invoke(viewManagerInst, settingV2ViewClass, null, 1);
+                    openView.invoke(activityHostInst, settingV2ViewClass, null, 1);
                 }
                 return null;
             }

@@ -12,6 +12,7 @@ import io.github.electroheavenvn.zaloxposed.hooks.custommenu.TabMeSettingItemHel
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZButtonHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.ConfigImportExportHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.ZaloViewLauncher;
 
 /*
 Why do we need to move all setting items to a separate class?
@@ -32,6 +33,10 @@ For now, we will still use the traditional settings menu.
 public final class SettingsMenu
 {
     private SettingsMenu() { }
+
+    static Class<?> settingView;
+    static Class<?> buildInfoView;
+    static Class<?> settingCallLogsView;
 
     private static final ArrayList<ISettingItem> settingItems = new ArrayList<>();
 
@@ -71,6 +76,11 @@ public final class SettingsMenu
                 new SwitchSettingFeature("hideZInstantAdsTitle", "hideZInstantAdsDesc", Config.KEY_HIDE_Z_INSTANT_ADS),
                 new SwitchSettingFeature("hideTimelineAdsTitle", "", Config.KEY_HIDE_FEED_ITEM_Z_INSTANT_ADS),
                 new SwitchSettingFeature("blockAdsEndpointsTitle", "", Config.KEY_BLOCK_ADS_ENDPOINTS)
+            )),
+            new SettingSubCategory("logTrackSubCategoryTitle", List.of(
+                new SwitchSettingFeature("disableFirebaseLoggingTitle", "", Config.KEY_DISABLE_FIREBASE_LOGGING),
+                new SwitchSettingFeature("disableZaloTrackingTitle", "", Config.KEY_DISABLE_ZALO_TRACKING),
+                new SwitchSettingFeature("blockQosEndpointsTitle", "", Config.KEY_BLOCK_ZALO_QOS)
             ))
         )));
         settingItems.add(new SettingCategory("uiCategoryTitle", "uiCategoryDesc", List.of(
@@ -122,10 +132,28 @@ public final class SettingsMenu
                 })
             ))
         )));
+        settingItems.add(new Separator());
+        settingItems.add(new SettingCategory("extendedSettingsCategoryTitle", "extendedSettingsCategoryDesc", List.of(
+            new SettingSubCategory("", List.of(
+                new OptionSettingFeature("openSettingViewTitle", "", ((item, context) -> {
+                    ZaloViewLauncher.Open(settingView, null);
+                })),
+                new OptionSettingFeature("openBuildInfoViewTitle", "openBuildInfoViewDesc", ((item, context) -> {
+                    ZaloViewLauncher.Open(buildInfoView, null);
+                })),
+                new OptionSettingFeature("openCallLogsViewTitle", "", ((item, context) -> {
+                    ZaloViewLauncher.Open(settingCallLogsView, null);
+                }))
+            ))
+        )));
     }
 
     public static void Init(DexKitBridge bridge, ClassLoader classLoader) throws Exception
     {
+        settingView = Class.forName("com.zing.zalo.ui.settings.SettingView", false, classLoader);
+        buildInfoView = Class.forName("com.zing.zalo.ui.settings.devtool.BuildInfoView", false, classLoader);
+        settingCallLogsView = Class.forName("com.zing.zalo.ui.call.SettingCallLogsView", false, classLoader);
+
         ListItemSettingHelper.Init(classLoader);
         ZButtonHelper.Init(classLoader);
         TabMeSettingItemHelper.Init(bridge, classLoader);

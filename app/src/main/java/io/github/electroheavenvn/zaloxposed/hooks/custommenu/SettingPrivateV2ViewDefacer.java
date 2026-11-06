@@ -56,10 +56,13 @@ public class SettingPrivateV2ViewDefacer extends BaseHook
         for (int i = 0; i < subCategories.size(); i++)
         {
             SettingSubCategory subCategory = subCategories.get(i);
-            subCategoryTitle = createSubCategoryTitle(context);
-            subCategoryTitle.setText(subCategory.getTitle());
-            rootLayout.addView(subCategoryTitle);
-
+            String title = subCategory.getTitle();
+            if (title != null && !title.isEmpty())
+            {
+                subCategoryTitle = createSubCategoryTitle(context);
+                subCategoryTitle.setText(title);
+                rootLayout.addView(subCategoryTitle);
+            }
             List<SettingFeature> features = subCategory.getFeatures();
             for (int j = 0; j < features.size(); j++)
             {
@@ -92,6 +95,8 @@ public class SettingPrivateV2ViewDefacer extends BaseHook
         switch (feature.getConfigType())
         {
             case OPTION:
+                ListItemSettingHelper.SetShowChevronRight(listItemSetting, true);
+                ListItemSettingHelper.SetOnClickListener(listItemSetting, view -> feature.onOptionClicked(view.getContext()));
                 break;
             case SWITCH:
                 ListItemSettingHelper.SetSwitch(listItemSetting, (boolean)feature.getCurrentState());

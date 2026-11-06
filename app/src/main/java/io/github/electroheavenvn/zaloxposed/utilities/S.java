@@ -119,6 +119,13 @@ public final class S
         trans.put("importConfigFileTitle", new String[] { "Import configuration from file", "Nhập cấu hình từ tệp" });
         trans.put("importConfigFileDesc", new String[] { "Choose a JSON file", "Chọn tệp JSON từ bộ nhớ" });
 
+        // Extended settings
+        trans.put("extendedSettingsCategoryTitle", new String[] { "Extended Settings", "Cài đặt mở rộng" });
+        trans.put("extendedSettingsCategoryDesc", new String[] { "Advanced/hidden settings inside Zalo", "Các cài đặt nâng cao/ẩn bên trong Zalo" });
+        trans.put("openSettingViewTitle", new String[] { "Open old Settings view", "Mở giao diện cài đặt cũ" });
+        trans.put("openBuildInfoViewTitle", new String[] { "Open Build Info view", "Mở giao diện thông tin phiên bản" });
+        trans.put("openBuildInfoViewDesc" , new String[] { "Can be opened by tapping the Zalo version 10 times in Settings > About Zalo", "Có thể mở bằng cách nhấn 10 lần vào phiên bản Zalo trong Cài đặt > Giới thiệu về Zalo" });
+        trans.put("openCallLogsViewTitle", new String[] { "Open Call Logs view", "Mở giao diện \"Danh sách log\" cuộc gọi" });
 
 
         // Toasts & Messages
@@ -141,13 +148,19 @@ public final class S
 
     public static String tr(String key)
     {
-        if (key == null)
+        if (key == null || key.isEmpty())
             return "";
         String[] values = trans.get(key);
         if (values == null || values.length == 0)
+        {
+            Logger.w("String value for key " + key + " not found");
             return key;
+        }
         if (values.length == 1)
+        {
+            Logger.w("Missing string values for key " + key);
             return values[0];
+        }
         return values[Utils.IsEnglish() ? 0 : 1];
     }
 

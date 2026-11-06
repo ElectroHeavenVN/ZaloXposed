@@ -28,6 +28,7 @@ import java.util.List;
 import io.github.electroheavenvn.zaloxposed.MorpheConstants;
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.ISettingItem;
+import io.github.electroheavenvn.zaloxposed.settingsmenu.Separator;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingCategory;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingFeature;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingSubCategory;
@@ -59,6 +60,11 @@ public class SettingV2ViewDefacer extends BaseHook
             ISettingItem item = items.get(i);
             if (item instanceof SettingSubCategory)
                 continue;
+            if (item instanceof Separator)
+            {
+                rootLayout.addView(createSeparator(context));
+                continue;
+            }
             if (item instanceof SettingFeature feature)
             {
                 feature.onLoad(context);
@@ -75,10 +81,13 @@ public class SettingV2ViewDefacer extends BaseHook
                 rootLayout.addView(createSeparator(context));
             RelativeLayout listItemSetting = ListItemSettingHelper.CreateNew(context);
             rootLayout.addView(listItemSetting);
+            ListItemSettingHelper.HideDivider(listItemSetting);
             if (i + 1 < items.size())
-                ListItemSettingHelper.ShowDivider(listItemSetting);
-            else
-                ListItemSettingHelper.HideDivider(listItemSetting);
+            {
+                ISettingItem nextItem = items.get(i + 1);
+                if (!(nextItem instanceof Separator))
+                    ListItemSettingHelper.ShowDivider(listItemSetting);
+            }
             ListItemSettingHelper.SetTitle(listItemSetting, item.getTitle());
             ListItemSettingHelper.SetSubtitle(listItemSetting, item.getDescription());
             final int index = i;
