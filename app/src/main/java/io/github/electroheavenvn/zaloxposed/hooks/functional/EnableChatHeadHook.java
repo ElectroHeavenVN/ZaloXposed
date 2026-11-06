@@ -8,6 +8,8 @@ import android.content.IntentFilter;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.view.Display;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.WindowManager;
 
 import com.android.tools.smali.dexlib2.Opcode;
@@ -264,10 +266,9 @@ public class EnableChatHeadHook extends BaseHook
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_8", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
-                .name("run")
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .paramCount(0)
+                .paramCount(0, 2)
                 .addUsingString("System Setting not allow to create Bubbles on Screen", StringMatchType.Equals)
                 .addUsingString("ChatView: Open Bubble Chat", StringMatchType.Contains)
             )), classLoader);
@@ -418,11 +419,83 @@ public class EnableChatHeadHook extends BaseHook
             Logger.h(14, method);
             module.hook(method).intercept(spoofHook);
         }
+
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_15", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .declaredClass("com.zing.zalo.ui.settings.SettingMessageView")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("android.view.View")
+                .paramCount(3)
+                .paramTypes("android.view.LayoutInflater", "android.view.ViewGroup", "android.os.Bundle")
+            )), classLoader);
+        if (methods.isEmpty())
+            Logger.e("Target method not found 15");
+        for (Method method : methods)
+        {
+            Logger.h(15, method);
+            module.hook(method).intercept(spoofHook);
+        }
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_16", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC)
+                .returnType("int")
+                .paramCount(0)
+                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+                .addUsingString("activity", StringMatchType.Equals)
+                .addUsingString("com.zing.zalo.ui.MessagePopupActivity", StringMatchType.Equals)
+                .addUsingString("com.zing.zalo.ui.ZaloUserPopupActivity", StringMatchType.Equals)
+                .addUsingString("com.zing.zalo.ui.RetryMsgPopupActivity", StringMatchType.Equals)
+                .addUsingString("com.zing.zalo.ui.MessageHintSuggestActivity", StringMatchType.Equals)
+                .addUsingNumber(0)
+                .addUsingNumber(1)
+                .addUsingNumber(1024)
+            )), classLoader);
+        if (methods.isEmpty())
+            Logger.e("Target method not found 16");
+        for (Method method : methods)
+        {
+            Logger.h(16, method);
+            module.hook(method).intercept(spoofHook);
+        }
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_17", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC)
+                .returnType("boolean")
+                .paramCount(0)
+                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+                .addInvoke(MethodMatcher.create()
+                    .declaredClass("com.zing.zalocore.connection.socket.NativeSocket")
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .returnType("void")
+                    .addUsingNumber(30000L)
+                    .addUsingNumber(102)
+                    .addUsingNumber(103))
+                .addInvoke(MethodMatcher.create()
+                    .declaredClass("com.zing.zalocore.connection.socket", StringMatchType.StartsWith)
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .returnType("void")
+                    .name("handleMessage")
+                    .addUsingNumber(1000)
+                    .addUsingNumber(2000)
+                    .addUsingNumber(102)
+                    .addUsingNumber(103))
+            )), classLoader);
+        if (methods.isEmpty())
+            Logger.e("Target method not found 17");
+        for (Method method : methods)
+        {
+            Logger.h(17, method);
+            module.hook(method).intercept(spoofHook);
+        }
+
         Method method = Class.forName("com.zing.zalo.ui.maintab.group.GroupTabView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
         Logger.h(-1, method);
         module.hook(method).intercept(spoofHook);
         method = Class.forName("com.zing.zalo.ui.maintab.msg.MessagesView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
         Logger.h(-2, method);
+        module.hook(method).intercept(spoofHook);
+        method = Class.forName("com.zing.zalo.ui.zviews.PassCodeSettingView", false, classLoader).getDeclaredMethod("onClick", View.class);
+        Logger.h(-3, method);
         module.hook(method).intercept(spoofHook);
         hooked = true;
     }
