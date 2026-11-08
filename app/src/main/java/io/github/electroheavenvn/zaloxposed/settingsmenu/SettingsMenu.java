@@ -13,6 +13,8 @@ import io.github.electroheavenvn.zaloxposed.hooks.custommenu.TabMeSettingItemHel
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZButtonHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.ConfigImportExportHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 import io.github.electroheavenvn.zaloxposed.utilities.ZaloViewLauncher;
 
 /*
@@ -140,6 +142,12 @@ public final class SettingsMenu
                     ZaloViewLauncher.Open(settingCallLogsView, null)))
             ))
         )));
+
+        settingItems.add(new Button("reloadDexKitCacheBtnTitle", (item, context) -> {
+            DexKitCache.ClearCache();
+            Utils.RestartApp(context);
+        }));
+        settingItems.add(new Button("restartAppBtnTitle", (item, context) -> Utils.RestartApp(context)));
     }
 
     public static void Init(DexKitBridge bridge, ClassLoader classLoader) throws Exception
