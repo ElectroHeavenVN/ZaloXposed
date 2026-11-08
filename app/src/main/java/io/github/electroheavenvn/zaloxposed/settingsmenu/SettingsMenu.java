@@ -7,6 +7,7 @@ import org.luckypray.dexkit.DexKitBridge;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.electroheavenvn.zaloxposed.MorpheConstants;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ListItemSettingHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.TabMeSettingItemHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZButtonHelper;
@@ -123,27 +124,20 @@ public final class SettingsMenu
             )),
             new SettingSubCategory("configBackupRestoreSubCategoryTitle", List.of(
                 new OptionSettingFeature("exportConfigFileTitle", "exportConfigFileDesc", (item, context) ->
-                {
-                    ConfigImportExportHook.ExportToDownloadFolder(context);
-                }),
+                    ConfigImportExportHook.ExportToDownloadFolder(context)),
                 new OptionSettingFeature("importConfigFileTitle", "importConfigFileDesc", (item, context) ->
-                {
-                    ConfigImportExportHook.ImportUsingFilePicker(context);
-                })
+                    ConfigImportExportHook.ImportUsingFilePicker(context))
             ))
         )));
         settingItems.add(new Separator());
         settingItems.add(new SettingCategory("extendedSettingsCategoryTitle", "extendedSettingsCategoryDesc", List.of(
             new SettingSubCategory("", List.of(
-                new OptionSettingFeature("openSettingViewTitle", "", ((item, context) -> {
-                    ZaloViewLauncher.Open(settingView, null);
-                })),
-                new OptionSettingFeature("openBuildInfoViewTitle", "openBuildInfoViewDesc", ((item, context) -> {
-                    ZaloViewLauncher.Open(buildInfoView, null);
-                })),
-                new OptionSettingFeature("openCallLogsViewTitle", "", ((item, context) -> {
-                    ZaloViewLauncher.Open(settingCallLogsView, null);
-                }))
+                new OptionSettingFeature("openSettingViewTitle", "", ((item, context) ->
+                    ZaloViewLauncher.Open(settingView, null))),
+                new OptionSettingFeature("openBuildInfoViewTitle", "openBuildInfoViewDesc", ((item, context) ->
+                    ZaloViewLauncher.Open(buildInfoView, null))),
+                new OptionSettingFeature("openCallLogsViewTitle", "", ((item, context) ->
+                    ZaloViewLauncher.Open(settingCallLogsView, null)))
             ))
         )));
     }
