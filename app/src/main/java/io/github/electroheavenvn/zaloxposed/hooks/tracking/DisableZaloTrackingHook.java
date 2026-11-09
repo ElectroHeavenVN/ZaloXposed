@@ -13,6 +13,7 @@ import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 public class DisableZaloTrackingHook extends BaseHook
 {
@@ -47,6 +48,10 @@ public class DisableZaloTrackingHook extends BaseHook
                 {
                     String enumName = ((Enum<?>)enumValue).name();
                     if (enumName.equals("ZALO_LOG"))
+                        return "";
+                    if (enumName.equals("QOS_TRK_INSTALL_ZALO_APP_S"))
+                        return "";
+                    if (enumName.equals("QOS_TALK_S"))
                         return "";
                 }
                 return chain.proceed();
@@ -139,15 +144,20 @@ public class DisableZaloTrackingHook extends BaseHook
             Logger.h(method);
             module.hook(method).intercept(chain ->
             {
+                Object value = chain.proceed();
                 if (!Config.getBlockQoSEndpoints())
-                    return chain.proceed();
-                Enum<?> enumValue = (Enum<?>)chain.getArg(0);
-                int ord = enumValue.ordinal();
-                return switch (ord)
-                {
-                    case 154, 110, 115, 109, 108, 107, 106, 105, 145 -> "";
-                    default -> chain.proceed();
-                };
+                    return value;
+                String endpoint = value.toString();
+                // https://qos-talk.123c.vn/api/qos/*, https://qos-talk.123c.vn/uploadservicepublic
+                if (endpoint.contains("/api/qos/") || endpoint.contains("/uploadservicepublic"))
+                    return "";
+                // https://zcld.chat.zalo.me/zalocloudqos
+                if (endpoint.contains("/zalocloudqos"))
+                    return "";
+                // https://zvoip-qos.zaloapp.com/api/qos/uploadcalllog
+                if (endpoint.contains("/qos/uploadcalllog"))
+                    return "";
+                return value;
             });
         }
     }

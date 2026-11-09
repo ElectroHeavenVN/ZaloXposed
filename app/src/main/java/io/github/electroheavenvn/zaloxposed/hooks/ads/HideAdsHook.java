@@ -117,15 +117,17 @@ public class HideAdsHook extends BaseHook
             Logger.h(method);
             module.hook(method).intercept(chain ->
             {
+                Object value = chain.proceed();
                 if (!Config.getBlockAdsEndpoints())
-                    return chain.proceed();
-                Enum<?> enumValue = (Enum<?>)chain.getArg(0);
-                int ord = enumValue.ordinal();
-                return switch (ord)
-                {
-                    case 147, 161 -> "";
-                    default -> chain.proceed();
-                };
+                    return value;
+                String endpoint = value.toString();
+                // https://ads-platform.zalo.me/zpads/inboxnative/getads
+                if (endpoint.contains("/zpads/"))
+                    return "";
+                //https://group.api.zaloapp.com/group/ads
+                if (endpoint.contains("/group/ads"))
+                    return "";
+                return value;
             });
         }
     }

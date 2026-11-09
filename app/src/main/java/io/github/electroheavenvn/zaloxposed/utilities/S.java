@@ -154,12 +154,12 @@ public final class S
         String[] values = trans.get(key);
         if (values == null || values.length == 0)
         {
-            Logger.w("String value for key " + key + " not found");
+            Logger.w("Missing string values for key " + key);
             return key;
         }
         if (values.length == 1)
         {
-            Logger.w("Missing string values for key " + key);
+            Logger.i("Using default value for key " + key);
             return values[0];
         }
         return values[Utils.IsEnglish() ? 0 : 1];

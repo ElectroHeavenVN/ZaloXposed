@@ -197,5 +197,22 @@ public class TabMeViewHook extends BaseHook
             catch (Throwable t) { Logger.e(t); }
             return chain.proceed();
         });
+        Method getPrivacySettingsFromServer = DexKitCache.GetMethod("ZaloXposedSettings_GetPrivacySettingsFromServer", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .paramCount(0)
+                .returnType("void")
+                .addUsingField(FieldMatcher.create().name("str_getPrivacySettings_fromServer_fail").type(int.class))
+                .addUsingNumber(254)
+            )), classLoader);
+        if (getPrivacySettingsFromServer == null)
+            return;
+        Logger.h(getPrivacySettingsFromServer);
+        module.hook(getPrivacySettingsFromServer).setPriority(10).intercept(chain ->
+        {
+            if (ZaloXposedSettingsMenu.isOpening || ZaloXposedSettingsMenu.isOpenSettingMenu)
+                return null;
+            return chain.proceed();
+        });
     }
 }
