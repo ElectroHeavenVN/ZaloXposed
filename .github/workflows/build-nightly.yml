@@ -9,7 +9,6 @@ on:
     paths:
       - 'app/**'
       - 'gradle/**'
-      - 'ZaloXposedNative/Output/**'
       - 'build.gradle'
       - 'gradle.properties'
       - 'gradlew'
@@ -35,6 +34,22 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      - name: Download native libraries
+        env:
+          GH_TOKEN: ${{ secrets.ZALOXPOSEDNATIVE_REPO_TOKEN }}
+        run: |
+          ASSET_URL="$(gh api \
+            repos/ElectroHeavenVN/ZaloXposedNative/releases/tags/lib \
+            --jq '.assets[] | select(.name == "Output.zip") | .url')"
+          if [ -z "$ASSET_URL" ]; then
+            echo "Output.zip not found in release tag lib" >&2
+            exit 1
+          fi
+          gh api "$ASSET_URL" \
+            --header 'Accept: application/octet-stream' \
+            > "$RUNNER_TEMP/Output.zip"
+          unzip -q -o "$RUNNER_TEMP/Output.zip" -d ZaloXposedNative
 
       - name: Set up JDK 17
         uses: actions/setup-java@v6
