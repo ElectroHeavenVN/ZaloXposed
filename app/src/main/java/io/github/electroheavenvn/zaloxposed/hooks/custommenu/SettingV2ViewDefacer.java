@@ -85,7 +85,7 @@ public class SettingV2ViewDefacer extends SettingViewsDefacerBase
                 if (i + 1 < items.size())
                 {
                     ISettingItem nextItem = items.get(i + 1);
-                    if (!(nextItem instanceof Separator))
+                    if (!(nextItem instanceof Separator) && !(nextItem instanceof Button))
                         ListItemSettingHelper.ShowDivider(listItemSetting);
                 }
                 ListItemSettingHelper.SetTitle(listItemSetting, item.getTitle());
