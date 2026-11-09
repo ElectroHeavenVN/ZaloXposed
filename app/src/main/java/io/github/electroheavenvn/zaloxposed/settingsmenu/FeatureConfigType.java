@@ -27,5 +27,10 @@ public enum FeatureConfigType
     /**
      * A list of values
      */
-    LIST
+    LIST,
+
+    /**
+     * A button
+     */
+    BUTTON
 }

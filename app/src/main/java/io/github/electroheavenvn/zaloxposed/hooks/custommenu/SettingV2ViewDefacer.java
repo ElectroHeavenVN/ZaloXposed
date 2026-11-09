@@ -1,15 +1,9 @@
 package io.github.electroheavenvn.zaloxposed.hooks.custommenu;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -26,7 +20,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import io.github.electroheavenvn.zaloxposed.MorpheConstants;
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.settingsmenu.Button;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.ISettingItem;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.Separator;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingCategory;
@@ -38,7 +32,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 import io.github.electroheavenvn.zaloxposed.utilities.S;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
-public class SettingV2ViewDefacer extends BaseHook
+public class SettingV2ViewDefacer extends SettingViewsDefacerBase
 {
     private static Class<?> settingPrivateV2View;
     private static Class<?> zaloViewManager;
@@ -57,69 +51,52 @@ public class SettingV2ViewDefacer extends BaseHook
         List<ISettingItem> items = SettingsMenu.getSettingItems();
         for (int i = 0; i < items.size(); i++)
         {
-            ISettingItem item = items.get(i);
-            if (item instanceof SettingSubCategory)
-                continue;
-            if (item instanceof Separator)
+            try 
             {
-                rootLayout.addView(createSeparator(context));
-                continue;
-            }
-            if (item instanceof SettingFeature feature)
-            {
-                feature.onLoad(context);
-                boolean hideDivider = true;
+                ISettingItem item = items.get(i);
+                if (item instanceof SettingSubCategory)
+                    continue;
+                if (item instanceof Separator)
+                {
+                    rootLayout.addView(createSeparator(context));
+                    continue;
+                }
+                if (item instanceof SettingFeature feature)
+                {
+                    feature.onLoad(context);
+                    if (i > 0 && feature instanceof Button)
+                        rootLayout.addView(createSeparator(context));
+                    boolean hideDivider = true;
+                    if (i + 1 < items.size())
+                    {
+                        ISettingItem itemNext = items.get(i + 1);
+                        if (itemNext instanceof SettingFeature && !(itemNext instanceof Button))
+                            hideDivider = false;
+                    }
+                    View view = ProcessSettingFeature(rootLayout, feature, hideDivider);
+                    rootLayout.addView(view);
+                    continue;
+                }
+                if (item instanceof SettingCategory && i > 0 && items.get(i - 1) instanceof SettingFeature)
+                    rootLayout.addView(createSeparator(context));
+                RelativeLayout listItemSetting = ListItemSettingHelper.CreateNew(context);
+                rootLayout.addView(listItemSetting);
+                ListItemSettingHelper.HideDivider(listItemSetting);
                 if (i + 1 < items.size())
                 {
-                    if (items.get(i + 1) instanceof SettingFeature)
-                        hideDivider = false;
+                    ISettingItem nextItem = items.get(i + 1);
+                    if (!(nextItem instanceof Separator) && !(nextItem instanceof Button))
+                        ListItemSettingHelper.ShowDivider(listItemSetting);
                 }
-                SettingPrivateV2ViewDefacer.ProcessSettingFeature(rootLayout, feature, hideDivider);
-                continue;
+                ListItemSettingHelper.SetTitle(listItemSetting, item.getTitle());
+                ListItemSettingHelper.SetSubtitle(listItemSetting, item.getDescription());
+                final int index = i;
+                ListItemSettingHelper.SetOnClickListener(listItemSetting, v -> openSubCategory(zaloView, index));
+                if (item instanceof SettingCategory)
+                    ListItemSettingHelper.SetShowChevronRight(listItemSetting, true);
             }
-            if (item instanceof SettingCategory && i > 0 && items.get(i - 1) instanceof SettingFeature)
-                rootLayout.addView(createSeparator(context));
-            RelativeLayout listItemSetting = ListItemSettingHelper.CreateNew(context);
-            rootLayout.addView(listItemSetting);
-            ListItemSettingHelper.HideDivider(listItemSetting);
-            if (i + 1 < items.size())
-            {
-                ISettingItem nextItem = items.get(i + 1);
-                if (!(nextItem instanceof Separator))
-                    ListItemSettingHelper.ShowDivider(listItemSetting);
-            }
-            ListItemSettingHelper.SetTitle(listItemSetting, item.getTitle());
-            ListItemSettingHelper.SetSubtitle(listItemSetting, item.getDescription());
-            final int index = i;
-            ListItemSettingHelper.SetOnClickListener(listItemSetting, v -> openSubCategory(zaloView, index));
-            if (item instanceof SettingCategory)
-                ListItemSettingHelper.SetShowChevronRight(listItemSetting, true);
+            catch (Exception e) { Logger.e(e); }
         }
-
-        rootLayout.addView(createSeparator(context));
-
-        int pad16 = dp(context, 16);
-
-        Object reloadCacheButton = ZButtonHelper.CreateNew(context);
-        rootLayout.addView((View)reloadCacheButton);
-        ZButtonHelper.SetText(reloadCacheButton, S.tr("reloadDexKitCacheBtnTitle"));
-        ZButtonHelper.SetOnClickListener(reloadCacheButton, v ->
-        {
-            DexKitCache.ClearCache();
-            restartApp(context);
-        });
-        LinearLayout.LayoutParams reloadCacheLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        reloadCacheLp.setMargins(pad16, dp(context, 8), pad16, 0);
-        ((View)reloadCacheButton).setLayoutParams(reloadCacheLp);
-
-        Object restartButton = ZButtonHelper.CreateNew(context);
-        rootLayout.addView((View)restartButton);
-        ZButtonHelper.SetText(restartButton, S.tr("restartAppBtnTitle"));
-        ZButtonHelper.SetOnClickListener(restartButton, v -> restartApp(context));
-        LinearLayout.LayoutParams restartLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        restartLp.setMargins(pad16, pad16, pad16, 0);
-        ((View)restartButton).setLayoutParams(restartLp);
-
         for (int i = 0; i < 5; i++)
             rootLayout.addView(createSeparator(context));
     }
@@ -307,18 +284,6 @@ public class SettingV2ViewDefacer extends BaseHook
         // return result;
     }
 
-    private static View createSeparator(Context context)
-    {
-        View separator = new View(context);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            (int)(10 * context.getResources().getDisplayMetrics().density)
-        );
-        separator.setLayoutParams(params);
-        separator.setBackgroundColor(Color.TRANSPARENT);
-        return separator;
-    }
-
     private static void openSubCategory(Object zaloViewInst, int categoryIndex)
     {
         if (zaloViewInst == null || !zaloView.isInstance(zaloViewInst))
@@ -333,26 +298,5 @@ public class SettingV2ViewDefacer extends BaseHook
             openView.invoke(viewManager, settingPrivateV2View, null, 1, true);
         }
         catch (Throwable t) { Logger.e(t); }
-    }
-
-    private static void restartApp(Context context)
-    {
-        try
-        {
-            Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
-            if (intent == null)
-                return;
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            context.startActivity(intent);
-            if (Activity.class.isAssignableFrom(context.getClass()))
-                ((Activity)context).finish();
-            new Handler(Looper.getMainLooper()).postDelayed(() -> Runtime.getRuntime().exit(0), 0);
-        }
-        catch (Exception e) { Logger.e(e); }
-    }
-
-    private static int dp(Context context, int value)
-    {
-        return (int)(value * context.getResources().getDisplayMetrics().density);
     }
 }

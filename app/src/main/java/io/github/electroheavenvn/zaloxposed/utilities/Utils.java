@@ -1,7 +1,12 @@
 package io.github.electroheavenvn.zaloxposed.utilities;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -618,4 +623,21 @@ public final class Utils
     {
         return appVersionCode;
     }
+
+    public static void RestartApp(Context context)
+    {
+        try
+        {
+            Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+            if (intent == null)
+                return;
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            context.startActivity(intent);
+            if (Activity.class.isAssignableFrom(context.getClass()))
+                ((Activity)context).finish();
+            new Handler(Looper.getMainLooper()).postDelayed(() -> Runtime.getRuntime().exit(0), 0);
+        }
+        catch (Exception e) { Logger.e(e); }
+    }
+
 }

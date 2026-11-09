@@ -2,17 +2,14 @@ package io.github.electroheavenvn.zaloxposed.hooks.custommenu;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.text.InputType;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.luckypray.dexkit.query.FindMethod;
@@ -26,8 +23,9 @@ import java.lang.reflect.Modifier;
 import java.text.NumberFormat;
 import java.util.List;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.settingsmenu.ListSelectionSettingFeature;
+import io.github.electroheavenvn.zaloxposed.settingsmenu.Button;
+import io.github.electroheavenvn.zaloxposed.settingsmenu.FeatureConfigType;
+import io.github.electroheavenvn.zaloxposed.settingsmenu.ISettingItem;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingCategory;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingFeature;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingSubCategory;
@@ -36,7 +34,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
-public class SettingPrivateV2ViewDefacer extends BaseHook
+public class SettingPrivateV2ViewDefacer extends SettingViewsDefacerBase
 {
     @SuppressLint("StaticFieldLeak")
     private static LinearLayout rootLayout = null;
@@ -45,7 +43,6 @@ public class SettingPrivateV2ViewDefacer extends BaseHook
     private static TextView templateHeader = null;
     private static boolean deface = false;
     private static int categoryIndex = -1;
-    private static ColorStateList textColor = null;
 
     private static void createCustomMenu() throws Exception
     {
@@ -55,131 +52,98 @@ public class SettingPrivateV2ViewDefacer extends BaseHook
         List<SettingSubCategory> subCategories = settingCategory.getSubCategories();
         for (int i = 0; i < subCategories.size(); i++)
         {
-            SettingSubCategory subCategory = subCategories.get(i);
-            String title = subCategory.getTitle();
-            if (title != null && !title.isEmpty())
+            try 
             {
-                subCategoryTitle = createSubCategoryTitle(context);
-                subCategoryTitle.setText(title);
-                rootLayout.addView(subCategoryTitle);
-            }
-            List<SettingFeature> features = subCategory.getFeatures();
-            for (int j = 0; j < features.size(); j++)
-            {
-                SettingFeature feature = features.get(j);
-                feature.onLoad(context);
-                ProcessSettingFeature(rootLayout, feature, j + 1 >= features.size());
-            }
-            rootLayout.addView(createSeparator(context));
-        }
-        for (int i = 0; i < 5; i++)
-            rootLayout.addView(createSeparator(context));
-    }
-
-    static void ProcessSettingFeature(LinearLayout rootLayout, SettingFeature feature, boolean hideDivider) throws Exception
-    {
-        Context context = rootLayout.getContext();
-        RelativeLayout listItemSetting = ListItemSettingHelper.CreateNew(context);
-        if (textColor == null)
-        {
-            TextView listItemSettingTitle = findTitleTextView(listItemSetting);
-            if (listItemSettingTitle != null)
-                textColor = listItemSettingTitle.getTextColors();
-        }
-        if (hideDivider)
-            ListItemSettingHelper.HideDivider(listItemSetting);
-        else
-            ListItemSettingHelper.ShowDivider(listItemSetting);
-        ListItemSettingHelper.SetTitle(listItemSetting, feature.getTitle());
-        ListItemSettingHelper.SetSubtitle(listItemSetting, feature.getDescription());
-        switch (feature.getConfigType())
-        {
-            case OPTION:
-                ListItemSettingHelper.SetShowChevronRight(listItemSetting, true);
-                ListItemSettingHelper.SetOnClickListener(listItemSetting, view -> feature.onOptionClicked(view.getContext()));
-                break;
-            case SWITCH:
-                ListItemSettingHelper.SetSwitch(listItemSetting, (boolean)feature.getCurrentState());
-                ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, value -> feature.onCheckedChanged(context, value));
-                break;
-            case CHECKBOX:
-                ListItemSettingHelper.SetCheckBox(listItemSetting, (boolean)feature.getCurrentState());
-                ListItemSettingHelper.SetCheckedChangeListener(listItemSetting, value -> feature.onCheckedChanged(context, value));
-                break;
-            case LIST:
-                //TODO: open drop down menu instead of rotating
-                ListSelectionSettingFeature listFeature = (ListSelectionSettingFeature)feature;
-                ListItemSettingHelper.SetStateSetting(listItemSetting, listFeature.getSelectedTitle());
-                ListItemSettingHelper.SetOnClickListener(listItemSetting, v ->
+                SettingSubCategory subCategory = subCategories.get(i);
+                String title = subCategory.getTitle();
+                if (title != null && !title.isEmpty())
                 {
-                    try
-                    {
-                        listFeature.onOptionClicked(context);
-                        ListItemSettingHelper.SetStateSetting(listItemSetting, listFeature.getSelectedTitle());
-                    }
-                    catch (Exception e) { Logger.e(e); }
-                });
-                break;
-            case NUMBER:
-                TextView headerTitle = createHeaderTitle(context);
-                headerTitle.setText(feature.getTitle());
-                TextView titleView = findTitleTextView(headerTitle);
-                if (titleView != null)
-                {
-                    TextView listItemSettingTitle = findTitleTextView(listItemSetting);
-                    if (listItemSettingTitle != null)
-                        titleView.setTextColor(listItemSettingTitle.getTextColors());
+                    subCategoryTitle = createSubCategoryTitle(context);
+                    subCategoryTitle.setText(title);
+                    rootLayout.addView(subCategoryTitle);
                 }
-                rootLayout.addView(headerTitle);
-                EditText input = new EditText(context);
-                rootLayout.addView(input);
-                input.setInputType(InputType.TYPE_CLASS_NUMBER);
-                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
-                input.setHint(feature.getDescription());
-                styleEditText(input, context, listItemSetting);
-
-                input.setText(feature.getCurrentState().toString());
-                input.setOnEditorActionListener((textView, actionId, keyEvent) ->
+                List<SettingFeature> features = subCategory.getFeatures();
+                for (int j = 0; j < features.size(); j++)
                 {
-                    if (actionId == EditorInfo.IME_ACTION_DONE)
+                    SettingFeature feature = features.get(j);
+                    feature.onLoad(context);
+                    if (j > 0 && feature instanceof Button)
+                        rootLayout.addView(createSeparator(context));
+                    boolean hideDivider = true;
+                    if (j + 1 < features.size())
                     {
+                        ISettingItem item = features.get(j + 1);
+                        if (!(item instanceof Button))
+                            hideDivider = false;
+                    }
+                    View item = ProcessSettingFeature(rootLayout, feature, hideDivider);
+                    if (feature.getConfigType() != FeatureConfigType.NUMBER)
+                    {
+                        rootLayout.addView(item);
+                        continue;
+                    }
+                    TextView headerTitle = createHeaderTitle(context);
+                    headerTitle.setText(feature.getTitle());
+                    TextView titleView = findTitleTextView(headerTitle);
+                    if (titleView != null)
+                    {
+                        TextView listItemSettingTitle = findTitleTextView(item);
+                        if (listItemSettingTitle != null)
+                            textColor = listItemSettingTitle.getTextColors();
+                        titleView.setTextColor(textColor);
+                    }
+                    EditText input = new EditText(context);
+                    input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    input.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                    input.setHint(feature.getDescription());
+                    styleEditText(input, context, item);
+                    input.setText(feature.getCurrentState().toString());
+                    input.setOnEditorActionListener((textView, actionId, keyEvent) ->
+                    {
+                        if (actionId == EditorInfo.IME_ACTION_DONE)
+                        {
+                            try
+                            {
+                                Number value = NumberFormat.getInstance().parse(textView.getText().toString());
+                                //TODO: add default value to NumberSettingFeature
+                                if (value == null)
+                                    value = 0;
+                                input.setText(value.toString());
+                                feature.onFieldValueChanged(context, value);
+                            }
+                            catch (Exception e) {Logger.e(e);}
+                            textView.clearFocus();
+                            return true;
+                        }
+                        return false;
+                    });
+                    input.setOnFocusChangeListener((view, hasFocus) ->
+                    {
+                        if (hasFocus)
+                            return;
                         try
                         {
+                            EditText textView = (EditText)view;
                             Number value = NumberFormat.getInstance().parse(textView.getText().toString());
                             //TODO: add default value to NumberSettingFeature
                             if (value == null)
                                 value = 0;
                             input.setText(value.toString());
                             feature.onFieldValueChanged(context, value);
+                            hideKeyboard(textView);
                         }
                         catch (Exception e) { Logger.e(e); }
-                        textView.clearFocus();
-                        return true;
-                    }
-                    return false;
-                });
-                input.setOnFocusChangeListener((view, hasFocus) ->
-                {
-                    if (hasFocus)
-                        return;
-                    try
-                    {
-                        EditText textView = (EditText)view;
-                        Number value = NumberFormat.getInstance().parse(textView.getText().toString());
-                        //TODO: add default value to NumberSettingFeature
-                        if (value == null)
-                            value = 0;
-                        input.setText(value.toString());
-                        feature.onFieldValueChanged(context, value);
-                        hideKeyboard(textView);
-                    }
-                    catch (Exception e) { Logger.e(e); }
-                });
-                rootLayout.setOnClickListener(v -> input.clearFocus());
-                return;
+                    });
+                    rootLayout.setOnClickListener(v -> input.clearFocus());
+                    rootLayout.addView(headerTitle);
+                    rootLayout.addView(input);
+                }
+                rootLayout.addView(createSeparator(context));
+            }
+            catch (Exception e) { Logger.e(e); }
         }
-        listItemSetting.setEnabled(feature.getEnabled());
-        rootLayout.addView(listItemSetting);
+        for (int i = 0; i < 5; i++)
+            rootLayout.addView(createSeparator(context));
     }
 
     @Override
@@ -303,41 +267,6 @@ public class SettingPrivateV2ViewDefacer extends BaseHook
         });
     }
 
-
-    private static View createSeparator(Context context)
-    {
-        View separator = new View(context);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            (int)(10 * context.getResources().getDisplayMetrics().density)
-        );
-        separator.setLayoutParams(params);
-        separator.setBackgroundColor(Color.TRANSPARENT);
-        return separator;
-    }
-
-    private static void styleEditText(EditText editText, Context context, RelativeLayout templateItem)
-    {
-        int pad16 = dp(context, 16);
-        int pad12 = dp(context, 12);
-        editText.setPadding(pad16, pad12, pad16, pad12);
-        editText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        try
-        {
-            TextView titleView = findTitleTextView(templateItem);
-            if (titleView != null)
-            {
-                editText.setTextColor(titleView.getTextColors());
-                editText.setHintTextColor(titleView.getTextColors());
-            }
-            var state = templateItem.getBackground().getConstantState();
-            if (state != null)
-                editText.setBackground(state.newDrawable().mutate());
-        }
-        catch (Exception ignored) {}
-        editText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-    }
-
     private static TextView createSubCategoryTitle(Context context) throws Exception
     {
         TextView textView = (TextView)headerTextViewClass.getConstructor(Context.class).newInstance(context);
@@ -383,22 +312,6 @@ public class SettingPrivateV2ViewDefacer extends BaseHook
         return textView;
     }
 
-    private static TextView findTitleTextView(View view)
-    {
-        if (view instanceof TextView)
-            return (TextView)view;
-        if (view instanceof ViewGroup group)
-        {
-            for (int i = 0; i < group.getChildCount(); i++)
-            {
-                TextView found = findTitleTextView(group.getChildAt(i));
-                if (found != null)
-                    return found;
-            }
-        }
-        return null;
-    }
-
     private static void loadTemplates()
     {
         int count = rootLayout.getChildCount();
@@ -412,15 +325,26 @@ public class SettingPrivateV2ViewDefacer extends BaseHook
         }
     }
 
-    private static void hideKeyboard(View view)
+    private static void styleEditText(EditText editText, Context context, View templateItem)
     {
-        InputMethodManager imm = (InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null)
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        int pad16 = dp(context, 16);
+        int pad12 = dp(context, 12);
+        editText.setPadding(pad16, pad12, pad16, pad12);
+        editText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        try
+        {
+            TextView titleView = findTitleTextView(templateItem);
+            if (titleView != null)
+            {
+                editText.setTextColor(titleView.getTextColors());
+                editText.setHintTextColor(titleView.getTextColors());
+            }
+            var state = templateItem.getBackground().getConstantState();
+            if (state != null)
+                editText.setBackground(state.newDrawable().mutate());
+        }
+        catch (Exception ignored) {}
+        editText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
     }
 
-    private static int dp(Context context, int value)
-    {
-        return (int)(value * context.getResources().getDisplayMetrics().density);
-    }
 }
