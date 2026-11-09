@@ -1,0 +1,110 @@
+name: Build APK from branch
+run-name: Build APK from branch ${{ github.ref_name }}
+
+on:
+  push:
+    branches-ignore:
+      - 'dev'
+      - 'main'
+    tags-ignore:
+      - '**'
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'build.gradle'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'settings.gradle'
+      - '.github/workflows/build-branch.yml'
+
+concurrency:
+  group: branch-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-branch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Download native libraries
+        env:
+          GH_TOKEN: ${{ secrets.ZALOXPOSEDNATIVE_REPO_TOKEN }}
+        run: |
+          ASSET_URL="$(gh api \
+            repos/ElectroHeavenVN/ZaloXposedNative/releases/tags/lib \
+            --jq '.assets[] | select(.name == "Output.zip") | .url')"
+          if [ -z "$ASSET_URL" ]; then
+            echo "Output.zip not found in release tag lib" >&2
+            exit 1
+          fi
+          gh api "$ASSET_URL" \
+            --header 'Accept: application/octet-stream' \
+            > "$RUNNER_TEMP/Output.zip"
+          unzip -q -o "$RUNNER_TEMP/Output.zip" -d ZaloXposedNative
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Restore signing keystore
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          if [ -z "$SIGNING_KEYSTORE_BASE64" ] || [ -z "$SIGNING_STORE_PASSWORD" ] || [ -z "$SIGNING_KEY_ALIAS" ] || [ -z "$SIGNING_KEY_PASSWORD" ]; then
+            echo "Missing signing secrets" >&2
+            exit 1
+          fi
+
+          KEYSTORE_PATH="$RUNNER_TEMP/release.keystore"
+          printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+
+          cat > local.properties <<EOF
+          signing.storeFile=$KEYSTORE_PATH
+          signing.storePassword=$SIGNING_STORE_PASSWORD
+          signing.keyAlias=$SIGNING_KEY_ALIAS
+          signing.keyPassword=$SIGNING_KEY_PASSWORD
+          EOF
+
+      - name: Build signed APK
+        run: |
+          chmod +x ./gradlew
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          VERSION_CODE=$(git rev-list --count HEAD)
+          ./gradlew --no-daemon --stacktrace assembleRelease \
+            -PversionCode="$VERSION_CODE" \
+            -PversionName="${GITHUB_REF_NAME}-${SHORT_SHA}"
+
+      - name: Collect APK
+        shell: bash
+        run: |
+          mkdir -p release
+          mapfile -t apks < <(find app/build/outputs/apk/release -type f -name '*.apk' | sort)
+          if [ "${#apks[@]}" -eq 0 ]; then
+            echo "Release APK not found" >&2
+            exit 1
+          fi
+          for apk in "${apks[@]}"; do
+            cp "$apk" "release/ZaloXposed-${apk##*/}"
+          done
+
+      - name: Publish APK artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-apk
+          path: release/*.apk

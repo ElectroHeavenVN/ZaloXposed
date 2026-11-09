@@ -118,6 +118,7 @@ public final class S
         trans.put("exportConfigFileDesc", new String[] { "Save to Downloads/ZaloXposed", "Lưu vào thư mục Downloads/ZaloXposed" });
         trans.put("importConfigFileTitle", new String[] { "Import configuration from file", "Nhập cấu hình từ tệp" });
         trans.put("importConfigFileDesc", new String[] { "Choose a JSON file", "Chọn tệp JSON từ bộ nhớ" });
+        trans.put("resetConfigTitle", new String[] { "Reset ZaloXposed configuration", "Đặt lại cấu hình ZaloXposed" });
 
         // Extended settings
         trans.put("extendedSettingsCategoryTitle", new String[] { "Extended Settings", "Cài đặt mở rộng" });
@@ -153,12 +154,12 @@ public final class S
         String[] values = trans.get(key);
         if (values == null || values.length == 0)
         {
-            Logger.w("String value for key " + key + " not found");
+            Logger.w("Missing string values for key " + key);
             return key;
         }
         if (values.length == 1)
         {
-            Logger.w("Missing string values for key " + key);
+            Logger.i("Using default value for key " + key);
             return values[0];
         }
         return values[Utils.IsEnglish() ? 0 : 1];
