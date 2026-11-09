@@ -118,6 +118,7 @@ public final class S
         trans.put("exportConfigFileDesc", new String[] { "Save to Downloads/ZaloXposed", "Lưu vào thư mục Downloads/ZaloXposed" });
         trans.put("importConfigFileTitle", new String[] { "Import configuration from file", "Nhập cấu hình từ tệp" });
         trans.put("importConfigFileDesc", new String[] { "Choose a JSON file", "Chọn tệp JSON từ bộ nhớ" });
+        trans.put("resetConfigTitle", new String[] { "Reset ZaloXposed configuration", "Đặt lại cấu hình ZaloXposed" });
 
         // Extended settings
         trans.put("extendedSettingsCategoryTitle", new String[] { "Extended Settings", "Cài đặt mở rộng" });

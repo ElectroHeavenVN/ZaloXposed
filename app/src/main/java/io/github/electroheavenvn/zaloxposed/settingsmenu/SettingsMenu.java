@@ -128,7 +128,11 @@ public final class SettingsMenu
                 new OptionSettingFeature("exportConfigFileTitle", "exportConfigFileDesc", (item, context) ->
                     ConfigImportExportHook.ExportToDownloadFolder(context)),
                 new OptionSettingFeature("importConfigFileTitle", "importConfigFileDesc", (item, context) ->
-                    ConfigImportExportHook.ImportUsingFilePicker(context))
+                    ConfigImportExportHook.ImportUsingFilePicker(context)),
+                new Button("resetConfigTitle", (item, context) -> {
+                    Config.Reset();
+                    Utils.RestartApp(context);
+                })
             ))
         )));
         settingItems.add(new Separator());

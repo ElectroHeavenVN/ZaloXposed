@@ -79,6 +79,12 @@ public final class Config
         catch (Exception e) { Logger.e(e); }
     }
 
+    public static void Reset()
+    {
+        config = new JSONObject();
+        save();
+    }
+
     private static void save()
     {
         try
