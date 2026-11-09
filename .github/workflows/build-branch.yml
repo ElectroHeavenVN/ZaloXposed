@@ -1,4 +1,5 @@
-name: Build APK from branch ${{ github.ref_name }}
+name: Build APK from branch
+run-name: Build APK from branch ${{ github.ref_name }}
 
 on:
   push:
