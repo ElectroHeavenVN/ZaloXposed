@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 import io.github.electroheavenvn.zaloxposed.hooks.*;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.*;
+import io.github.electroheavenvn.zaloxposed.hooks.functional.minichat.*;
 import io.github.electroheavenvn.zaloxposed.hooks.morphe.*;
 import io.github.electroheavenvn.zaloxposed.hooks.nativehook.NativeHook;
 import io.github.electroheavenvn.zaloxposed.hooks.privacy.*;
@@ -64,13 +65,14 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new SettingPrivateV2ViewDefacer());
 
         hooks.add(new CustomBackgroundHook());
+        hooks.add(new EnableChatHeadHook());
+        hooks.add(new ChatHeadIMESyncHook());
         hooks.add(new RestoreGoogleDriveBackupHook());
         hooks.add(new RestoreProfileMusicHook());
         hooks.add(new DisableFirebaseLoggingHook());
         hooks.add(new DisableZaloTrackingHook());
         hooks.add(new HideAdsHook());
         hooks.add(new CustomizeBottomRowHook());
-        hooks.add(new EnableChatHeadHook());
         hooks.add(new ExtendedGridMenuHook());
         hooks.add(new ExtendedGroupSettingMenuHook());
         hooks.add(new FakeAdminHook());

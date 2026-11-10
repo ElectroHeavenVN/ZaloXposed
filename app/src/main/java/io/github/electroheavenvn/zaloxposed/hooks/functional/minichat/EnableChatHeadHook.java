@@ -1,4 +1,4 @@
-package io.github.electroheavenvn.zaloxposed.hooks.functional;
+package io.github.electroheavenvn.zaloxposed.hooks.functional.minichat;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
 
 import com.android.tools.smali.dexlib2.Opcode;
@@ -41,13 +42,13 @@ import io.github.libxposed.api.XposedInterface;
 // It would be great if we can patch dex...
 public class EnableChatHeadHook extends BaseHook
 {
-    static Field isAdr10OrOld = null;
-    static Field isAdr11OrNew = null;
-    static Field chatHeadUnavailable = null;
-    static boolean chatHeadUnavailableOriginalValue = false;
-    static Class<?> androidVersionCheckClass = null;
-    static Class<?> classContainsChatHeadUnavailableConfig = null;
-    static boolean hooked = false;
+    private static Field isAdr10OrOld = null;
+    private static Field isAdr11OrNew = null;
+    private static Field chatHeadUnavailable = null;
+    private static boolean chatHeadUnavailableOriginalValue = false;
+    private static Class<?> androidVersionCheckClass = null;
+    private static Class<?> classContainsChatHeadUnavailableConfig = null;
+    private static boolean hooked = false;
 
     @Override
     public void hook() throws Throwable
@@ -93,7 +94,7 @@ public class EnableChatHeadHook extends BaseHook
             {
                 if (!Config.KEY_ENABLE_CHAT_HEAD.equals(key))
                     return;
-                boolean enabled = (Boolean) newValue;
+                boolean enabled = (Boolean)newValue;
                 try
                 {
                     if (enabled)
@@ -117,10 +118,10 @@ public class EnableChatHeadHook extends BaseHook
             return result;
         });
         loadFields();
-        doHook(new SpoofAndroidVersionCheckFields());
+        doInstallSpoofHook(new SpoofAndroidVersionCheckFields());
     }
 
-    private void doHook(SpoofAndroidVersionCheckFields spoofHook) throws NoSuchMethodException, ClassNotFoundException
+    private void doInstallSpoofHook(SpoofAndroidVersionCheckFields spoofHook) throws NoSuchMethodException, ClassNotFoundException
     {
         if (hooked)
             return;
@@ -264,10 +265,9 @@ public class EnableChatHeadHook extends BaseHook
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_8", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
-                .name("run")
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
-                .paramCount(0)
+                .paramCount(0, 2)
                 .addUsingString("System Setting not allow to create Bubbles on Screen", StringMatchType.Equals)
                 .addUsingString("ChatView: Open Bubble Chat", StringMatchType.Contains)
             )), classLoader);
@@ -418,11 +418,83 @@ public class EnableChatHeadHook extends BaseHook
             Logger.h(14, method);
             module.hook(method).intercept(spoofHook);
         }
+
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_15", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .declaredClass("com.zing.zalo.ui.settings.SettingMessageView")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("android.view.View")
+                .paramCount(3)
+                .paramTypes("android.view.LayoutInflater", "android.view.ViewGroup", "android.os.Bundle")
+            )), classLoader);
+        if (methods.isEmpty())
+            Logger.e("Target method not found 15");
+        for (Method method : methods)
+        {
+            Logger.h(15, method);
+            module.hook(method).intercept(spoofHook);
+        }
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_16", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC)
+                .returnType("int")
+                .paramCount(0)
+                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+                .addUsingString("activity", StringMatchType.Equals)
+                .addUsingString("com.zing.zalo.ui.MessagePopupActivity", StringMatchType.Equals)
+                .addUsingString("com.zing.zalo.ui.ZaloUserPopupActivity", StringMatchType.Equals)
+                .addUsingString("com.zing.zalo.ui.RetryMsgPopupActivity", StringMatchType.Equals)
+                .addUsingString("com.zing.zalo.ui.MessageHintSuggestActivity", StringMatchType.Equals)
+                .addUsingNumber(0)
+                .addUsingNumber(1)
+                .addUsingNumber(1024)
+            )), classLoader);
+        if (methods.isEmpty())
+            Logger.e("Target method not found 16");
+        for (Method method : methods)
+        {
+            Logger.h(16, method);
+            module.hook(method).intercept(spoofHook);
+        }
+        methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_17", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC)
+                .returnType("boolean")
+                .paramCount(0)
+                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+                .addCaller(MethodMatcher.create()
+                    .declaredClass("com.zing.zalocore.connection.socket.NativeSocket")
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .returnType("void")
+                    .addUsingNumber(30000L)
+                    .addUsingNumber(102)
+                    .addUsingNumber(103))
+                .addCaller(MethodMatcher.create()
+                    .declaredClass("com.zing.zalocore.connection.socket", StringMatchType.StartsWith)
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .returnType("void")
+                    .name("handleMessage")
+                    .addUsingNumber(1000)
+                    .addUsingNumber(2000)
+                    .addUsingNumber(102)
+                    .addUsingNumber(103))
+            )), classLoader);
+        if (methods.isEmpty())
+            Logger.e("Target method not found 17");
+        for (Method method : methods)
+        {
+            Logger.h(17, method);
+            module.hook(method).intercept(spoofHook);
+        }
+
         Method method = Class.forName("com.zing.zalo.ui.maintab.group.GroupTabView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
         Logger.h(-1, method);
         module.hook(method).intercept(spoofHook);
         method = Class.forName("com.zing.zalo.ui.maintab.msg.MessagesView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
         Logger.h(-2, method);
+        module.hook(method).intercept(spoofHook);
+        method = Class.forName("com.zing.zalo.ui.zviews.PassCodeSettingView", false, classLoader).getDeclaredMethod("onClick", View.class);
+        Logger.h(-3, method);
         module.hook(method).intercept(spoofHook);
         hooked = true;
     }
@@ -443,7 +515,7 @@ public class EnableChatHeadHook extends BaseHook
                     continue;
                 Method registerReceiver3Args = Context.class.getDeclaredMethod("registerReceiver", BroadcastReceiver.class, IntentFilter.class, int.class);
                 registerReceiver3Args.setAccessible(true);
-                registerReceiver3Args.invoke(chain.getThisObject(), (BroadcastReceiver) chain.getArg(0), (IntentFilter) chain.getArg(1), Context.RECEIVER_NOT_EXPORTED);
+                registerReceiver3Args.invoke(chain.getThisObject(), (BroadcastReceiver)chain.getArg(0), (IntentFilter)chain.getArg(1), Context.RECEIVER_NOT_EXPORTED);
                 return null;
             }
             return chain.proceed();
@@ -465,7 +537,7 @@ public class EnableChatHeadHook extends BaseHook
             instructions = Utils.Disassemble(androidVersionCheckClass, "<clinit>");
             for (Instruction instruction : instructions)
             {
-                if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction oneRegisterInstruction)
+                if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction)
                 {
                     FieldReference field = (FieldReference)((ReferenceInstruction)instruction).getReference();
                     String fieldName = field.getName();
@@ -500,8 +572,7 @@ public class EnableChatHeadHook extends BaseHook
             {
                 Instruction instruction = instructions.get(i);
                 Instruction prevInstruction = instructions.get(i - 1);
-                if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction oneRegisterInstruction
-                    && prevInstruction.getOpcode() == Opcode.SGET_BOOLEAN && prevInstruction instanceof OneRegisterInstruction prevOneRegisterInstruction)
+                if (instruction.getOpcode() == Opcode.SPUT_BOOLEAN && instruction instanceof OneRegisterInstruction && prevInstruction.getOpcode() == Opcode.SGET_BOOLEAN && prevInstruction instanceof OneRegisterInstruction)
                 {
                     FieldReference field = (FieldReference)((ReferenceInstruction)prevInstruction).getReference();
                     String fieldName = field.getName();
@@ -523,13 +594,14 @@ public class EnableChatHeadHook extends BaseHook
         }
     }
 
+    @SuppressWarnings("NullableProblems")
     static class FixWindowLayoutComponentImpl implements XposedInterface.Hooker
     {
         public Object intercept(XposedInterface.Chain chain) throws Throwable
         {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
                 return chain.proceed();
-            Context ctx = (Context) chain.getArg(0);
+            Context ctx = (Context)chain.getArg(0);
             boolean validUiContext = ctx instanceof Activity;
             if (validUiContext)
                 return chain.proceed();
@@ -537,7 +609,7 @@ public class EnableChatHeadHook extends BaseHook
             {
                 Logger.i("Invalid context, creating new...");
                 Context appCtx = ctx.getApplicationContext();
-                DisplayManager dm = (DisplayManager) appCtx.getSystemService(Context.DISPLAY_SERVICE);
+                DisplayManager dm = (DisplayManager)appCtx.getSystemService(Context.DISPLAY_SERVICE);
                 Display defaultDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
                 Context windowContext = appCtx.createWindowContext(defaultDisplay, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, null);
                 return chain.proceed(new Object[]{windowContext, chain.getArg(1)});
@@ -547,6 +619,7 @@ public class EnableChatHeadHook extends BaseHook
         }
     }
 
+    @SuppressWarnings("NullableProblems")
     static class SpoofAndroidVersionCheckFields implements XposedInterface.Hooker
     {
         private static final HashMap<Field, Boolean> originalValues = new HashMap<>();
