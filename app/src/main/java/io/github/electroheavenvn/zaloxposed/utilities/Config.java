@@ -351,4 +351,20 @@ public final class Config
     public static final String KEY_HIDE_FULLSCREEN_EFFECTS = "hide_fullscreen_effects";
     public static boolean getHideFullscreenEffects() { return (boolean)get(KEY_HIDE_FULLSCREEN_EFFECTS, false); }
     public static void setHideFullscreenEffects(boolean value) { set(KEY_HIDE_FULLSCREEN_EFFECTS, value); }
+
+    public static final String KEY_DEFAULT_ORIGINAL_QUALITY = "default_original_quality";
+    public static boolean getDefaultOriginalQuality() { return (boolean)get(KEY_DEFAULT_ORIGINAL_QUALITY, false); }
+    public static void setDefaultOriginalQuality(boolean value) { set(KEY_DEFAULT_ORIGINAL_QUALITY, value); }
+
+    public static final String KEY_DEFAULT_ORIGINAL_QUALITY_PASTED = "default_original_quality_pasted";
+    public static boolean getDefaultOriginalQualityPasted() { return (boolean)get(KEY_DEFAULT_ORIGINAL_QUALITY_PASTED, false); }
+    public static void setDefaultOriginalQualityPasted(boolean value) { set(KEY_DEFAULT_ORIGINAL_QUALITY_PASTED, value); }
+
+    public static final String KEY_DEFAULT_ORIGINAL_QUALITY_SHARE = "default_original_quality_share";
+    public static boolean getDefaultOriginalQualityShare() { return (boolean)get(KEY_DEFAULT_ORIGINAL_QUALITY_SHARE, false); }
+    public static void setDefaultOriginalQualityShare(boolean value) { set(KEY_DEFAULT_ORIGINAL_QUALITY_SHARE, value); }
+
+    public static final String KEY_DEFAULT_ORIGINAL_QUALITY_CAMERA = "default_original_quality_camera";
+    public static boolean getDefaultOriginalQualityCamera() { return (boolean)get(KEY_DEFAULT_ORIGINAL_QUALITY_CAMERA, false); }
+    public static void setDefaultOriginalQualityCamera(boolean value) { set(KEY_DEFAULT_ORIGINAL_QUALITY_CAMERA, value); }
 }

@@ -47,8 +47,7 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("boolean")
                 .paramCount(0)
-                .addUsingNumber(2)
-                .addUsingNumber(3)
+                .usingNumbers(2, 3)
             )), classLoader);
         if (methods.isEmpty())
         {

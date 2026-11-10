@@ -40,9 +40,7 @@ public class ExtendedGroupSettingMenuHook extends BaseHook
                 .returnType("boolean")
                 .paramCount(0)
                 .addUsingString("community@grouptype_threshold", StringMatchType.Equals)
-                .addUsingNumber(0)
-                .addUsingNumber(2)
-                .addUsingNumber(100)
+                .usingNumbers(0, 2, 100)
             )), classLoader);
         if (methods.isEmpty())
         {

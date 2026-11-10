@@ -81,10 +81,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
                     .not(MethodMatcher.create()
                         .addUsingString("recommened.calltime", StringMatchType.Equals)
                         .addUsingString("recommened.misscall", StringMatchType.Equals)
-                        .addUsingNumber(24)
-                        .addUsingNumber(26)
-                        .addUsingNumber(33)
-                        .addUsingNumber(34))
+                        .usingNumbers(24, 26, 33, 34))
                 ));
             if (methodsData.isEmpty())
             {

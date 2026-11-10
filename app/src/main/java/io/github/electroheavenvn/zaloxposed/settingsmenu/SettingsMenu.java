@@ -64,6 +64,12 @@ public final class SettingsMenu
             new SettingSubCategory("effectsAndContentSubCategoryTitle", List.of(
                 new SwitchSettingFeature("hideFullscreenEffectsTitle", "hideFullscreenEffectsDesc", Config.KEY_HIDE_FULLSCREEN_EFFECTS),
                 new SwitchSettingFeature("shareHiddenStickerPackTitle", "", Config.KEY_ENABLE_SHARE_HIDDEN_STICKER_PACK)
+            )),
+            new SettingSubCategory("mediaQualitySubCategoryTitle", List.of(
+                new SwitchSettingFeature("defaultOriginalQualityTitle", "defaultOriginalQualityDesc", Config.KEY_DEFAULT_ORIGINAL_QUALITY),
+                new SwitchSettingFeature("defaultOriginalQualityForPastedImagesTitle", "defaultOriginalQualityForPastedImagesDesc", Config.KEY_DEFAULT_ORIGINAL_QUALITY_PASTED),
+                new SwitchSettingFeature("defaultOriginalQualityShareTitle", "defaultOriginalQualityShareDesc", Config.KEY_DEFAULT_ORIGINAL_QUALITY_SHARE),
+                new SwitchSettingFeature("defaultOriginalQualityCameraTitle", "defaultOriginalQualityCameraDesc", Config.KEY_DEFAULT_ORIGINAL_QUALITY_CAMERA)
             ))
         )));
         settingItems.add(new SettingCategory("privacyCategoryTitle", "privacyCategoryDesc", List.of(

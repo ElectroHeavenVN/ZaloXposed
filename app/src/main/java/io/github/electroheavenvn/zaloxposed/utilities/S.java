@@ -36,7 +36,7 @@ public final class S
         trans.put("reloadDexKitCacheBtnTitle", new String[] { "Force reload DexKit cache", "Buộc tải lại bộ nhớ đệm DexKit" });
         trans.put("restartAppBtnTitle", new String[] { "Restart app", "Khởi động lại ứng dụng" });
 
-        //Conversation appearance
+        //Messages & Conversations
         trans.put("chatHeadSubCategoryTitle", new String[] { "Mini Chat (Chat Head)" });
         trans.put("chatHeadTitle", new String[] { "Replace Android Bubble conversations with Mini Chat", "Thay thế bong bóng hội thoại Android bằng Mini Chat" });
         trans.put("chatHeadDesc", new String[] { "Requires Android 11 or higher", "Yêu cầu Android 11 trở lên" });
@@ -57,6 +57,16 @@ public final class S
         trans.put("hideFullscreenEffectsTitle", new String[] { "Hide fullscreen effects", "Ẩn hiệu ứng toàn màn hình" });
         trans.put("hideFullscreenEffectsDesc", new String[] { "Hide fullscreen effects when certain messages are received", "Ẩn hiệu ứng toàn màn hình khi nhận được một số tin nhắn nhất định" });
         trans.put("shareHiddenStickerPackTitle", new String[] { "Allow sharing hidden sticker packs", "Cho phép chia sẻ bộ sticker ẩn" });
+
+        trans.put("imageQualitySubCategoryTitle", new String[] { "Image quality", "Chất lượng hình ảnh" });
+        trans.put("defaultOriginalQualityTitle", new String[] { "Default to Original quality when selecting images from gallery", "Mặc định chọn chất lượng Original khi chọn ảnh từ thư viện" });
+        trans.put("defaultOriginalQualityDesc", new String[] { "Requires the \"Unlock ZCloud\" feature to work", "Yêu cầu tính năng \"Mở khoá ZCloud\" được bật" });
+        trans.put("defaultOriginalQualityForPastedImagesTitle", new String[] { "Send pasted images in Original quality", "Gửi ảnh được dán ở chất lượng Original" });
+        trans.put("defaultOriginalQualityForPastedImagesDesc", new String[] { "Requires the \"Unlock ZCloud\" feature to work", "Yêu cầu tính năng \"Mở khoá ZCloud\" được bật" });
+        trans.put("defaultOriginalQualityShareTitle", new String[] { "Send shared images in Original quality", "Gửi ảnh được chia sẻ ở chất lượng Original" });
+        trans.put("defaultOriginalQualityShareDesc", new String[] { "Requires the \"Unlock ZCloud\" feature to work, does not work when forwarding photos", "Yêu cầu tính năng \"Mở khoá ZCloud\" được bật, không hoạt động khi chuyển tiếp ảnh" });
+        trans.put("defaultOriginalQualityCameraTitle", new String[] { "Send camera images in Original quality", "Gửi ảnh chụp từ camera ở chất lượng Original" });
+        trans.put("defaultOriginalQualityCameraDesc", new String[] { "Requires the \"Unlock ZCloud\" feature to work", "Yêu cầu tính năng \"Mở khoá ZCloud\" được bật" });
 
         // Privacy
         trans.put("privacyStatusControlSubCategoryTitle", new String[] { "Control activity status and messages", "Kiểm soát trạng thái hoạt động và tin nhắn" });
