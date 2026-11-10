@@ -168,14 +168,22 @@ jobs:
               -f message="$COMMIT_MSG" \
               -f content="$NEW_CONTENT_BASE64" \
               -f branch="$TARGET_BRANCH" \
-              -f sha="$EXISTING_SHA"
+              -f sha="$EXISTING_SHA" \
+              -F committer[name]="github-actions[bot]" \
+              -F committer[email]="41898282+github-actions[bot]@users.noreply.github.com" \
+              -F author[name]="github-actions[bot]" \
+              -F author[email]="41898282+github-actions[bot]@users.noreply.github.com"
           else
             gh api \
               --method PUT \
               "$API_URL" \
               -f message="$COMMIT_MSG" \
               -f content="$NEW_CONTENT_BASE64" \
-              -f branch="$TARGET_BRANCH"
+              -f branch="$TARGET_BRANCH" \
+              -F committer[name]="github-actions[bot]" \
+              -F committer[email]="41898282+github-actions[bot]@users.noreply.github.com" \
+              -F author[name]="github-actions[bot]" \
+              -F author[email]="41898282+github-actions[bot]@users.noreply.github.com"
           fi
 
       - name: Publish APK to Xposed Modules Repo

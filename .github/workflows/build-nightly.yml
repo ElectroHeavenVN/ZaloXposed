@@ -166,3 +166,24 @@ jobs:
             --repo "$TARGET_REPO" \
             --draft=false \
             --prerelease
+
+      - name: Checkout morphe-patches repository
+        uses: actions/checkout@v7
+        with:
+          repository: ElectroHeavenVN/morphe-patches
+          token: ${{ secrets.MORPHE_PATCHES_REPO_TOKEN }}
+          path: morphe-patches
+          ref: dev
+
+      - name: Create and push empty commit to morphe-patches
+        env:
+          SHORT_SHA: ${{ github.sha }}
+        run: |
+          cd morphe-patches
+          SHORT_SHA="${SHORT_SHA::7}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty \
+            -m "feat: Update ZaloXposed nightly-${SHORT_SHA}" \
+            -m "Automated empty commit for triggering CI/CD pipelines"
+          git push origin HEAD:dev
