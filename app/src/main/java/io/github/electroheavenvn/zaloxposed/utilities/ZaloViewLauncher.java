@@ -67,7 +67,8 @@ public final class ZaloViewLauncher
 
     private void openInternal(Class<?> viewClass, Bundle args, int animation, Activity explicitHost)
     {
-        Runnable task = () -> {
+        Runnable task = () ->
+        {
             Activity host = explicitHost != null ? explicitHost : resolveHost();
             if (host == null)
             {

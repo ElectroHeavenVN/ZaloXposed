@@ -49,11 +49,7 @@ public class ExtendedGroupRightMenuHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("java.util.ArrayList")
                 .paramCount(0)
-                .addUsingNumber(84)
-                .addUsingNumber(82)
-                .addUsingNumber(10)
-                .addUsingNumber(0)
-                .addUsingNumber(2)
+                .usingNumbers(84, 82, 10, 0, 2)
                 .addInvoke("Landroid/text/SpannableString;-><init>(Ljava/lang/CharSequence;)V")
             )), classLoader);
         if (methods2.isEmpty())
