@@ -2,10 +2,11 @@ name: Build test APK
 
 on:
   workflow_dispatch:
-
-concurrency:
-  group: test-${{ github.ref }}
-  cancel-in-progress: true
+    inputs:
+      pr_number:
+        description: "Pull request number to build (leave empty to build the selected branch)"
+        required: false
+        type: number
 
 jobs:
   build-test:
@@ -16,6 +17,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v7
         with:
+          ref: ${{ inputs.pr_number && format('refs/pull/{0}/head', inputs.pr_number) || github.ref }}
           fetch-depth: 0
 
       - name: Download native libraries
