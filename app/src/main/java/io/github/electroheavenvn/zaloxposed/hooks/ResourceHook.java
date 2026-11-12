@@ -107,7 +107,7 @@ public class ResourceHook extends BaseHook
     }
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         if (sInstalled)
             return;
@@ -122,8 +122,7 @@ public class ResourceHook extends BaseHook
     private void hookImageView() throws Throwable
     {
         Method method = ImageView.class.getDeclaredMethod("setImageResource", int.class);
-        Logger.h(method);
-        module.hook(method).setPriority(5).intercept(chain ->
+        doHook(method, 5, chain ->
         {
             int resId = (int)chain.getArg(0);
             if (!isMapped(resId))
@@ -158,8 +157,7 @@ public class ResourceHook extends BaseHook
             Class<?>[] params = method.getParameterTypes();
             if (params.length == 0 || params[0] != int.class)
                 continue;
-            Logger.h(method);
-            module.hook(method).setPriority(5).intercept(chain ->
+            doHook(method, 5, chain ->
             {
                 int resId = (int)chain.getArg(0);
                 if (!isMapped(resId))
@@ -197,8 +195,7 @@ public class ResourceHook extends BaseHook
             Class<?>[] ps = method.getParameterTypes();
             if (isGetValue && (ps.length != 3 || ps[0] != int.class))
                 continue;
-            Logger.h(method);
-            module.hook(method).setPriority(5).intercept(chain ->
+            doHook(method, 5, chain ->
             {
                 Object[] arr = chain.getArgs().toArray();
                 int idIndex = findCustomIdIndex(arr);
@@ -237,8 +234,7 @@ public class ResourceHook extends BaseHook
             Class<?>[] ps = method.getParameterTypes();
             if (ps.length != 4 || ps[0] != int.class)
                 continue;
-            Logger.h(method);
-            module.hook(method).setPriority(5).intercept(chain ->
+            doHook(method, 5, chain ->
             {
                 int resId = (int)chain.getArg(0);
                 if (!isMapped(resId))

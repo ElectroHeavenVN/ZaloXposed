@@ -30,7 +30,7 @@ public class CustomBackgroundHook extends BaseHook
     private static final Random random = new Random();
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         Class<?> msgViewCls = Class.forName("com.zing.zalo.ui.maintab.MainTabView", false, classLoader);
         List<Method> methods = DexKitCache.GetMethods("CustomBackground_1", () -> bridge.findMethod(FindMethod.create()
@@ -49,8 +49,7 @@ public class CustomBackgroundHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 Object result = chain.proceed();
                 if (!Config.getEnableBackground())

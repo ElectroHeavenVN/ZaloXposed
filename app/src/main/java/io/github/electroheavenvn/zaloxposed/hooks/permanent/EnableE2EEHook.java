@@ -16,7 +16,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 public class EnableE2EEHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         List<Method> methods = DexKitCache.GetMethods("EnableE2EE_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -27,8 +27,7 @@ public class EnableE2EEHook extends BaseHook
             )), classLoader);
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain -> true);
+            doHook(method, chain -> true);
         }
         methods = DexKitCache.GetMethods("EnableE2EE_2", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -40,8 +39,7 @@ public class EnableE2EEHook extends BaseHook
             )), classLoader);
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain -> true);
+            doHook(method, chain -> true);
         }
     }
 }

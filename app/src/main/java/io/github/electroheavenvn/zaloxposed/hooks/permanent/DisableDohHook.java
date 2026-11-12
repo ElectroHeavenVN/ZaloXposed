@@ -8,12 +8,11 @@ import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 public class DisableDohHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         Class<?> clazz = Class.forName("com.zing.zalocore.connection.socket.NativeSocket", false, classLoader);
         Method method = clazz.getDeclaredMethod("nativeSetDohUrl", String.class);
-        Logger.h(method);
-        module.hook(method).intercept(chain ->
+        doHook(method, chain ->
         {
             // String dohUrl = (String) chain.getArg(0);
             // Logger.i("nativeSetDohUrl called with: " + dohUrl);

@@ -16,7 +16,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 public class RestoreProfileMusicHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         List<Method> methods = DexKitCache.GetMethods("RestoreProfileMusic_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -33,8 +33,7 @@ public class RestoreProfileMusicHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (!Config.getRestoreProfileMusic())
                     return chain.proceed();

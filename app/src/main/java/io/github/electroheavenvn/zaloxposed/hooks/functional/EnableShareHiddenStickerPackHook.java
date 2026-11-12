@@ -34,7 +34,7 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
     static Method toJsonMethod = null;
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {  
         Config.addOnConfigChangedListener((key, oldValue, newValue) ->
         {
@@ -81,8 +81,7 @@ public class EnableShareHiddenStickerPackHook extends BaseHook
         if (onStickerPackOptionsClicked == null)
             return;
         Method synchronizedMapClassGet = Class.forName("java.util.Collections$SynchronizedMap", false, classLoader).getDeclaredMethod("get", Object.class);
-        Logger.h(synchronizedMapClassGet);
-        module.hook(synchronizedMapClassGet).intercept(chain ->
+        doHook(synchronizedMapClassGet, chain ->
         {
             if (!Config.getEnableShareHiddenStickerPack())
                 return chain.proceed();

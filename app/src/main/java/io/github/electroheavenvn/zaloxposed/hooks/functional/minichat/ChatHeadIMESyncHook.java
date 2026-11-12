@@ -149,7 +149,7 @@ public class ChatHeadIMESyncHook extends BaseHook
 
     @SuppressLint({"WrongConstant", "PrivateApi"})
     @Override
-    public void hook() throws ClassNotFoundException, NoSuchMethodException
+    public void installHooks() throws ClassNotFoundException, NoSuchMethodException
     {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
             return;
@@ -219,8 +219,7 @@ public class ChatHeadIMESyncHook extends BaseHook
 
 
         Method setWindowInsetsAnimationCallback = View.class.getDeclaredMethod("setWindowInsetsAnimationCallback", WindowInsetsAnimation.Callback.class);
-        Logger.h(setWindowInsetsAnimationCallback);
-        module.hook(setWindowInsetsAnimationCallback).intercept(chain ->
+        doHook(setWindowInsetsAnimationCallback, chain ->
         {
             if (!Config.getEnableChatHead())
                 return chain.proceed();
@@ -232,8 +231,7 @@ public class ChatHeadIMESyncHook extends BaseHook
             return chain.proceed();
         });
         Method dispatchApplyWindowInsets = View.class.getDeclaredMethod("dispatchApplyWindowInsets", WindowInsets.class);
-        Logger.h(dispatchApplyWindowInsets);
-        module.hook(dispatchApplyWindowInsets).intercept(chain ->
+        doHook(dispatchApplyWindowInsets, chain ->
         {
             Object result = chain.proceed();
             if (!Config.getEnableChatHead())
@@ -250,8 +248,7 @@ public class ChatHeadIMESyncHook extends BaseHook
         });
         Method onAttachedToWindow = View.class.getDeclaredMethod("onAttachedToWindow");
         onAttachedToWindow.setAccessible(true);
-        Logger.h(onAttachedToWindow);
-        module.hook(onAttachedToWindow).intercept(chain ->
+        doHook(onAttachedToWindow, chain ->
         {
             Object result = chain.proceed();
             if (!Config.getEnableChatHead())
@@ -265,8 +262,7 @@ public class ChatHeadIMESyncHook extends BaseHook
         });
         Method onDetachedFromWindow = View.class.getDeclaredMethod("onDetachedFromWindow");
         onDetachedFromWindow.setAccessible(true);
-        Logger.h(onDetachedFromWindow);
-        module.hook(onDetachedFromWindow).intercept(chain ->
+        doHook(onDetachedFromWindow, chain ->
         {
             Object result = chain.proceed();
             if (!Config.getEnableChatHead())
@@ -288,8 +284,7 @@ public class ChatHeadIMESyncHook extends BaseHook
             }
             return result;
         });
-        Logger.h(getSoftKeyboardHeight);
-        module.hook(getSoftKeyboardHeight).intercept(chain ->
+        doHook(getSoftKeyboardHeight, chain ->
         {
             Object result = chain.proceed();
             if (!Config.getEnableChatHead())
@@ -353,8 +348,7 @@ public class ChatHeadIMESyncHook extends BaseHook
         });
         Method getRealOffsetBottom = chatFrameLayout.getDeclaredMethod("getRealOffsetBottom");
         getRealOffsetBottom.setAccessible(true);
-        Logger.h(getRealOffsetBottom);
-        module.hook(getRealOffsetBottom).intercept(chain ->
+        doHook(getRealOffsetBottom, chain ->
         {
             Object result = chain.proceed();
             if (!Config.getEnableChatHead())
@@ -382,8 +376,7 @@ public class ChatHeadIMESyncHook extends BaseHook
             boolean hide = name.equals("hideSoftInputFromWindow") && params.length >= 2 && params[0] == IBinder.class;
             if (!show && !hide)
                 continue;
-            Logger.h(inputMethodManagerMethod);
-            module.hook(inputMethodManagerMethod).intercept(chain ->
+            doHook(inputMethodManagerMethod, chain ->
             {
                 if (!Config.getEnableChatHead())
                     return chain.proceed();
@@ -421,8 +414,7 @@ public class ChatHeadIMESyncHook extends BaseHook
                     || !parameters[0].getName().equals("android.view.InsetsState")
                     || Modifier.isAbstract(method.getModifiers()))
                     continue;
-                Logger.h(method);
-                module.hook(method).intercept(chain ->
+                doHook(method, chain ->
                 {
                     Object result = chain.proceed();
                     if (!Config.getEnableChatHead())
@@ -443,8 +435,7 @@ public class ChatHeadIMESyncHook extends BaseHook
         {
             Method method = manager.getDeclaredMethod(methodName, View.class, ViewGroup.LayoutParams.class);
             method.setAccessible(true);
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (!Config.getEnableChatHead())
                     return chain.proceed();

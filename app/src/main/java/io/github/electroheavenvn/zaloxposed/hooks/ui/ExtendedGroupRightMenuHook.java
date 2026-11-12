@@ -20,7 +20,7 @@ public class ExtendedGroupRightMenuHook extends BaseHook
 {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         List<Method> methods = DexKitCache.GetMethods("ExtendedGroupRightMenu_GetItems", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -60,8 +60,7 @@ public class ExtendedGroupRightMenuHook extends BaseHook
         methods.addAll(methods2);
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 ArrayList result = (ArrayList)chain.proceed();
                 if (!Config.getEnableExtendedGroupRightMenu())

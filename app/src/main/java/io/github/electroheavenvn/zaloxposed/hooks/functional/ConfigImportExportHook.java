@@ -26,11 +26,10 @@ public class ConfigImportExportHook extends BaseHook
     private static final int REQUEST_CODE_IMPORT_CONFIG = 3636;
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         Method onActivityResult = Activity.class.getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
-        Logger.h(onActivityResult);
-        module.hook(onActivityResult).setPriority(10).intercept(chain ->
+        doHook(onActivityResult, 10, chain ->
         {
             int requestCode = (int)chain.getArg(0);
             if (requestCode != REQUEST_CODE_IMPORT_CONFIG)

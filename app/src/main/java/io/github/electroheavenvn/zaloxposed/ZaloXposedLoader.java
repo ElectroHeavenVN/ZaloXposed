@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 
 import org.luckypray.dexkit.DexKitBridge;
 
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
@@ -33,6 +34,7 @@ import io.github.electroheavenvn.zaloxposed.hooks.ads.*;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.*;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingsMenu;
 import io.github.electroheavenvn.zaloxposed.utilities.*;
+import io.github.libxposed.api.XposedInterfaceWrapper;
 import io.github.libxposed.api.XposedModule;
 
 public class ZaloXposedLoader extends XposedModule
@@ -131,8 +133,7 @@ public class ZaloXposedLoader extends XposedModule
                             return modRes.getAssets();
                         }
                     };
-                    LayoutInflater inflater = activity.getLayoutInflater()
-                        .cloneInContext(modContext);
+                    LayoutInflater inflater = activity.getLayoutInflater().cloneInContext(modContext);
                     customSplash = inflater.inflate(layoutId, null, false);
                     if (customSplash == null)
                         return result;
@@ -219,8 +220,8 @@ public class ZaloXposedLoader extends XposedModule
                 try
                 {
                     long startHookTime = System.currentTimeMillis();
-                    hook.init(this, bridge, param, assetManager);
-                    hook.hook();
+                    hook.Init(this, bridge, param, assetManager);
+                    hook.installHooks();
                     long time = System.currentTimeMillis() - startHookTime;
                     if (time > 10)
                         Logger.d(hook.getClass().getSimpleName() + " finished in " + time + "ms");

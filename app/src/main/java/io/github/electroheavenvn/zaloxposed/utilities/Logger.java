@@ -12,7 +12,7 @@ public final class Logger
 
     private static XposedModule module;
 
-    private static final String TAG = "ZaloXposed";
+    public static final String TAG = "ZaloXposed";
 
     private static final String RESET = "\u001B[0m";
     private static final String GRAY = "\u001B[90m";
@@ -20,8 +20,6 @@ public final class Logger
     private static final String GREEN = "\u001B[32m";
     private static final String YELLOW = "\u001B[33m";
     private static final String CYAN = "\u001B[38;2;0;255;255m";
-    private static final String LIME = "\u001B[38;2;166;226;46m";
-    private static final String PURPLE = "\u001B[38;2;174;129;255m";
     private static final String ORANGE = "\u001B[38;5;208m";
 
     public static void Init(XposedModule xposedModule)
@@ -36,11 +34,10 @@ public final class Logger
         {
             StackTraceElement element = stackTrace[i];
             String className = element.getClassName();
-            if (!className.equals(Logger.class.getName())) 
-            {
-                String simpleName = className.substring(className.lastIndexOf('.') + 1);
-                return "[" + simpleName + "] ";
-            }
+            if (className.equals(Logger.class.getName()))
+                continue;
+            String simpleName = className.substring(className.lastIndexOf('.') + 1);
+            return "[" + simpleName + "] ";
         }
         return "";
     }
@@ -112,23 +109,5 @@ public final class Logger
         Log.e(TAG, colored);
         if (module != null)
             module.log(Log.ERROR, TAG, callerInfo, t);
-    }
-
-    public static void h(Executable executable)
-    {
-        String callerInfo = getCallerInfo();
-        String execInfo = executable == null ? "null" : executable.toString();
-        Log.i(TAG, formatCaller(callerInfo) + LIME + "Hooking: " + PURPLE + execInfo + RESET);
-        if (module != null)
-            module.log(Log.INFO, TAG, callerInfo + "Hooking: " + execInfo);
-    }
-
-    public static void h(int index, Executable executable)
-    {
-        String callerInfo = getCallerInfo();
-        String execInfo = executable == null ? "null" : executable.toString();
-        Log.i(TAG, formatCaller(callerInfo) + LIME + "Hooking [" + index + "]: " + PURPLE + execInfo + RESET);
-        if (module != null)
-            module.log(Log.INFO, TAG, callerInfo + "Hooking [" + index + "]: " + execInfo);
     }
 }

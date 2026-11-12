@@ -21,7 +21,7 @@ public class UnlockZStyleHook extends BaseHook
     private static Field zStylePackageIdField = null;
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         zStylePackageIdField = DexKitCache.GetFieldRaw("UnlockZStyle_ZStylePackageId", classLoader);
         List<Method> methods = DexKitCache.GetMethods("UnlockZStyle_1", () -> bridge.findMethod(FindMethod.create()
@@ -56,7 +56,7 @@ public class UnlockZStyleHook extends BaseHook
         }
         for (Method method : methods)
         {
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 Object result = chain.proceed();
                 if (!Config.getUnlockZStyle())

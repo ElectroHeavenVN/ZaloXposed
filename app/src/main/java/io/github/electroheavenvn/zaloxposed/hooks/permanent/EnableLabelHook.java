@@ -16,7 +16,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 public class EnableLabelHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         List<Method> methods = DexKitCache.GetMethods("EnableLabel_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -35,8 +35,7 @@ public class EnableLabelHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 String key = (String)chain.getArg(0);
                 if (key.equals("features@comm4work@chat_label@enable_chat_filter"))

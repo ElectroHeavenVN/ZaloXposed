@@ -34,7 +34,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
     Field quoteAttrField = null;
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         Class<?> msgClass = DexKitCache.GetClass("AntiRecallDeleteChatRow_MsgClass", () -> bridge.findClass(FindClass.create()
             .matcher(ClassMatcher.create()
@@ -104,8 +104,7 @@ public class AntiRecallDeleteChatRowHook extends BaseHook
             )), classLoader);
         if (drawMethod == null)
             return;
-        Logger.h(drawMethod);
-        module.hook(drawMethod).intercept(chain ->
+        doHook(drawMethod, chain ->
         {
             Object thisObj = chain.getThisObject();
             Object msg = null;

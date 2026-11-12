@@ -20,7 +20,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 public class AntiRecallDeleteHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         List<Method> methods = DexKitCache.GetMethods("AntiRecallDelete_ChatPacketHandler_OnPayload", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -41,8 +41,7 @@ public class AntiRecallDeleteHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (!Config.getEnableAntiRecall() && !Config.getEnableAntiDelete())
                     return chain.proceed();

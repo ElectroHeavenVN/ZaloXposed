@@ -24,7 +24,7 @@ public class DefaultOriginalQualityHook extends BaseHook
     // private static Field cameraInputMode;
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         Method getCurrentQuality = DexKitCache.GetMethod("DefaultOriginalQuality_GetCurrentQuality", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -40,8 +40,7 @@ public class DefaultOriginalQualityHook extends BaseHook
             )), classLoader);
         if (getCurrentQuality == null)
             return;
-        Logger.h(getCurrentQuality);
-        module.hook(getCurrentQuality).intercept(chain ->
+        doHook(getCurrentQuality, chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
@@ -60,8 +59,7 @@ public class DefaultOriginalQualityHook extends BaseHook
             )), classLoader);
         if (openView == null)
             return;
-        Logger.h(openView);
-        module.hook(openView).intercept(chain ->
+        doHook(openView, chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
@@ -93,8 +91,7 @@ public class DefaultOriginalQualityHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (!Config.getUnlockZCloud())
                     return chain.proceed();
@@ -128,8 +125,7 @@ public class DefaultOriginalQualityHook extends BaseHook
             )), classLoader);
         if (sendImageFromCamera == null)
             return;
-        Logger.h(sendImageFromCamera);
-        module.hook(sendImageFromCamera).intercept(chain ->
+        doHook(sendImageFromCamera, chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
@@ -206,8 +202,7 @@ public class DefaultOriginalQualityHook extends BaseHook
             )), classLoader);
         if (loadFromCameraInputParams == null)
             return;
-        Logger.h(loadFromCameraInputParams);
-        module.hook(loadFromCameraInputParams).intercept(chain ->
+        doHook(loadFromCameraInputParams, chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
@@ -230,8 +225,7 @@ public class DefaultOriginalQualityHook extends BaseHook
             )), classLoader);
         if (sendImg == null)
             return;
-        Logger.h(sendImg);
-        module.hook(sendImg).intercept(chain ->
+        doHook(sendImg, chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
@@ -245,8 +239,7 @@ public class DefaultOriginalQualityHook extends BaseHook
             return chain.proceed(args);
         });
         // Method v5 = Class.forName("vrv", false, classLoader).getDeclaredMethod("V5", Intent.class, int.class);
-        // Logger.h(v5);
-        // module.hook(v5).intercept(chain ->
+        //        // doHook(v5, chain ->
         // {
         //     Intent intent = (Intent)chain.getArg(0);
         //     if (intent != null)

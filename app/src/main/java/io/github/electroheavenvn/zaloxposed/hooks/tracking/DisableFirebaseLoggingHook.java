@@ -16,7 +16,7 @@ import java.util.List;
 public class DisableFirebaseLoggingHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         List<Method> methods = DexKitCache.GetMethods("DisableFirebaseLogging_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -37,8 +37,7 @@ public class DisableFirebaseLoggingHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (Config.getDisableFirebaseLogging())
                     return null;

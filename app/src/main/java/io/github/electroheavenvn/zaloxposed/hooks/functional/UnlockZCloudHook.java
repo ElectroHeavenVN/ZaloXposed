@@ -17,7 +17,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 public class UnlockZCloudHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         Method targetMethod = DexKitCache.GetMethod("UnlockZCloud_SMLZCloudSubscription_GetZCloudPlan", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -29,8 +29,7 @@ public class UnlockZCloudHook extends BaseHook
         if (targetMethod == null)
             return;
         Class<?> smlZCloudSubscription = targetMethod.getDeclaringClass();
-        Logger.h(targetMethod);
-        module.hook(targetMethod).intercept(chain ->
+        doHook(targetMethod, chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
@@ -50,8 +49,7 @@ public class UnlockZCloudHook extends BaseHook
             )), classLoader);
         if (targetMethod == null)
             return;
-        Logger.h(targetMethod);
-        module.hook(targetMethod).intercept(chain ->
+        doHook(targetMethod, chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
@@ -75,8 +73,7 @@ public class UnlockZCloudHook extends BaseHook
             )), classLoader);
         if (targetMethod == null)
             return;
-        Logger.h(targetMethod);
-        module.hook(targetMethod).intercept(chain ->
+        doHook(targetMethod, chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
@@ -93,8 +90,7 @@ public class UnlockZCloudHook extends BaseHook
             )), classLoader);
         if (targetMethod == null)
             return;
-        Logger.h(targetMethod);
-        module.hook(targetMethod).intercept(chain ->
+        doHook(targetMethod, chain ->
         {
             if (!Config.getUnlockZCloud())
                 return chain.proceed();
@@ -114,8 +110,7 @@ public class UnlockZCloudHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (!Config.getUnlockZCloud())
                     return chain.proceed();
@@ -142,8 +137,7 @@ public class UnlockZCloudHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (!Config.getUnlockZCloud())
                     return chain.proceed();

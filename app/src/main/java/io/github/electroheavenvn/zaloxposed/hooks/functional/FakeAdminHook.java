@@ -19,7 +19,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 public class FakeAdminHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         Class<?> groupDAO = DexKitCache.GetClass("FakeAdmin_GroupDAO", () -> bridge.findClass(FindClass.create()
             .matcher(ClassMatcher.create()
@@ -36,8 +36,7 @@ public class FakeAdminHook extends BaseHook
         if (groupDAO == null)
             return;
         Method method = JSONObject.class.getMethod("optJSONArray", String.class);
-        Logger.h(method);
-        module.hook(method).intercept(chain ->
+        doHook(method, chain ->
         {
             if (!Config.getEnableFakeGroupRole())
                 return chain.proceed();

@@ -58,7 +58,7 @@ public final class S
         trans.put("hideFullscreenEffectsDesc", new String[] { "Hide fullscreen effects when certain messages are received", "Ẩn hiệu ứng toàn màn hình khi nhận được một số tin nhắn nhất định" });
         trans.put("shareHiddenStickerPackTitle", new String[] { "Allow sharing hidden sticker packs", "Cho phép chia sẻ bộ sticker ẩn" });
 
-        trans.put("imageQualitySubCategoryTitle", new String[] { "Image quality", "Chất lượng hình ảnh" });
+        trans.put("mediaQualitySubCategoryTitle", new String[] { "Media quality", "Chất lượng nội dung đa phương tiện" });
         trans.put("defaultOriginalQualityTitle", new String[] { "Default to Original quality when selecting images from gallery", "Mặc định chọn chất lượng Original khi chọn ảnh từ thư viện" });
         trans.put("defaultOriginalQualityDesc", new String[] { "Requires the \"Unlock ZCloud\" feature to work", "Yêu cầu tính năng \"Mở khoá ZCloud\" được bật" });
         trans.put("defaultOriginalQualityForPastedImagesTitle", new String[] { "Send pasted images in Original quality", "Gửi ảnh được dán ở chất lượng Original" });

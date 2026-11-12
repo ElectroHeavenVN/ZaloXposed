@@ -51,7 +51,7 @@ public class EnableChatHeadHook extends BaseHook
     private static boolean hooked = false;
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
             return;
@@ -83,8 +83,7 @@ public class EnableChatHeadHook extends BaseHook
             )), classLoader);
         if (androidVersionCheckClass == null)
             return;
-        Logger.h(0, targetMethod);
-        module.hook(targetMethod).intercept(chain ->
+        doHook(targetMethod, chain ->
         {
             Object result = chain.proceed();
             Config.addOnConfigChangedListener((key, oldValue, newValue) ->
@@ -135,8 +134,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 1");
         for (Method method : methods)
         {
-            Logger.h(1, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_2", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -154,8 +152,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 2");
         for (Method method : methods)
         {
-            Logger.h(2, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_3", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -178,8 +175,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 3");
         for (Method method : methods)
         {
-            Logger.h(3, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_4", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -195,8 +191,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 4");
         for (Method method : methods)
         {
-            Logger.h(4, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_5", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -215,8 +210,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 5");
         for (Method method : methods)
         {
-            Logger.h(5, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_6", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -231,8 +225,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 6");
         for (Method method : methods)
         {
-            Logger.h(6, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_7", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -250,8 +243,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 7");
         for (Method method : methods)
         {
-            Logger.h(7, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_8", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -265,8 +257,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 8");
         for (Method method : methods)
         {
-            Logger.h(8, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_9", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -284,8 +275,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 9");
         for (Method method : methods)
         {
-            Logger.h(9, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         // 13(12 now) already included the same method
         // methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_10", () -> bridge.findMethod(FindMethod.create()
@@ -302,8 +292,7 @@ public class EnableChatHeadHook extends BaseHook
         //     Logger.e("Target method not found 10");
         // for (Method method : methods)
         // {
-        //     Logger.h(10, method);
-        //     module.hook(method).intercept(spoofHook);
+        //        //     doHook(method, spoofHook);
         // }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_10", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -329,8 +318,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 10");
         for (Method method : methods)
         {
-            Logger.h(10, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_11", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -343,8 +331,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 11");
         for (Method method : methods)
         {
-            Logger.h(11, method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (!Config.getEnableChatHead())
                     return chain.proceed();
@@ -370,8 +357,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 12");
         for (Method method : methods)
         {
-            Logger.h(12, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_13", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -387,8 +373,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 13");
         for (Method method : methods)
         {
-            Logger.h(13, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_14", () -> bridge.findMethod(FindMethod.create()
         .matcher(MethodMatcher.create()
@@ -405,8 +390,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 14");
         for (Method method : methods)
         {
-            Logger.h(14, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
 
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_15", () -> bridge.findMethod(FindMethod.create()
@@ -421,8 +405,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 15");
         for (Method method : methods)
         {
-            Logger.h(15, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_16", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -442,8 +425,7 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 16");
         for (Method method : methods)
         {
-            Logger.h(16, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
         methods = DexKitCache.GetMethods("EnableChatHead_SpoofHook_17", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -472,19 +454,15 @@ public class EnableChatHeadHook extends BaseHook
             Logger.e("Target method not found 17");
         for (Method method : methods)
         {
-            Logger.h(17, method);
-            module.hook(method).intercept(spoofHook);
+            doHook(method, spoofHook);
         }
 
         Method method = Class.forName("com.zing.zalo.ui.maintab.group.GroupTabView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
-        Logger.h(-1, method);
-        module.hook(method).intercept(spoofHook);
+        doHook(method, spoofHook);
         method = Class.forName("com.zing.zalo.ui.maintab.msg.MessagesView", false, classLoader).getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
-        Logger.h(-2, method);
-        module.hook(method).intercept(spoofHook);
+        doHook(method, spoofHook);
         method = Class.forName("com.zing.zalo.ui.zviews.PassCodeSettingView", false, classLoader).getDeclaredMethod("onClick", View.class);
-        Logger.h(-3, method);
-        module.hook(method).intercept(spoofHook);
+        doHook(method, spoofHook);
         hooked = true;
     }
 
@@ -493,7 +471,7 @@ public class EnableChatHeadHook extends BaseHook
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU)
             return;
         Method method = Class.forName("android.content.ContextWrapper", false, classLoader).getDeclaredMethod("registerReceiver", BroadcastReceiver.class, IntentFilter.class);
-        module.hook(method).intercept(chain ->
+        doHook(method, chain ->
         {
             StackTraceElement[] stack = Thread.currentThread().getStackTrace();
             for (StackTraceElement e : stack)
@@ -510,7 +488,7 @@ public class EnableChatHeadHook extends BaseHook
             return chain.proceed();
         });
         method = Class.forName("androidx.window.extensions.layout.WindowLayoutComponentImpl", false, classLoader).getDeclaredMethod("addWindowLayoutInfoListener", Context.class, Class.forName("androidx.window.extensions.core.util.function.Consumer", false, classLoader));
-        module.hook(method).intercept(new FixWindowLayoutComponentImpl());
+        doHook(method, new FixWindowLayoutComponentImpl());
     }
 
     private void loadFields() throws IOException, NoSuchFieldException

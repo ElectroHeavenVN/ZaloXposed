@@ -16,7 +16,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 public class EnableSetNicknameInGroupHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         List<Method> methods = DexKitCache.GetMethods("EnableSetNicknameInGroup_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -28,8 +28,7 @@ public class EnableSetNicknameInGroupHook extends BaseHook
             )), classLoader);
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain -> 1);
+            doHook(method, chain -> 1);
         }
     }
 }

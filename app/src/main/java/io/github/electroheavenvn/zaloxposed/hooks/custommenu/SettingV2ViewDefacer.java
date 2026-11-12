@@ -102,7 +102,7 @@ public class SettingV2ViewDefacer extends SettingViewsDefacerBase
     }
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         settingPrivateV2View = Class.forName("com.zing.zalo.ui.settings.SettingPrivateV2View", false, classLoader);
         MethodMatcher openViewMatcher = MethodMatcher.create()
@@ -168,8 +168,7 @@ public class SettingV2ViewDefacer extends SettingViewsDefacerBase
             )), classLoader);
         if (inflate == null)
             return;
-        Logger.h(inflate);
-        module.hook(inflate).setPriority(10).intercept(chain ->
+        doHook(inflate, 10, chain ->
         {
             Object result = chain.proceed();
             // Bundle bundle = (Bundle)chain.getArg(2);
@@ -206,8 +205,7 @@ public class SettingV2ViewDefacer extends SettingViewsDefacerBase
             )), classLoader);
         if (initUI == null)
             return;
-        Logger.h(initUI);
-        module.hook(initUI).setPriority(10).intercept(chain ->
+        doHook(initUI, 10, chain ->
         {
             Object result = chain.proceed();
             if (!isOpenZaloXposedSettings(chain.getThisObject()))
@@ -243,8 +241,7 @@ public class SettingV2ViewDefacer extends SettingViewsDefacerBase
             )), classLoader);
         if (setActionBarTitle == null)
             return;
-        Logger.h(setActionBarTitle);
-        module.hook(setActionBarTitle).setPriority(10).intercept(chain ->
+        doHook(setActionBarTitle, 10, chain ->
         {
             Field actionBarField = DexKitCache.GetFieldRaw("ZaloXposedSettings_SettingV2View_ActionBar", classLoader);
             if (actionBarField == null)

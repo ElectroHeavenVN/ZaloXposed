@@ -17,7 +17,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 public abstract class SettingViewsDefacerBase extends BaseHook
 {
-    public abstract void hook() throws Throwable;
+    public abstract void installHooks() throws Throwable;
 
     protected static ColorStateList textColor = null;
 

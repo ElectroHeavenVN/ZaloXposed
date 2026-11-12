@@ -15,7 +15,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.ZaloViewLauncher;
 public class ZaloViewLauncherHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         Class<?> zaloActivity = Class.forName("com.zing.zalo.activity.ZaloActivity", false, classLoader);
         Method openView = DexKitCache.GetMethod("ZaloViewLauncher_ZaloActivity_OpenView", () -> bridge.findMethod(FindMethod.create()
@@ -29,19 +29,19 @@ public class ZaloViewLauncherHook extends BaseHook
             return;
         ZaloViewLauncher.get().Init(classLoader, openView);
         Method onCreate = zaloActivity.getDeclaredMethod("onCreate", Bundle.class);
-        module.hook(onCreate).setPriority(10).intercept(chain -> {
+        doHook(onCreate, 10, chain -> {
             Object result = chain.proceed();
             ZaloViewLauncher.get().Attach((Activity)chain.getThisObject());
             return result;
         });
         Method onResume = zaloActivity.getDeclaredMethod("onResume");
-        module.hook(onResume).setPriority(10).intercept(chain -> {
+        doHook(onResume, 10, chain -> {
             Object result = chain.proceed();
             ZaloViewLauncher.get().Attach((Activity)chain.getThisObject());
             return result;
         });
         Method onDestroy = zaloActivity.getDeclaredMethod("onDestroy");
-        module.hook(onDestroy).setPriority(10).intercept(chain -> {
+        doHook(onDestroy, 10, chain -> {
             ZaloViewLauncher.get().Detach((Activity)chain.getThisObject());
             return chain.proceed();
         });

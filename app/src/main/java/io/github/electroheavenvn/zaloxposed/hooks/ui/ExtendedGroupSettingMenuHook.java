@@ -18,7 +18,7 @@ public class ExtendedGroupSettingMenuHook extends BaseHook
     Method runMethod = null;
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         runMethod = DexKitCache.GetMethod("ExtendedGroupSettingMenu_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -49,8 +49,7 @@ public class ExtendedGroupSettingMenuHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain -> 
+            doHook(method, chain -> 
             {
                 if (!Config.getEnableExtendedGroupSettingMenu())
                     return chain.proceed();

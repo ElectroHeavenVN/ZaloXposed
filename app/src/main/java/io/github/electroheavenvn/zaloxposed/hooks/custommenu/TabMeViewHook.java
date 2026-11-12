@@ -35,7 +35,7 @@ public class TabMeViewHook extends BaseHook
 
     @Override
     @SuppressWarnings("unchecked")
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         ResourceHook.map(CUSTOM_DRAWABLE_ID, "extension_24px", "zds_oic_premium_crown_color_24");
         Class<?> tabMeViewClass = Class.forName("com.zing.zalo.ui.maintab.me.TabMeView", false, classLoader);
@@ -95,8 +95,7 @@ public class TabMeViewHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).setPriority(10).intercept(chain -> false);
+            doHook(method, 10, chain -> false);
         }
         methods = DexKitCache.GetMethods("ZaloXposedSettings_TabMeView_GetItemList", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -115,8 +114,7 @@ public class TabMeViewHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).setPriority(10).intercept(chain ->
+            doHook(method, 10, chain ->
             {
                 Object result = chain.proceed();
                 if (!(result instanceof ArrayList))
@@ -161,8 +159,7 @@ public class TabMeViewHook extends BaseHook
             )), classLoader);
         if (onClick == null)
             return;
-        Logger.h(onClick);
-        module.hook(onClick).setPriority(10).intercept(chain ->
+        doHook(onClick, 10, chain ->
         {
             Object tabMeItem = chain.getArg(0);
             if (tabMeItem == null)
@@ -207,8 +204,7 @@ public class TabMeViewHook extends BaseHook
             )), classLoader);
         if (getPrivacySettingsFromServer == null)
             return;
-        Logger.h(getPrivacySettingsFromServer);
-        module.hook(getPrivacySettingsFromServer).setPriority(10).intercept(chain ->
+        doHook(getPrivacySettingsFromServer, 10, chain ->
         {
             if (ZaloXposedSettingsMenu.isOpening || ZaloXposedSettingsMenu.isOpenSettingMenu)
                 return null;

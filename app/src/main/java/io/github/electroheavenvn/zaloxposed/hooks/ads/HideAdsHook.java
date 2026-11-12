@@ -21,7 +21,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 public class HideAdsHook extends BaseHook
 { 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         List<Method> methods = DexKitCache.GetMethods("HideAdsHook_InflateModuleView", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
@@ -40,8 +40,7 @@ public class HideAdsHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 Object result = chain.proceed(); 
                 int viewType = (Integer)chain.getArg(1);
@@ -76,8 +75,7 @@ public class HideAdsHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 Object result = chain.proceed();
                 if (Config.getHideFeedItemZInstantAds())
@@ -114,8 +112,7 @@ public class HideAdsHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 Object value = chain.proceed();
                 if (!Config.getBlockAdsEndpoints())

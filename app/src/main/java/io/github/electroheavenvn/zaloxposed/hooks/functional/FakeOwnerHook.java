@@ -12,11 +12,10 @@ import java.lang.reflect.Constructor;
 public class FakeOwnerHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         Constructor<?> constructor = JSONObject.class.getConstructor(String.class);
-        Logger.h(constructor);
-        module.hook(constructor).intercept(chain ->
+        doHook(constructor, chain ->
         {
             if (!Config.getEnableFakeGroupRole())
                 return chain.proceed();

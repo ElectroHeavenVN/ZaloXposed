@@ -18,7 +18,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 public class RestoreGoogleDriveBackupHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         hookRestoreOldGDriveBackupSection();
         hookShowNewGDriveBackupSection();
@@ -56,8 +56,7 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (Config.getRestoreGoogleDriveBackup())
                     return true;
@@ -113,8 +112,7 @@ public class RestoreGoogleDriveBackupHook extends BaseHook
         }
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (Config.getRestoreGoogleDriveBackup())
                     return true;

@@ -43,7 +43,7 @@ public class RestoreDevToolsMenuHook extends BaseHook
     }
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         Class<?> aboutViewClass;
         try
@@ -66,8 +66,7 @@ public class RestoreDevToolsMenuHook extends BaseHook
             )), classLoader);
         for (Method method : methods)
         {
-            Logger.h(method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 Object result = chain.proceed();
                 Object thisObj = chain.getThisObject();
