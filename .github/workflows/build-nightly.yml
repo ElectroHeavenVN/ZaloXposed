@@ -21,7 +21,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: nightly-${{ github.ref }}
+  group: nightly
   cancel-in-progress: true
 
 jobs:
@@ -148,10 +148,17 @@ jobs:
           NOTES_FILE="$RUNNER_TEMP/xposed-release-notes.md"
           git log -1 --pretty=format:"Nightly build (%h)%n%n%B" > "$NOTES_FILE"
 
-          gh release delete nightly \
+          gh release list \
             --repo "$TARGET_REPO" \
-            --yes \
-            --cleanup-tag 2>/dev/null || true
+            --limit 1000 \
+            --json tagName,name,isPrerelease \
+            --jq '.[] | select(.isPrerelease == true and (((.name // "") | startswith("nightly-")) or ((.name // "") | startswith("Nightly")))) | .tagName' |
+            while IFS= read -r old_tag; do
+              [ -z "$old_tag" ] || gh release delete "$old_tag" \
+                --repo "$TARGET_REPO" \
+                --yes \
+                --cleanup-tag
+            done
 
           gh release create nightly "$APK" \
             --repo "$TARGET_REPO" \
