@@ -1,5 +1,7 @@
 package io.github.electroheavenvn.zaloxposed.utilities;
 
+import android.text.TextUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -113,15 +115,19 @@ public final class S
         // Advanced features
         trans.put("paidFeaturesSubCategoryTitle", new String[] { "Paid features", "Chức năng trả phí" });
         trans.put("unlockZCloudTitle", new String[] { "Unlock ZCloud", "Mở khoá ZCloud" });
-        trans.put("unlockZCloudDesc", new String[] { "Does not increase My Documents capacity", "Không tăng dung lượng bộ nhớ My Documents" });
+        trans.put("unlockZCloudDesc", new String[] { "Does not increase My Documents capacity (Server side checks)", "Không tăng dung lượng bộ nhớ My Documents (được kiểm tra trên máy chủ)" });
         trans.put("unlockZStyleTitle", new String[] { "Unlock ZStyle", "Mở khoá ZStyle" });
-        trans.put("unlockZStyleDesc", new String[] { "Does not unlock the profile customization feature exclusive to ZStyle", "Không mở khóa tính năng tùy chỉnh hồ sơ dành riêng cho ZStyle" });
+        trans.put("unlockZStyleDesc", new String[] { "Does not unlock the profile customization feature exclusive to ZStyle (Server side checks)", "Không mở khóa tính năng tùy chỉnh hồ sơ dành riêng cho ZStyle (được kiểm tra trên máy chủ)" });
+
+        trans.put("microGSubCategoryTitle", new String[] { "MicroG" });
+        trans.put("useMicroGTitle", new String[] { "Use MicroG instead of Google Mobile Services", "Sử dụng MicroG thay vì Google Mobile Services" });
+        trans.put("useMicroGDesc", new String[] { "Always enabled on builds patched by Morphe", "Luôn bật khi vá bằng Morphe" });
+        trans.put("microGVariantTitle", new String[] { "MicroG variant", "Biến thể MicroG" });
 
         // Backup and restore
         trans.put("backupMessagesSubCategoryTitle", new String[] { "Backup messages", "Sao lưu tin nhắn" });
         trans.put("restoreGoogleDriveBackupTitle", new String[] { "Restore Google Drive backup options", "Phục hồi tuỳ chọn sao lưu ảnh bằng Google Drive" });
         trans.put("restoreGoogleDriveBackupDesc", new String[] { "Replace the ZCloud backup options", "Thay thế tuỳ chọn sao lưu bằng ZCloud" });
-        //TODO: support MicroG
 
         trans.put("configBackupRestoreSubCategoryTitle", new String[] { "Configuration backup & restore", "Sao lưu & Khôi phục cấu hình" });
         trans.put("exportConfigFileTitle", new String[] { "Export configuration file", "Xuất tệp cấu hình" });
@@ -159,8 +165,10 @@ public final class S
 
     public static String tr(String key)
     {
-        if (key == null || key.isEmpty())
+        if (TextUtils.isEmpty(key))
             return "";
+        if (key.contains(" "))
+            return key;
         String[] values = trans.get(key);
         if (values == null || values.length == 0)
         {

@@ -1,5 +1,7 @@
 package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
+import android.text.TextUtils;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.luckypray.dexkit.query.FindClass;
@@ -59,7 +61,7 @@ public class FakeAdminHook extends BaseHook
             if (!calledFromClazz)
                 return chain.proceed();
             String userId = CoreUtilityHelper.GetCurrentUserID();
-            if (userId.isEmpty() || "0".equals(userId))
+            if (TextUtils.isEmpty(userId) || "0".equals(userId))
                 return chain.proceed();
             JSONArray arr = (JSONArray)chain.proceed();
             if (arr == null)

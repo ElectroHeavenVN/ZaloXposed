@@ -14,6 +14,7 @@ import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZButtonHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.ConfigImportExportHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.microg.MicroGVariant;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 import io.github.electroheavenvn.zaloxposed.utilities.ZaloViewLauncher;
 
@@ -45,6 +46,10 @@ public final class SettingsMenu
 
     static
     {
+        ArrayList<ListSelectionSettingFeature.Selection> selections = new ArrayList<>();
+        for (var variant : MicroGVariant.availableVariants)
+            selections.add(new ListSelectionSettingFeature.Selection(variant.displayName, variant.id));
+
         settingItems.add(new SwitchSettingFeature("customBackgroundTitle", "", Config.KEY_ENABLE_BACKGROUND));
 
         settingItems.add(new SettingCategory("msgAndConverCategoryTitle", "msgAndConverCategoryDesc", List.of(
@@ -124,6 +129,10 @@ public final class SettingsMenu
             new SettingSubCategory("paidFeaturesSubCategoryTitle", List.of(
                 new SwitchSettingFeature("unlockZCloudTitle", "unlockZCloudDesc", Config.KEY_UNLOCK_ZCLOUD),
                 new SwitchSettingFeature("unlockZStyleTitle", "unlockZStyleDesc", Config.KEY_UNLOCK_ZSTYLE)
+            )),
+            new SettingSubCategory("microGSubCategoryTitle", List.of(
+                new SwitchSettingFeature("useMicroGTitle", "useMicroGDesc", Config.KEY_ENABLE_MICROG).setEnabled(!MorpheConstants.isPatchedByMorphe()),
+                new ListSelectionSettingFeature("microGVariantTitle", "", Config.KEY_SELECTED_MICROG_VARIANT_ID, selections)
             ))
         )));
         settingItems.add(new SettingCategory("backupAndRestoreCategoryTitle", "backupAndRestoreCategoryDesc", List.of(

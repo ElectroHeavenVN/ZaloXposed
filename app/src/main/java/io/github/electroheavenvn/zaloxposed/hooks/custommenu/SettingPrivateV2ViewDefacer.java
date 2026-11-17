@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,7 +57,7 @@ public class SettingPrivateV2ViewDefacer extends SettingViewsDefacerBase
             {
                 SettingSubCategory subCategory = subCategories.get(i);
                 String title = subCategory.getTitle();
-                if (title != null && !title.isEmpty())
+                if (!TextUtils.isEmpty(title))
                 {
                     subCategoryTitle = createSubCategoryTitle(context);
                     subCategoryTitle.setText(title);

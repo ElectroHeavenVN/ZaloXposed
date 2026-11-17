@@ -2,3 +2,5 @@
 -dontoptimize
 -keep class io.github.electroheavenvn.zaloxposed.** { *; }
 -keepattributes *Annotation*, Signature, InnerClasses
+-keep class org.luckypray.dexkit.query.matchers.** { *; }
+-keepclassmembers class org.luckypray.dexkit.query.matchers.** { *; }

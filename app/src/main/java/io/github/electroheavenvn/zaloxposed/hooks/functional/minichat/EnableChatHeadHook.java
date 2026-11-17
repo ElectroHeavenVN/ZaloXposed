@@ -219,7 +219,7 @@ public class EnableChatHeadHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(1)
                 .paramTypes("java.util.ArrayList")
-                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+                .addUsingField(FieldMatcher.create(isAdr10OrOld))
             )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 6");
@@ -312,7 +312,7 @@ public class EnableChatHeadHook extends BaseHook
                             .declaredClass("com.zing.zalo.MainApplication"))
                     )
                 )
-                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+                .addUsingField(FieldMatcher.create(isAdr10OrOld))
             )), classLoader);
         if (methods.isEmpty())
             Logger.e("Target method not found 10");
@@ -344,7 +344,7 @@ public class EnableChatHeadHook extends BaseHook
                 .returnType("void")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
-                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+                .addUsingField(FieldMatcher.create(isAdr10OrOld))
                 .addInvoke(MethodMatcher.create()
                     .name("run")
                     .modifiers(Modifier.PUBLIC | Modifier.FINAL)
@@ -366,7 +366,7 @@ public class EnableChatHeadHook extends BaseHook
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(0)
                 .addInvoke("Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z")
-                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+                .addUsingField(FieldMatcher.create(isAdr10OrOld))
                 .addUsingField(FieldMatcher.create().declaredClass("com.zing.zalo.ui.WebViewMPActivity").name("Companion"))
             )), classLoader);
         if (methods.isEmpty())
@@ -383,7 +383,7 @@ public class EnableChatHeadHook extends BaseHook
             .paramCount(0) 
             .addInvoke("Landroid/widget/Toast;->show()V")
             .addInvoke("Landroid/view/LayoutInflater;->from(Landroid/content/Context;)Landroid/view/LayoutInflater;")
-            .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+            .addUsingField(FieldMatcher.create(isAdr10OrOld))
             .addUsingField(FieldMatcher.create().declaredClass("com.zing.zalo.comm.chathead.bubblechat.ui.ZaloBubbleActivity").name("Companion"))
         )), classLoader);
         if (methods.isEmpty())
@@ -412,7 +412,7 @@ public class EnableChatHeadHook extends BaseHook
                 .modifiers(Modifier.PUBLIC)
                 .returnType("int")
                 .paramCount(0)
-                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+                .addUsingField(FieldMatcher.create(isAdr10OrOld))
                 .addUsingString("activity", StringMatchType.Equals)
                 .addUsingString("com.zing.zalo.ui.MessagePopupActivity", StringMatchType.Equals)
                 .addUsingString("com.zing.zalo.ui.ZaloUserPopupActivity", StringMatchType.Equals)
@@ -432,7 +432,7 @@ public class EnableChatHeadHook extends BaseHook
                 .modifiers(Modifier.PUBLIC)
                 .returnType("boolean")
                 .paramCount(0)
-                .addUsingField(Utils.GetDescriptor(isAdr10OrOld))
+                .addUsingField(FieldMatcher.create(isAdr10OrOld))
                 .addCaller(MethodMatcher.create()
                     .declaredClass("com.zing.zalocore.connection.socket.NativeSocket")
                     .modifiers(Modifier.PUBLIC | Modifier.FINAL)

@@ -1,5 +1,7 @@
 package io.github.electroheavenvn.zaloxposed;
 
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+
 public final class MorpheConstants
 {
     private static final boolean PATCHED_BY_MORPHE = false;
@@ -16,5 +18,15 @@ public final class MorpheConstants
     public static String getModuleName()
     {
         return isPatchedByMorphe() ? MORPHE_MODULE_NAME : MODULE_NAME;
+    }
+
+    /**
+     * enable MicroG on root mode (non-root mode always use MicroG)
+     */
+    public static boolean isEnableMicroG()
+    {
+        if (isPatchedByMorphe())
+            return true;
+        return Config.getEnableMicroG();
     }
 }

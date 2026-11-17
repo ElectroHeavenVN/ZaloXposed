@@ -20,14 +20,15 @@ import io.github.libxposed.api.XposedModuleInterface;
 public abstract class BaseHook
 {
     private static final HashMap<Executable, ArrayList<Object>> hooks = new HashMap<>();
-    private XposedModule module;
+    private static XposedModule module;
     protected DexKitBridge bridge;
     protected ClassLoader classLoader;
     protected AssetManager assetManager;
 
-    public void Init(XposedModule module, DexKitBridge bridge, XposedModuleInterface.PackageReadyParam param, AssetManager assetManager)
+    public static void setModule(XposedModule module) { BaseHook.module = module; }
+
+    public void Init(DexKitBridge bridge, XposedModuleInterface.PackageReadyParam param, AssetManager assetManager)
     {
-        this.module = module;
         this.bridge = bridge;
         this.classLoader = param.getClassLoader();
         this.assetManager = assetManager;
@@ -50,7 +51,13 @@ public abstract class BaseHook
     protected XposedInterface.HookHandle doHook(Executable origin, int priority, XposedInterface.Hooker hooker)
     {
         logHook(origin, priority, hooker);
-        return module.hook(origin).setPriority(priority).intercept(hooker);
+        XposedInterface.HookHandle handle = module.hook(origin).setPriority(priority).intercept(hooker);
+        if (!hooks.containsKey(origin) || hooks.get(origin) == null)
+            hooks.put(origin, new ArrayList<>());
+        ArrayList<Object> handles = hooks.get(origin);
+        assert handles != null;
+        handles.add(handle);
+        return handle;
     }
 
     protected XposedInterface.HookHandle doHookClInit(Class<?> origin, XposedInterface.Hooker hooker)
@@ -69,10 +76,17 @@ public abstract class BaseHook
     protected XposedInterface.HookHandle doHookClInit(Class<?> origin, int priority, XposedInterface.Hooker hooker)
     {
         logHook(origin, priority, hooker);
-        return module.hookClassInitializer(origin).setPriority(priority).intercept(hooker);
+        XposedInterface.HookHandle handle = module.hookClassInitializer(origin).setPriority(priority).intercept(hooker);
+        Executable exe = handle.getExecutable();
+        if (!hooks.containsKey(exe) || hooks.get(exe) == null)
+            hooks.put(exe, new ArrayList<>());
+        ArrayList<Object> handles = hooks.get(exe);
+        assert handles != null;
+        handles.add(handle);
+        return handle;
     }
 
-    protected boolean unhook(XposedInterface.HookHandle handle)
+    public static boolean unhook(XposedInterface.HookHandle handle)
     {
         logUnhook(handle);
         handle.unhook();
@@ -82,7 +96,7 @@ public abstract class BaseHook
         return handles.remove(handle);
     }
 
-    protected boolean unhook(Executable origin)
+    public static boolean unhook(Executable origin)
     {
         ArrayList<Object> handles = hooks.get(origin);
         if (handles == null)
@@ -123,10 +137,8 @@ public abstract class BaseHook
             module.log(Log.INFO, Logger.TAG, callerInfo + str + target + " (" + hookerName + ")");
     }
 
-    private void logUnhook(XposedInterface.HookHandle handle)
+    private static void logUnhook(XposedInterface.HookHandle handle)
     {
-        if (this instanceof BaseNativeHook)
-            return;
         final String LIME = "\u001B[38;2;166;226;46m";
         final String PURPLE = "\u001B[38;2;174;129;255m";
         final String CYAN = "\u001B[38;2;0;255;255m";

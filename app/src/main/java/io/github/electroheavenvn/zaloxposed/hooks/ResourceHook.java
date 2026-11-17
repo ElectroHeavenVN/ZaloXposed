@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.widget.ImageView;
 
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
@@ -46,7 +47,7 @@ public class ResourceHook extends BaseHook
         {
             sDrawableMap.put(customId, moduleDrawableName);
         }
-        if (fallbackName != null && !fallbackName.isEmpty())
+        if (!TextUtils.isEmpty(fallbackName))
         {
             synchronized (sFallbackNames)
             {
@@ -65,7 +66,7 @@ public class ResourceHook extends BaseHook
 
     public static void replace(String targetDrawableName, String moduleDrawableName)
     {
-        if (targetDrawableName == null || targetDrawableName.isEmpty())
+        if (TextUtils.isEmpty(targetDrawableName))
             return;
         int targetId = Utils.GetDrawableResourceIdByName(targetDrawableName);
         if (targetId != 0)
@@ -352,7 +353,7 @@ public class ResourceHook extends BaseHook
         {
             name = sFallbackNames.get(customId);
         }
-        if (name != null && !name.isEmpty())
+        if (!TextUtils.isEmpty(name))
         {
             try
             {
@@ -390,7 +391,7 @@ public class ResourceHook extends BaseHook
         {
             name = sDrawableMap.get(customId);
         }
-        if (name == null || name.isEmpty())
+        if (TextUtils.isEmpty(name))
             return null;
         try
         {
