@@ -107,7 +107,6 @@ public final class DexKitCache
     @SuppressWarnings("BusyWait")
     public static void AutoSave()
     {
-        //TODO: don't auto save
         new Thread(() ->
         {
             while (true)
@@ -618,13 +617,7 @@ public final class DexKitCache
         return "";
     }
     
-    public static void LogWarn(String msg)
-    {
-        Logger.w(getPrefix() + msg);
-    }
-
-    public static void LogError(String msg)
-    {
-        Logger.e(getPrefix() + msg);
-    }
+    public static void LogDebug(String msg) { Logger.d(getPrefix() + msg); }
+    public static void LogWarn(String msg) { Logger.w(getPrefix() + msg); }
+    public static void LogError(String msg) { Logger.e(getPrefix() + msg); }
 }

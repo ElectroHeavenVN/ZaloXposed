@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.electroheavenvn.zaloxposed.MorpheConstants;
+
 public final class Config
 {
     private Config() { }
@@ -367,4 +369,12 @@ public final class Config
     public static final String KEY_DEFAULT_ORIGINAL_QUALITY_CAMERA = "default_original_quality_camera";
     public static boolean getDefaultOriginalQualityCamera() { return (boolean)get(KEY_DEFAULT_ORIGINAL_QUALITY_CAMERA, false); }
     public static void setDefaultOriginalQualityCamera(boolean value) { set(KEY_DEFAULT_ORIGINAL_QUALITY_CAMERA, value); }
+    
+    public static final String KEY_ENABLE_MICROG = "enable_microg_root";
+    public static boolean getEnableMicroG() { return (boolean)get(KEY_ENABLE_MICROG, MorpheConstants.isPatchedByMorphe()); }
+    public static void setEnableMicroG(boolean value) { set(KEY_ENABLE_MICROG, value); }
+
+    public static final String KEY_SELECTED_MICROG_VARIANT_ID = "microg_selected_variant_id";
+    public static String getSelectedMicroGVariantID() { return (String)get(KEY_SELECTED_MICROG_VARIANT_ID, ""); }
+    public static void setSelectedMicroGVariantID(String value) { set(KEY_SELECTED_MICROG_VARIANT_ID, value); }
 }

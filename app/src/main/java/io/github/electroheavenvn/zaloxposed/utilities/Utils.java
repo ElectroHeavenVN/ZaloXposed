@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -40,6 +41,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.github.electroheavenvn.zaloxposed.MorpheConstants;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 
 public final class Utils
 {
@@ -458,7 +460,7 @@ public final class Utils
 
     public static String DescriptorToClassName(String descriptor)
     {
-        if (descriptor == null || descriptor.isEmpty())
+        if (TextUtils.isEmpty(descriptor))
             return "";
         if (descriptor.startsWith("L"))
             descriptor = descriptor.substring(1);
@@ -474,11 +476,11 @@ public final class Utils
 
     public static String GetExternalFilesDir()
     {
-        if (externalFilesDir.isEmpty())
+        if (TextUtils.isEmpty(externalFilesDir))
         {
             try
             {
-                if (packageName.isEmpty())
+                if (TextUtils.isEmpty(packageName))
                     return "";
                 String path = "/storage/emulated/0/Android/data/" + packageName + "/files";
                 File dir = new File(path);
@@ -498,12 +500,12 @@ public final class Utils
     public static String GetZaloXposedDir()
     {
         File targetDir = null;
-        if (appDataDir != null && !appDataDir.isEmpty())
+        if (!TextUtils.isEmpty(appDataDir))
             targetDir = new File(appDataDir, "files/ZaloXposed");
         else
         {
             String externalFilesDir = GetExternalFilesDir();
-            if (!externalFilesDir.isEmpty())
+            if (!TextUtils.isEmpty(externalFilesDir))
                 targetDir = new File(externalFilesDir, "ZaloXposed");
         }
         if (targetDir == null)
@@ -628,6 +630,7 @@ public final class Utils
     {
         try
         {
+            BaseHook.unhook(Intent.class.getMethod("setPackage", String.class));
             Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
             if (intent == null)
                 return;
@@ -635,9 +638,8 @@ public final class Utils
             context.startActivity(intent);
             if (Activity.class.isAssignableFrom(context.getClass()))
                 ((Activity)context).finish();
-            new Handler(Looper.getMainLooper()).postDelayed(() -> Runtime.getRuntime().exit(0), 0);
         }
         catch (Exception e) { Logger.e(e); }
+        new Handler(Looper.getMainLooper()).postDelayed(() -> Runtime.getRuntime().exit(0), 0);
     }
-
 }

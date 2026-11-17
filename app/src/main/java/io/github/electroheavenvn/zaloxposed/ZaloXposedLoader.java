@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import io.github.electroheavenvn.zaloxposed.hooks.*;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.*;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.minichat.*;
+import io.github.electroheavenvn.zaloxposed.hooks.microg.MicroGHook;
 import io.github.electroheavenvn.zaloxposed.hooks.morphe.*;
 import io.github.electroheavenvn.zaloxposed.hooks.nativehook.NativeHook;
 import io.github.electroheavenvn.zaloxposed.hooks.privacy.*;
@@ -59,6 +60,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new ConfigImportExportHook());
         hooks.add(new ZaloViewLauncherHook());
         hooks.add(new TestHook());
+        hooks.add(new MicroGHook());
         if (MorpheConstants.isPatchedByMorphe())
             hooks.add(new FixProviderHook());
 
@@ -215,12 +217,13 @@ public class ZaloXposedLoader extends XposedModule
             addAssetPath.invoke(assetManager, getModuleApplicationInfo().sourceDir);
             hookDisplayCustomSplash(param.getClassLoader(), assetManager);
             SettingsMenu.Init(bridge, param.getClassLoader());
+            BaseHook.setModule(this);
             for (BaseHook hook : hooks)
             {
                 try
                 {
                     long startHookTime = System.currentTimeMillis();
-                    hook.Init(this, bridge, param, assetManager);
+                    hook.Init(bridge, param, assetManager);
                     hook.installHooks();
                     long time = System.currentTimeMillis() - startHookTime;
                     if (time > 10)

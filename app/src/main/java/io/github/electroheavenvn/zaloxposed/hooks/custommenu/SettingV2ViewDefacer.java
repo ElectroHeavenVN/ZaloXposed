@@ -200,8 +200,6 @@ public class SettingV2ViewDefacer extends SettingViewsDefacerBase
                 .returnType("void")
                 .paramCount(0)
                 .addUsingString("WARNING_FULL_STORAGE_ENABLED_${UserID}", StringMatchType.Equals)
-                .addUsingNumber(8.0f)
-                .addUsingNumber(28)
             )), classLoader);
         if (initUI == null)
             return;
