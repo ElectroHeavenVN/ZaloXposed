@@ -50,6 +50,10 @@ public class ZaloXposedLoader extends XposedModule
     {
         System.loadLibrary("dexkit");
         hooks.add(new NativeHook());
+    }
+
+    private static void loadHooks()
+    {
         hooks.add(new ResourceHook());
         hooks.add(new EnableE2EEHook());
         hooks.add(new EnableLabelHook());
@@ -192,6 +196,7 @@ public class ZaloXposedLoader extends XposedModule
             Logger.e(e);
             return;
         }
+        loadHooks();
         try
         {
             DexKitCache.Load(param.getClassLoader(), param.getApplicationInfo().dataDir);

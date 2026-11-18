@@ -161,6 +161,10 @@ public final class S
 
         trans.put("roleAdmin", new String[] { "Admin", "Phó nhóm" });
         trans.put("roleOwner", new String[] { "Owner", "Trưởng nhóm" });
+        trans.put("microGMissingTitle", new String[] { "MicroG client is not installed", "Ứng dụng khách MicroG chưa được cài đặt" });
+        trans.put("microGMissingDesc", new String[] { "A MicroG client is required, please download and install it from the link below, or disable the \"Use MicroG\" option in ZaloXposed settings if you are using rooted version.", "Cần có ứng dụng khách MicroG, vui lòng tải xuống và cài đặt từ liên kết bên dưới, hoặc tắt tùy chọn \"Sử dụng MicroG\" trong cài đặt ZaloXposed nếu bạn đang sử dụng phiên bản root." });
+        trans.put("cancel", new String[] { "Cancel", "Hủy" });
+        trans.put("gotoDownload", new String[] { "Go to download page", "Đi tới trang tải xuống" });
     }
 
     public static String tr(String key)

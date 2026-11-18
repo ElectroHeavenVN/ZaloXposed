@@ -3,6 +3,7 @@ package io.github.electroheavenvn.zaloxposed.utilities;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Handler;
@@ -641,5 +642,13 @@ public final class Utils
         }
         catch (Exception e) { Logger.e(e); }
         new Handler(Looper.getMainLooper()).postDelayed(() -> Runtime.getRuntime().exit(0), 0);
+    }
+
+    public static final class DialogInterfaceOnClickListener implements DialogInterface.OnClickListener
+    {
+        private Context context;
+        private String url;
+        @Override
+        public native void onClick(DialogInterface dialog, int which);
     }
 }

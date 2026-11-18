@@ -46,7 +46,7 @@ public final class MicroGUtils
                 .setTitle(S.tr("microGMissingTitle", selectedVariant.displayName))
                 .setMessage(S.tr("microGMissingDesc", selectedVariant.displayName))
                 .setNegativeButton(S.tr("cancel"), null)
-                .setPositiveButton(S.tr("install"), (dialog, which) ->
+                .setPositiveButton(S.tr("gotoDownload"), (dialog, which) ->
                 {
                     try
                     {
