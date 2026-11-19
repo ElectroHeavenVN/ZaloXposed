@@ -12,8 +12,10 @@ import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ListItemSettingHelp
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.TabMeSettingItemHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZButtonHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.ConfigImportExportHook;
+import io.github.electroheavenvn.zaloxposed.hooks.ui.CustomBackgroundHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.S;
 import io.github.electroheavenvn.zaloxposed.microg.MicroGVariant;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 import io.github.electroheavenvn.zaloxposed.utilities.ZaloViewLauncher;
@@ -22,13 +24,13 @@ import io.github.electroheavenvn.zaloxposed.utilities.ZaloViewLauncher;
 Why do we need to move all setting items to a separate class?
 Up until now, all setting items are constructed directly in the ZaloXposedSettingsMenuHook class, which makes the code messy and hard to maintain.
 Furthermore, the ZaloXposedSettingsMenuHook class is currently depending on the feature flag: `features@tabme@fullzins@enable`, which can be removed anytime. Currently, this flag's value is set to true on most account and devices, but we force it to false for keeping the traditional settings menu.
-If that happens, the traditional settings menu will be replaced with the "ZInstant" settings menu, which is not easy to add our custom setting items to. 
-Therefore, we need to move all setting items to a separate class, so that when that happens, we can easily migrate all setting items to the new settings menu, either by using available views (and defacing them) or by creating one from scratch. 
+If that happens, the traditional settings menu will be replaced with the "ZInstant" settings menu, which is not easy to add our custom setting items to.
+Therefore, we need to move all setting items to a separate class, so that when that happens, we can easily migrate all setting items to the new settings menu, either by using available views (and defacing them) or by creating one from scratch.
 For now, we will still use the traditional settings menu.
 */
 
 /**
- * Stores all setting items for the settings menu, divided into categories and subcategories. 
+ * Stores all setting items for the settings menu, divided into categories and subcategories.
  * <p>
  * Each category is represented by a TabMeSettingItem in the main settings menu, open a new page when clicked.
  * <p>
@@ -50,8 +52,21 @@ public final class SettingsMenu
         for (var variant : MicroGVariant.availableVariants)
             selections.add(new ListSelectionSettingFeature.Selection(variant.displayName, variant.id));
 
-        settingItems.add(new SwitchSettingFeature("customBackgroundTitle", "", Config.KEY_ENABLE_BACKGROUND));
-
+        settingItems.add(new SettingCategory("backgroundCategoryTitle", "backgroundCategoryDesc", List.of(
+            new SettingSubCategory("backgroundImagesSubCategoryTitle", List.of(
+                new SwitchSettingFeature("customBackgroundTitle", "", Config.KEY_ENABLE_BACKGROUND),
+                new OptionSettingFeature("addBackgroundImagesTitle", "addBackgroundImagesDesc", (item, context) ->
+                    CustomBackgroundHook.PickImages(context)),
+                new OptionSettingFeature("clearBackgroundImagesTitle", "clearBackgroundImagesDesc", (item, context) ->
+                    CustomBackgroundHook.ClearImages(context)),
+                new TextLabel(() ->
+                {
+                    int count = CustomBackgroundHook.getCustomImageCount();
+                    return count == 0 ? S.tr("bgImageCountEmpty") : S.tr("bgImageCount", count);
+                }, true)
+            ))
+        )));
+        settingItems.add(new Separator());
         settingItems.add(new SettingCategory("msgAndConverCategoryTitle", "msgAndConverCategoryDesc", List.of(
             new SettingSubCategory("chatHeadSubCategoryTitle", List.of(
                 new SwitchSettingFeature("chatHeadTitle", "chatHeadDesc", Config.KEY_ENABLE_CHAT_HEAD).setEnabled(Build.VERSION.SDK_INT > Build.VERSION_CODES.Q)

@@ -3,6 +3,7 @@ package io.github.electroheavenvn.zaloxposed.hooks.custommenu;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.ListSelectionSettingFeature;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingFeature;
+import io.github.electroheavenvn.zaloxposed.settingsmenu.TextLabel;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 public abstract class SettingViewsDefacerBase extends BaseHook
@@ -77,6 +79,22 @@ public abstract class SettingViewsDefacerBase extends BaseHook
                 lp.setMargins(pad16, dp(context, 8), pad16, 0);
                 ((View)btn).setLayoutParams(lp);
                 return (View)btn;
+            }
+            case TEXT:
+            {
+                TextView textView = new TextView(context);
+                textView.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                textView.setText(feature.getTitle());
+                textView.setTextSize(13);
+                int pad16 = dp(context, 16);
+                textView.setPadding(pad16, dp(context, 8), pad16, dp(context, 8));
+                if (textColor != null)
+                    textView.setTextColor(textColor);
+                textView.setAlpha(0.7f);
+                if (feature instanceof TextLabel textFeature && textFeature.isCentered())
+                    textView.setGravity(Gravity.CENTER);
+                return textView;
             }
         }
         listItemSetting.setEnabled(feature.getEnabled());

@@ -13,9 +13,19 @@ public final class S
 
     static
     {
-        // trans.put("conversationAppearanceSubCategoryTitle", new String[] { "Conversation appearance", "Hình thức trò chuyện" });
+        trans.put("backgroundCategoryTitle", new String[] { "Background", "Hình nền" });
+        trans.put("backgroundCategoryDesc", new String[] { "Customize background images", "Tuỳ chỉnh ảnh nền" });
+        trans.put("backgroundImagesSubCategoryTitle", new String[] { "Background images", "Ảnh nền" });
         trans.put("customBackgroundTitle", new String[] { "Custom background", "Hình nền tuỳ chỉnh" });
-        //TODO allow choosing custom background image/folder
+        trans.put("addBackgroundImagesTitle", new String[] { "Add background images", "Thêm ảnh nền" });
+        trans.put("addBackgroundImagesDesc", new String[] { "Pick one or more images to randomize", "Chọn một hoặc nhiều ảnh để dùng ngẫu nhiên" });
+        trans.put("clearBackgroundImagesTitle", new String[] { "Clear custom background images", "Xoá ảnh nền tuỳ chỉnh" });
+        trans.put("clearBackgroundImagesDesc", new String[] { "Remove all added images", "Xoá tất cả ảnh đã thêm" });
+        trans.put("bgImagesAdded", new String[] { "Added %d image(s).", "Đã thêm %d ảnh." });
+        trans.put("bgImagesCleared", new String[] { "Cleared %d image(s)", "Đã xoá %d ảnh" });
+        trans.put("bgImagesFailed", new String[] { "No valid image selected", "Không có ảnh hợp lệ nào được chọn" });
+        trans.put("bgImageCount", new String[] { "Saved %d background images", "Đã lưu %d ảnh nền" });
+        trans.put("bgImageCountEmpty", new String[] { "Saved 0 background images", "Đã lưu 0 ảnh nền" });
 
         // Master menu
         trans.put("msgAndConverCategoryTitle", new String[] { "Messages & Conversations", "Tin nhắn & Trò chuyện" });

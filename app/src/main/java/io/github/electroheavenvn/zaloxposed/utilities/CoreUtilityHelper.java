@@ -48,7 +48,7 @@ public final class CoreUtilityHelper
 
     private static void loadCoreUtility() throws ClassNotFoundException, IllegalAccessException
     {
-        if (coreUtility != null)
+        if (coreUtility != null && myUserIDField != null && myUserTokenField == null)
             return;
         coreUtility = Class.forName("com.zing.zalocore.CoreUtility", true, Utils.GetClassLoader());
         for (Field field : coreUtility.getDeclaredFields())
@@ -61,10 +61,10 @@ public final class CoreUtilityHelper
                 String value = (String)field.get(null);
                 if (value == null)
                     continue;
-                if (value.matches("\\d+"))
+                if (myUserIDField == null && value.matches("\\d+"))
                     myUserIDField = field;
                 // token may not contain dashes, include it anyway
-                else if (value.matches("[\\w\\-_]\\.\\d{9}\\.a[0-1]\\.[\\w\\-_]*"))
+                else if (myUserTokenField == null && value.matches("[\\w\\-_]\\.\\d{9}\\.a[0-1]\\.[\\w\\-_]*"))
                     myUserTokenField = field;
             }
         }

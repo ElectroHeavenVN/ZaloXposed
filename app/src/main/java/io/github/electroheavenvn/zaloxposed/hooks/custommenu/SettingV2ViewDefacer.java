@@ -27,6 +27,7 @@ import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingCategory;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingFeature;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingSubCategory;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingsMenu;
+import io.github.electroheavenvn.zaloxposed.settingsmenu.TextLabel;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 import io.github.electroheavenvn.zaloxposed.utilities.S;
@@ -70,7 +71,7 @@ public class SettingV2ViewDefacer extends SettingViewsDefacerBase
                     if (i + 1 < items.size())
                     {
                         ISettingItem itemNext = items.get(i + 1);
-                        if (itemNext instanceof SettingFeature && !(itemNext instanceof Button))
+                        if (itemNext instanceof SettingFeature && !(itemNext instanceof Button) && !(item instanceof TextLabel))
                             hideDivider = false;
                     }
                     View view = ProcessSettingFeature(rootLayout, feature, hideDivider);

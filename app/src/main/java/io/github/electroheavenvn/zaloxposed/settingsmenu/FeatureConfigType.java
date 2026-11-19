@@ -32,5 +32,10 @@ public enum FeatureConfigType
     /**
      * A button
      */
-    BUTTON
+    BUTTON,
+
+    /**
+     * Plain text line (no switch, no chevron, no click)
+     */
+    TEXT
 }
