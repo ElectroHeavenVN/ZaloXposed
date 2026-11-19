@@ -63,8 +63,9 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new AntiRecallDeleteChatRowHook());
         hooks.add(new ConfigImportExportHook());
         hooks.add(new ZaloViewLauncherHook());
-        hooks.add(new TestHook());
+        hooks.add(new AmoledThemeHook());
         hooks.add(new MicroGHook());
+        hooks.add(new TestHook());
         if (MorpheConstants.isPatchedByMorphe())
             hooks.add(new FixProviderHook());
 
