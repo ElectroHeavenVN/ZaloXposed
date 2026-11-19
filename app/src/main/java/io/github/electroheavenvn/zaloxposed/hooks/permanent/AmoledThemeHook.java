@@ -2,6 +2,8 @@ package io.github.electroheavenvn.zaloxposed.hooks.permanent;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -10,7 +12,11 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 
 import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.FindMethod;
@@ -31,7 +37,9 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.CoreUtilityHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.S;
 import io.github.libxposed.api.XposedInterface;
 
 public class AmoledThemeHook extends BaseHook
@@ -95,6 +103,20 @@ public class AmoledThemeHook extends BaseHook
     private static Method cslGetColors;
     private static Method cslGetStates;
 
+    private static final String AMOLED_PREFS = "zalo_xposed_amoled";
+    private static final String AMOLED_ENABLED_KEY = "enabled";
+    private static final String TOGGLE_TAG = "zalo_xposed_amoled_toggle";
+    private static final String THEME_CHANGED_ACTION = "com.zing.zalo.action.ACTION_THEME_CHANGED";
+
+    private static SharedPreferences amoledPrefs;
+    private static boolean amoledEnabled;
+    private static boolean prefsLoaded;
+    private static Method refreshThemeMethod;
+    private static Constructor<?> themeEventCtor;
+    private static Method publishEventMethod;
+    private static Method localBroadcasterInstance;
+    private static Method localBroadcasterSend;
+
     static
     {
         map(0xFF171717, AMOLED_BLACK);   // ng95 = layer_background
@@ -131,10 +153,8 @@ public class AmoledThemeHook extends BaseHook
         {
             return res.getResourceEntryName(id);
         }
-        catch (Throwable t)
-        {
-            return "?";
-        }
+        catch (Throwable ignored) { }
+        return "?";
     }
 
     private static boolean isContentBarView(String name)
@@ -180,6 +200,46 @@ public class AmoledThemeHook extends BaseHook
         if (attrs == null || index < 0 || index >= attrs.length)
             return null;
         return amoledColor(ta.getResources(), attrs[index]);
+    }
+
+    private static boolean isAmoledActive()
+    {
+        return isAmoledEnabled() && isDark();
+    }
+
+    private static void ensurePrefs()
+    {
+        if (prefsLoaded)
+            return;
+        try
+        {
+            Context ctx = CoreUtilityHelper.GetAppContext();
+            if (ctx != null)
+            {
+                amoledPrefs = ctx.getSharedPreferences(AMOLED_PREFS, Context.MODE_PRIVATE);
+                amoledEnabled = amoledPrefs.getBoolean(AMOLED_ENABLED_KEY, false);
+                prefsLoaded = true;
+            }
+        }
+        catch (Throwable ignored) { }
+    }
+
+    private static boolean isAmoledEnabled()
+    {
+        ensurePrefs();
+        return prefsLoaded && amoledEnabled;
+    }
+
+    private static void setAmoledEnabled(boolean value)
+    {
+        ensurePrefs();
+        amoledEnabled = value;
+        try
+        {
+            if (amoledPrefs != null)
+                amoledPrefs.edit().putBoolean(AMOLED_ENABLED_KEY, value).apply();
+        }
+        catch (Throwable ignored) { }
     }
 
     private static boolean isDark()
@@ -259,6 +319,80 @@ public class AmoledThemeHook extends BaseHook
         return csl;
     }
 
+    private static void notifyThemeChanged(Context context)
+    {
+        if (refreshThemeMethod != null)
+        {
+            try
+            {
+                refreshThemeMethod.invoke(null, context.getApplicationContext(), 14);
+            }
+            catch (Throwable ignored) { }
+        }
+        if (themeEventCtor != null && publishEventMethod != null)
+        {
+            try
+            {
+                int current = isDark() ? 1 : 0;
+                publishEventMethod.invoke(null, themeEventCtor.newInstance(current, current));
+            }
+            catch (Throwable ignored) { }
+        }
+        if (localBroadcasterInstance != null && localBroadcasterSend != null)
+        {
+            try
+            {
+                Object manager = localBroadcasterInstance.invoke(null, context.getApplicationContext());
+                localBroadcasterSend.invoke(manager, new Intent(THEME_CHANGED_ACTION));
+            }
+            catch (Throwable ignored) { }
+        }
+    }
+
+    private static void addToggleRow(LinearLayout root) throws Exception
+    {
+        if (root == null || root.findViewWithTag(TOGGLE_TAG) != null)
+            return;
+        Resources res = root.getResources();
+        int anchorId = res.getIdentifier("itemChangeFont", "id", "com.zing.zalo");
+        View anchor = anchorId == 0 ? null : root.findViewById(anchorId);
+        if (anchor == null || !(anchor.getParent() instanceof ViewGroup parent))
+            return;
+        Context context = root.getContext();
+        int layoutId = res.getIdentifier("setting_theme_v2_view", "layout", "com.zing.zalo");
+        if (layoutId == 0)
+            return;
+        LinearLayout temp = new LinearLayout(context);
+        LayoutInflater.from(context).inflate(layoutId, temp, true);
+        View rowView = temp.findViewById(anchorId);
+        if (rowView == null)
+            return;
+        temp.removeView(rowView);
+        rowView.setTag(TOGGLE_TAG);
+        ViewGroup.LayoutParams src = anchor.getLayoutParams();
+        ViewGroup.LayoutParams lp = src == null
+            ? new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            : src.getClass().getConstructor(ViewGroup.LayoutParams.class).newInstance(src);
+        rowView.setLayoutParams(lp);
+        rowView.setPadding(anchor.getPaddingLeft(), anchor.getPaddingTop(), anchor.getPaddingRight(), anchor.getPaddingBottom());
+        Drawable background = anchor.getBackground();
+        if (background != null && background.getConstantState() != null)
+            rowView.setBackground(background.getConstantState().newDrawable().mutate());
+        rowView.getClass().getMethod("setTitle", CharSequence.class).invoke(rowView, S.tr("amoledTheme"));
+        rowView.getClass().getMethod("setShowChevronRight", boolean.class).invoke(rowView, false);
+        rowView.getClass().getMethod("setSwitch", boolean.class).invoke(rowView, isAmoledEnabled());
+        rowView.getClass().getMethod("setCheckedChangeListener", CompoundButton.OnCheckedChangeListener.class).invoke(rowView,
+            (CompoundButton.OnCheckedChangeListener)(button, checked) ->
+            {
+                if (checked == isAmoledEnabled())
+                    return;
+                setAmoledEnabled(checked);
+                notifyThemeChanged(context);
+            });
+        int index = parent.indexOfChild(anchor);
+        parent.addView(rowView, Math.max(index, 0));
+    }
+
     @Override
     public void installHooks() throws Throwable
     {
@@ -286,6 +420,74 @@ public class AmoledThemeHook extends BaseHook
                 .returnType("int")
                 .paramCount(0)
             )), classLoader);
+        if (darkModeMethod == null)
+            return;
+        refreshThemeMethod = DexKitCache.GetMethod("AmoledTheme_RefreshTheme", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                .returnType("void")
+                .paramCount(2)
+                .paramTypes(Context.class, int.class)
+                .addInvoke(MethodMatcher.create().declaredClass(themeController).paramCount(4))
+            )), classLoader);
+        Class<?> eventClass = DexKitCache.GetClass("AmoledTheme_ThemeChangedEvent", () -> bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
+                .addUsingString("ThemeChanged(oldTheme=", StringMatchType.Equals)
+            )), classLoader);
+        if (eventClass != null)
+        {
+            themeEventCtor = eventClass.getConstructor(int.class, int.class);
+            publishEventMethod = DexKitCache.GetMethod("AmoledTheme_PublishThemeEvent", () -> bridge.findMethod(FindMethod.create()
+                .matcher(MethodMatcher.create()
+                    .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                    .returnType("void")
+                    .paramCount(1)
+                    .paramTypes(eventClass.getSuperclass())
+                    .addInvoke(MethodMatcher.create()
+                        .declaredClass("kotlinx.coroutines.flow.SharedFlowImpl")
+                        .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                        .returnType("boolean")
+                        .paramCount(1)
+                    )
+                )), classLoader);
+        }
+        Class<?> broadcaster = DexKitCache.GetClass("AmoledTheme_LocalBroadcaster", () -> bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .addUsingString("LocalBroadcastManager", StringMatchType.Equals)
+                .addMethod(MethodMatcher.create()
+                    .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                    .paramCount(1)
+                    .paramTypes(Context.class)
+                )
+                .addMethod(MethodMatcher.create()
+                    .modifiers(Modifier.PUBLIC)
+                    .paramCount(1)
+                    .paramTypes(Intent.class)
+                    .returnType("void")
+                )
+            )), classLoader);
+        if (broadcaster != null)
+        {
+            localBroadcasterInstance = DexKitCache.GetMethod("AmoledTheme_LocalBroadcaster_GetInstance", () -> bridge.findMethod(FindMethod.create()
+                .matcher(MethodMatcher.create()
+                    .declaredClass(broadcaster)
+                    .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                    .paramCount(1)
+                    .paramTypes(Context.class)
+                    .addInvoke("Landroid/content/Context;->getApplicationContext()Landroid/content/Context;")
+                )), classLoader);
+            localBroadcasterSend = DexKitCache.GetMethod("AmoledTheme_LocalBroadcaster_Send", () -> bridge.findMethod(FindMethod.create()
+                .matcher(MethodMatcher.create()
+                    .declaredClass(broadcaster)
+                    .modifiers(Modifier.PUBLIC)
+                    .paramCount(1)
+                    .paramTypes(Intent.class)
+                    .returnType("void")
+                    .addInvoke("Landroid/content/Intent;->resolveTypeIfNeeded(Landroid/content/ContentResolver;)Ljava/lang/String;")
+                    .addInvoke("Landroid/os/Handler;->sendEmptyMessage(I)Z")
+                )), classLoader);
+        }
         Method themedColor = DexKitCache.GetMethod("AmoledTheme_ThemedColor", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass(themeController)
@@ -294,11 +496,11 @@ public class AmoledThemeHook extends BaseHook
                 .paramCount(2)
                 .paramTypes(Context.class, int.class)
             )), classLoader);
-        if (darkModeMethod == null || themedColor == null)
+        if (themedColor == null)
             return;
         doHook(themedColor, chain ->
         {
-            if (!isDark())
+            if (!isAmoledActive())
                 return chain.proceed();
             Resources res = ((Context)chain.getArg(0)).getResources();
             int attrId = (int)chain.getArg(1);
@@ -318,7 +520,7 @@ public class AmoledThemeHook extends BaseHook
         });
         doHook(TypedArray.class.getMethod("getColor", int.class, int.class), chain ->
         {
-            if (!isDark())
+            if (!isAmoledActive())
                 return chain.proceed();
             TypedArray ta = (TypedArray)chain.getThisObject();
             int index = (int)chain.getArg(0);
@@ -339,13 +541,13 @@ public class AmoledThemeHook extends BaseHook
         doHook(TypedArray.class.getMethod("getColorStateList", int.class), chain ->
         {
             Object result = chain.proceed();
-            if (!isDark() || !(result instanceof ColorStateList colorStateList))
+            if (!isAmoledActive() || !(result instanceof ColorStateList colorStateList))
                 return result;
             return remapColorStateList(colorStateList);
         });
         doHook(View.class.getMethod("setBackgroundColor", int.class), chain ->
         {
-            if (!isDark())
+            if (!isAmoledActive())
                 return chain.proceed();
             String viewName = chain.getThisObject().getClass().getName();
             if (isNavBarView(viewName))
@@ -358,7 +560,7 @@ public class AmoledThemeHook extends BaseHook
         doHook(View.class.getMethod("setBackground", Drawable.class), chain ->
         {
             Object result = chain.proceed();
-            if (!isDark())
+            if (!isAmoledActive())
                 return result;
             View view = (View)chain.getThisObject();
             String viewName = view.getClass().getName();
@@ -377,7 +579,7 @@ public class AmoledThemeHook extends BaseHook
         });
         doHook(View.class.getMethod("setBackgroundResource", int.class), chain ->
         {
-            if (!isDark())
+            if (!isAmoledActive())
                 return chain.proceed();
             View view = (View)chain.getThisObject();
             String viewName = view.getClass().getName();
@@ -390,7 +592,7 @@ public class AmoledThemeHook extends BaseHook
         });
         doHook(Resources.Theme.class.getMethod("resolveAttribute", int.class, TypedValue.class, boolean.class), chain ->
         {
-            if (!isDark())
+            if (!isAmoledActive())
                 return chain.proceed();
             Resources.Theme theme = (Resources.Theme)chain.getThisObject();
             Integer color = amoledColor(theme.getResources(), (int)chain.getArg(0));
@@ -400,6 +602,26 @@ public class AmoledThemeHook extends BaseHook
             out.type = TypedValue.TYPE_INT_COLOR_ARGB8;
             out.data = color;
             return true;
+        });
+        Method inflate = DexKitCache.GetMethod("AmoledTheme_SettingThemeInflate", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .declaredClass("com.zing.zalo.ui.settings.SettingThemeV2View")
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("android.view.View")
+                .paramCount(3)
+                .paramTypes("android.view.LayoutInflater", "android.widget.LinearLayout", "android.os.Bundle")
+            )), classLoader);
+        if (inflate == null)
+            return;
+        doHook(inflate, 10, chain ->
+        {
+            Object result = chain.proceed();
+            try
+            {
+                addToggleRow((LinearLayout)chain.getArg(1));
+            }
+            catch (Throwable ignored) { }
+            return result;
         });
         RemapGetColorNameBasedHooker getColorHooker = new RemapGetColorNameBasedHooker();
         doHook(Resources.class.getMethod("getColor", int.class), getColorHooker);
@@ -441,7 +663,7 @@ public class AmoledThemeHook extends BaseHook
         @Override
         public Object intercept(XposedInterface.Chain chain) throws Throwable
         {
-            if (!isDark())
+            if (!isAmoledActive())
                 return chain.proceed();
             try
             {
@@ -466,7 +688,7 @@ public class AmoledThemeHook extends BaseHook
         @Override
         public Object intercept(XposedInterface.Chain chain) throws Throwable
         {
-            if (!isDark())
+            if (!isAmoledActive())
                 return chain.proceed();
             Integer mapped = remap((int)chain.getArg(0));
             if (mapped == null)
