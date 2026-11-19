@@ -58,8 +58,6 @@ public final class Utils
     private static MultiDexContainer<? extends DexBackedDexFile> dexContainer;
     private static final List<DexBackedDexFile> cachedDexFiles = new ArrayList<>();
     private static final Map<String, ClassDef> classDefCache = new ConcurrentHashMap<>();
-    private static final ArrayList<Class<?>> drawableResourceClasses = new ArrayList<>();
-    private static final ArrayList<Class<?>> resourceClasses = new ArrayList<>();
     private static Method getIsVietnameseMethod;
     private static int appVersionCode = 0;
 
@@ -120,31 +118,6 @@ public final class Utils
                     .addUsingString("@en", StringMatchType.Equals)
                 )
             )), classLoader);
-        LoadResourceClasses(bridge, classLoader);
-    }
-
-    private static void LoadResourceClasses(DexKitBridge bridge, ClassLoader classLoader)
-    {
-        List<Class<?>> classes = DexKitCache.GetClasses("Utils_Config_DrawableResourceClasses_1", () -> bridge.findClass(FindClass.create()
-            .matcher(ClassMatcher.create()
-                .addFieldForName("zds_ic_storage_line_24")
-            )), classLoader);
-        drawableResourceClasses.addAll(classes);
-        classes = DexKitCache.GetClasses("Utils_Config_DrawableResourceClasses_2", () -> bridge.findClass(FindClass.create()
-            .matcher(ClassMatcher.create()
-                .addFieldForName("bg_btn_postfeed")
-            )), classLoader);
-        drawableResourceClasses.addAll(classes);
-        classes = DexKitCache.GetClasses("Utils_Config_ResourceClasses_1", () -> bridge.findClass(FindClass.create()
-            .matcher(ClassMatcher.create()
-                .addFieldForName("signup_gender_female")
-            )), classLoader);
-        resourceClasses.addAll(classes);
-        classes = DexKitCache.GetClasses("Utils_Config_ResourceClasses_2", () -> bridge.findClass(FindClass.create()
-            .matcher(ClassMatcher.create()
-                .addFieldForName("str_group_invite_link")
-            )), classLoader);
-        resourceClasses.addAll(classes);
     }
 
     public static Class<?> GetConfigClass()
@@ -524,64 +497,6 @@ public final class Utils
         if (!targetDir.exists())
             targetDir.mkdirs();
         return targetDir.getAbsolutePath();
-    }
-
-    public static int GetDrawableResourceIdByName(String resourceName)
-    {
-        try
-        { 
-            if (drawableResourceClasses.isEmpty())
-            {
-                Logger.e("Drawable resource classes not found");
-                return 0;
-            }
-            Field field = null;
-            for (Class<?> clazz : drawableResourceClasses)
-            {
-                try
-                {
-                    field = clazz.getField(resourceName);
-                }
-                catch (NoSuchFieldException ignored) { }
-            }
-            if (field == null)
-            {
-                Logger.e("Drawable resource class not found");
-                return 0;
-            }
-            return field.getInt(null);
-        }
-        catch (Exception e) { Logger.e(e); }
-        return 0;
-    }
-
-    public static int GetResourceIdByName(String resourceName)
-    {
-        try
-        {
-            if (resourceClasses.isEmpty())
-            {
-                Logger.e("Resource classes not found");
-                return 0;
-            }
-            Field field = null;
-            for (Class<?> clazz : resourceClasses)
-            {
-                try
-                {
-                    field = clazz.getField(resourceName);
-                }
-                catch (NoSuchFieldException ignored) { }
-            }
-            if (field == null)
-            {
-                Logger.e("Resource class not found");
-                return 0;
-            }
-            return field.getInt(null);
-        }
-        catch (Exception e) { Logger.e(e); }
-        return 0;
     }
 
     public static void HideView(View view) 

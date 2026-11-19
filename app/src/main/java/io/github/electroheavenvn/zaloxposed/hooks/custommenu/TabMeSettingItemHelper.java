@@ -22,6 +22,7 @@ import java.util.List;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingItemID;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ResourceHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 @SuppressWarnings("rawtypes")
@@ -199,7 +200,7 @@ public final class TabMeSettingItemHelper
     {
         return tabMeSettingItemClass
             .getDeclaredConstructor(tabMeItemIdEnumClass, int.class, String.class, int.class, int.class)
-            .newInstance(MapSettingItemIDToEnum(id), Utils.GetDrawableResourceIdByName(drawableName), title, 0, 24);
+            .newInstance(MapSettingItemIDToEnum(id), ResourceHelper.GetResourceIdByName(drawableName), title, 0, 24);
     }
 
     public static String GetTracking(Object tabMeSettingItem) throws Exception
@@ -262,7 +263,7 @@ public final class TabMeSettingItemHelper
     {
         CheckType(tabMeSettingItem);
         LateInit();
-        iconField.setInt(tabMeSettingItem, Utils.GetDrawableResourceIdByName(drawableName));
+        iconField.setInt(tabMeSettingItem, ResourceHelper.GetResourceIdByName(drawableName));
     }
 
     public static SettingItemID GetID(Object tabMeSettingItem) throws Exception

@@ -4,6 +4,7 @@ import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ResourceHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindMethod;
@@ -69,10 +70,10 @@ public class ExtendedGroupRightMenuHook extends BaseHook
                 Class<?> clazz = element.getClass();
                 Constructor<?> ctor = clazz.getConstructor(int.class, int.class, int.class, boolean.class, boolean.class);
                 // [id] [drawable icon] [title] [show line separator] [show blank separator]
-                result.add(ctor.newInstance(68, Utils.GetDrawableResourceIdByName("ic_countdown"), Utils.GetResourceIdByName("str_disappear_messages"), false, true));
-                result.add(ctor.newInstance(23, Utils.GetDrawableResourceIdByName("ic_group"), Utils.GetResourceIdByName("str_nickname_in_group"), true, false));
-                result.add(ctor.newInstance(75, Utils.GetDrawableResourceIdByName("ic_right_menu_chevron_double_up_line_24"), Utils.GetResourceIdByName("str_right_menu_upgrade_to_community"), true, false));
-                result.add(ctor.newInstance(40, Utils.GetDrawableResourceIdByName("ic_disband"), Utils.GetResourceIdByName("str_community_settings_delete_community"), true, false));
+                result.add(ctor.newInstance(68, ResourceHelper.GetResourceIdByName("ic_countdown"), ResourceHelper.GetResourceIdByName("str_disappear_messages"), false, true));
+                result.add(ctor.newInstance(23, ResourceHelper.GetResourceIdByName("ic_group"), ResourceHelper.GetResourceIdByName("str_nickname_in_group"), true, false));
+                result.add(ctor.newInstance(75, ResourceHelper.GetResourceIdByName("ic_right_menu_chevron_double_up_line_24"), ResourceHelper.GetResourceIdByName("str_right_menu_upgrade_to_community"), true, false));
+                result.add(ctor.newInstance(40, ResourceHelper.GetResourceIdByName("ic_disband"), ResourceHelper.GetResourceIdByName("str_community_settings_delete_community"), true, false));
                 return result;
             });
         }

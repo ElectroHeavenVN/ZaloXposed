@@ -207,6 +207,7 @@ public class ZaloXposedLoader extends XposedModule
             if (bridge == null)
                 bridge = DexKitBridge.create(param.getApplicationInfo().sourceDir);
             Utils.Init(param.getApplicationInfo(), param.getClassLoader(), bridge);
+            ResourceHelper.Init(bridge, param.getClassLoader());
         }
         catch (Exception e)
         {

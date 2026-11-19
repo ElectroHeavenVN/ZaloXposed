@@ -28,7 +28,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 public class TabMeViewHook extends BaseHook
 {
     private static final String CUSTOM_ITEM_MARKER = "zalo_xposed_settings";
-    private static final int CUSTOM_DRAWABLE_ID = -6767;
+    private static final int CUSTOM_DRAWABLE_ID = -239491;
 
     private static Method openView;
     private static Field activityHost;
