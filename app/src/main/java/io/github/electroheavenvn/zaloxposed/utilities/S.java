@@ -21,7 +21,7 @@ public final class S
         trans.put("addBackgroundImagesDesc", new String[] { "Pick one or more images to randomize", "Chọn một hoặc nhiều ảnh để dùng ngẫu nhiên" });
         trans.put("clearBackgroundImagesTitle", new String[] { "Clear custom background images", "Xoá ảnh nền tuỳ chỉnh" });
         trans.put("clearBackgroundImagesDesc", new String[] { "Remove all added images", "Xoá tất cả ảnh đã thêm" });
-        trans.put("bgImagesAdded", new String[] { "Added %d image(s).", "Đã thêm %d ảnh." });
+        trans.put("bgImagesAdded", new String[] { "Added %d image(s), skipped %d duplicate(s).", "Đã thêm %d ảnh, bỏ qua %d ảnh trùng." });
         trans.put("bgImagesCleared", new String[] { "Cleared %d image(s)", "Đã xoá %d ảnh" });
         trans.put("bgImagesFailed", new String[] { "No valid image selected", "Không có ảnh hợp lệ nào được chọn" });
         trans.put("bgImageCount", new String[] { "Saved %d background images", "Đã lưu %d ảnh nền" });

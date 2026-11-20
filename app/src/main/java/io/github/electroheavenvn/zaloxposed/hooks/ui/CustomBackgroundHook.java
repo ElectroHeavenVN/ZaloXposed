@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.ChecksumFileHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
@@ -28,9 +29,7 @@ import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -216,46 +215,25 @@ public class CustomBackgroundHook extends BaseHook
         catch (Exception e) { Logger.e(e); }
 
         int added = 0;
+        int skipped = 0;
         File dir = getCustomBgDir();
         if (dir != null)
         {
-            long timestamp = System.currentTimeMillis();
-            for (int i = 0; i < uris.size(); i++)
+            ContentResolver resolver = context.getContentResolver();
+            for (Uri uri : uris)
             {
-                File target = new File(dir, "custom_" + timestamp + "_" + i + ".img");
-                if (copyUriToFile(context.getContentResolver(), uris.get(i), target))
+                ChecksumFileHelper.Result result = ChecksumFileHelper.CopyWithChecksumChecks(resolver, uri, dir, "img");
+                if (result == null)
+                    continue;
+                if (result.duplicate())
+                    skipped++;
+                else
                     added++;
             }
         }
-        toast(context, added > 0 ? S.tr("bgImagesAdded", added) : S.tr("bgImagesFailed"));
+        toast(context, uris.isEmpty() ? S.tr("bgImagesFailed") : S.tr("bgImagesAdded", added, skipped));
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private static boolean copyUriToFile(ContentResolver resolver, Uri uri, File target)
-    {
-        try (InputStream in = resolver.openInputStream(uri);
-             OutputStream out = new FileOutputStream(target))
-        {
-            if (in == null)
-                return false;
-            byte[] buffer = new byte[8192];
-            int len;
-            while ((len = in.read(buffer)) > 0)
-                out.write(buffer, 0, len);
-            out.flush();
-            return target.length() > 0;
-        }
-        catch (Exception e)
-        {
-            Logger.e(e);
-            try
-            {
-                target.delete();
-            }
-            catch (Exception ignored) { }
-            return false;
-        }
-    }
 
     private static Activity findActivity(Context context)
     {
