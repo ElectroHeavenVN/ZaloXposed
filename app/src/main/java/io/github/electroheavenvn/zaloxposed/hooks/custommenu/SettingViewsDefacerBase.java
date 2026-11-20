@@ -55,18 +55,17 @@ public abstract class SettingViewsDefacerBase extends BaseHook
                 break;
             case LIST:
             {
-                //TODO: open drop down menu instead of rotating
                 ListSelectionSettingFeature listFeature = (ListSelectionSettingFeature)feature;
                 ListItemSettingHelper.SetStateSetting(listItemSetting, listFeature.getSelectedTitle());
                 ListItemSettingHelper.SetOnClickListener(listItemSetting, v ->
-                {
-                    try
+                    BottomSheetListSelectionHelper.Show(v.getContext(), listFeature, () ->
                     {
-                        listFeature.onOptionClicked(context);
-                        ListItemSettingHelper.SetStateSetting(listItemSetting, listFeature.getSelectedTitle());
-                    }
-                    catch (Exception e) { Logger.e(e); }
-                });
+                        try
+                        {
+                            ListItemSettingHelper.SetStateSetting(listItemSetting, listFeature.getSelectedTitle());
+                        }
+                        catch (Exception e) { Logger.e(e); }
+                    }));
                 break;
             }
             case BUTTON:

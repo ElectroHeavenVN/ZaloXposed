@@ -222,6 +222,10 @@ public final class Config
     public static boolean getEnableBackground() { return (boolean)get(KEY_ENABLE_BACKGROUND, true); }
     public static void setEnableBackground(boolean value) { set(KEY_ENABLE_BACKGROUND, value); }
 
+    public static final String KEY_ENABLE_CUSTOM_RINGTONE = "enable_custom_ringtone";
+    public static boolean getEnableCustomRingtone() { return (boolean)get(KEY_ENABLE_CUSTOM_RINGTONE, true); }
+    public static void setEnableCustomRingtone(boolean value) { set(KEY_ENABLE_CUSTOM_RINGTONE, value); }
+
     public static final String KEY_ENABLE_EXTENDED_GRID_MENU = "enable_extended_grid_menu";
     public static boolean getEnableExtendedGridMenu() { return (boolean)get(KEY_ENABLE_EXTENDED_GRID_MENU, false); }
     public static void setEnableExtendedGridMenu(boolean value) { set(KEY_ENABLE_EXTENDED_GRID_MENU, value); }

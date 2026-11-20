@@ -13,21 +13,11 @@ public final class S
 
     static
     {
+        // Master menu
         trans.put("backgroundCategoryTitle", new String[] { "Background", "Hình nền" });
         trans.put("backgroundCategoryDesc", new String[] { "Customize background images", "Tuỳ chỉnh ảnh nền" });
-        trans.put("backgroundImagesSubCategoryTitle", new String[] { "Background images", "Ảnh nền" });
-        trans.put("customBackgroundTitle", new String[] { "Custom background", "Hình nền tuỳ chỉnh" });
-        trans.put("addBackgroundImagesTitle", new String[] { "Add background images", "Thêm ảnh nền" });
-        trans.put("addBackgroundImagesDesc", new String[] { "Pick one or more images to randomize", "Chọn một hoặc nhiều ảnh để dùng ngẫu nhiên" });
-        trans.put("clearBackgroundImagesTitle", new String[] { "Clear custom background images", "Xoá ảnh nền tuỳ chỉnh" });
-        trans.put("clearBackgroundImagesDesc", new String[] { "Remove all added images", "Xoá tất cả ảnh đã thêm" });
-        trans.put("bgImagesAdded", new String[] { "Added %d image(s).", "Đã thêm %d ảnh." });
-        trans.put("bgImagesCleared", new String[] { "Cleared %d image(s)", "Đã xoá %d ảnh" });
-        trans.put("bgImagesFailed", new String[] { "No valid image selected", "Không có ảnh hợp lệ nào được chọn" });
-        trans.put("bgImageCount", new String[] { "Saved %d background images", "Đã lưu %d ảnh nền" });
-        trans.put("bgImageCountEmpty", new String[] { "Saved 0 background images", "Đã lưu 0 ảnh nền" });
-
-        // Master menu
+        trans.put("callRingtoneCategoryTitle", new String[] { "Call ringtone", "Nhạc chuông cuộc gọi" });
+        trans.put("callRingtoneCategoryDesc", new String[] { "Customize the incoming-call ringtone", "Tuỳ chỉnh nhạc chuông cuộc gọi đến" });
         trans.put("msgAndConverCategoryTitle", new String[] { "Messages & Conversations", "Tin nhắn & Trò chuyện" });
         trans.put("msgAndConverCategoryDesc", new String[] { "Customize message appearance and behavior", "Tùy chỉnh hiển thị và hành vi tin nhắn" });
         trans.put("privacyCategoryTitle", new String[] { "Privacy", "Quyền riêng tư" });
@@ -47,6 +37,23 @@ public final class S
         // Buttons
         trans.put("reloadDexKitCacheBtnTitle", new String[] { "Force reload DexKit cache", "Buộc tải lại bộ nhớ đệm DexKit" });
         trans.put("restartAppBtnTitle", new String[] { "Restart app", "Khởi động lại ứng dụng" });
+
+		// Custom background
+		trans.put("backgroundImagesSubCategoryTitle", new String[] { "Background images", "Ảnh nền" });
+        trans.put("customBackgroundTitle", new String[] { "Custom background", "Hình nền tuỳ chỉnh" });
+        trans.put("addBackgroundImagesTitle", new String[] { "Add background images", "Thêm ảnh nền" });
+        trans.put("addBackgroundImagesDesc", new String[] { "Pick one or more images to randomize", "Chọn một hoặc nhiều ảnh để dùng ngẫu nhiên" });
+        trans.put("clearBackgroundImagesTitle", new String[] { "Clear custom background images", "Xoá ảnh nền tuỳ chỉnh" });
+        trans.put("clearBackgroundImagesDesc", new String[] { "Remove all added images", "Xoá tất cả ảnh đã thêm" });
+        
+		// Custom call ringtone
+		trans.put("callRingtoneSubCategoryTitle", new String[] { "Incoming-call sounds", "Âm thanh cuộc gọi đến" });
+        trans.put("customRingtoneTitle", new String[] { "Custom call ringtone", "Nhạc chuông cuộc gọi tuỳ chỉnh" });
+        trans.put("customRingtoneDesc", new String[] { "Play a random saved file on each incoming call", "Phát ngẫu nhiên một tệp đã lưu cho mỗi cuộc gọi đến" });
+        trans.put("addRingtoneFilesTitle", new String[] { "Add ringtone files", "Thêm tệp nhạc chuông" });
+        trans.put("addRingtoneFilesDesc", new String[] { "Pick one or more audio files to randomize", "Chọn một hoặc nhiều tệp âm thanh để dùng ngẫu nhiên" });
+        trans.put("clearRingtoneFilesTitle", new String[] { "Clear custom ringtone files", "Xoá tệp nhạc chuông tuỳ chỉnh" });
+        trans.put("clearRingtoneFilesDesc", new String[] { "Remove all added audio files", "Xoá tất cả tệp âm thanh đã thêm" });
 
         //Messages & Conversations
         trans.put("chatHeadSubCategoryTitle", new String[] { "Mini Chat (Chat Head)" });
@@ -176,6 +183,16 @@ public final class S
         trans.put("cancel", new String[] { "Cancel", "Hủy" });
         trans.put("gotoDownload", new String[] { "Go to download page", "Đi tới trang tải xuống" });
         trans.put("amoledTheme", new String[] { "AMOLED Dark theme", "Chủ đề tối AMOLED" });
+        trans.put("bgImagesAdded", new String[] { "Added %d image(s), skipped %d duplicate(s).", "Đã thêm %d ảnh, bỏ qua %d ảnh trùng." });
+        trans.put("bgImagesCleared", new String[] { "Cleared %d image(s)", "Đã xoá %d ảnh" });
+        trans.put("bgImagesFailed", new String[] { "No valid image selected", "Không có ảnh hợp lệ nào được chọn" });
+        trans.put("bgImageCount", new String[] { "Saved %d background images", "Đã lưu %d ảnh nền" });
+        trans.put("bgImageCountEmpty", new String[] { "Saved 0 background images", "Đã lưu 0 ảnh nền" });
+        trans.put("ringtoneFilesAdded", new String[] { "Added %d ringtone file(s), skipped %d duplicate(s).", "Đã thêm %d tệp nhạc chuông, bỏ qua %d tệp trùng." });
+        trans.put("ringtoneFilesCleared", new String[] { "Cleared %d ringtone file(s)", "Đã xoá %d tệp nhạc chuông" });
+        trans.put("ringtoneFilesFailed", new String[] { "No valid audio file selected", "Không có tệp âm thanh hợp lệ nào được chọn" });
+        trans.put("ringtoneFileCount", new String[] { "Saved %d ringtone files", "Đã lưu %d tệp nhạc chuông" });
+        trans.put("ringtoneFileCountEmpty", new String[] { "Saved 0 ringtone files", "Đã lưu 0 tệp nhạc chuông" });
     }
 
     public static String tr(String key)
