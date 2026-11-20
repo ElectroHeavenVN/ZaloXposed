@@ -13,6 +13,7 @@ import io.github.electroheavenvn.zaloxposed.hooks.custommenu.BottomSheetListSele
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.TabMeSettingItemHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZButtonHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.ConfigImportExportHook;
+import io.github.electroheavenvn.zaloxposed.hooks.functional.CustomCallRingtoneHook;
 import io.github.electroheavenvn.zaloxposed.hooks.ui.CustomBackgroundHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
@@ -67,7 +68,20 @@ public final class SettingsMenu
                 }, true)
             ))
         )));
+        settingItems.add(new SettingCategory("callRingtoneCategoryTitle", "callRingtoneCategoryDesc", List.of(
+            new SettingSubCategory("callRingtoneSubCategoryTitle", List.of(
+                new SwitchSettingFeature("customRingtoneTitle", "customRingtoneDesc", Config.KEY_ENABLE_CUSTOM_RINGTONE),
+                new OptionSettingFeature("addRingtoneFilesTitle", "addRingtoneFilesDesc", (item, context) -> CustomCallRingtoneHook.PickFiles(context)),
+                new OptionSettingFeature("clearRingtoneFilesTitle", "clearRingtoneFilesDesc", (item, context) -> CustomCallRingtoneHook.ClearFiles(context)),
+                new TextLabel(() ->
+                {
+                    int count = CustomCallRingtoneHook.getCustomFileCount();
+                    return count == 0 ? S.tr("ringtoneFileCountEmpty") : S.tr("ringtoneFileCount", count);
+                }, true)
+            ))
+        )));
         settingItems.add(new Separator());
+
         settingItems.add(new SettingCategory("msgAndConverCategoryTitle", "msgAndConverCategoryDesc", List.of(
             new SettingSubCategory("chatHeadSubCategoryTitle", List.of(
                 new SwitchSettingFeature("chatHeadTitle", "chatHeadDesc", Config.KEY_ENABLE_CHAT_HEAD).setEnabled(Build.VERSION.SDK_INT > Build.VERSION_CODES.Q)

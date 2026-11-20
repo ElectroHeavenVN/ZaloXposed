@@ -17,7 +17,6 @@ import android.widget.FrameLayout;
 
 import org.luckypray.dexkit.DexKitBridge;
 
-import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
@@ -35,7 +34,6 @@ import io.github.electroheavenvn.zaloxposed.hooks.ads.*;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.*;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingsMenu;
 import io.github.electroheavenvn.zaloxposed.utilities.*;
-import io.github.libxposed.api.XposedInterfaceWrapper;
 import io.github.libxposed.api.XposedModule;
 
 public class ZaloXposedLoader extends XposedModule
@@ -78,6 +76,7 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new ChatHeadIMESyncHook());
         hooks.add(new RestoreGoogleDriveBackupHook());
         hooks.add(new RestoreProfileMusicHook());
+        hooks.add(new CustomCallRingtoneHook());
         hooks.add(new DisableFirebaseLoggingHook());
         hooks.add(new DisableZaloTrackingHook());
         hooks.add(new HideAdsHook());
