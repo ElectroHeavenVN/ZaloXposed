@@ -9,6 +9,7 @@ import java.util.List;
 
 import io.github.electroheavenvn.zaloxposed.MorpheConstants;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ListItemSettingHelper;
+import io.github.electroheavenvn.zaloxposed.hooks.custommenu.BottomSheetListSelectionHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.TabMeSettingItemHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZButtonHelper;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.ConfigImportExportHook;
@@ -191,6 +192,7 @@ public final class SettingsMenu
         settingCallLogsView = Class.forName("com.zing.zalo.ui.call.SettingCallLogsView", false, classLoader);
 
         ListItemSettingHelper.Init(classLoader);
+        BottomSheetListSelectionHelper.Init(classLoader);
         ZButtonHelper.Init(classLoader);
         TabMeSettingItemHelper.Init(bridge, classLoader);
     }

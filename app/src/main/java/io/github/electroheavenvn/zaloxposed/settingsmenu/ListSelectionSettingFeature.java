@@ -6,7 +6,6 @@ import java.util.Objects;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.S;
 
-//TODO: open drop down menu instead of rotating
 public final class ListSelectionSettingFeature extends SettingFeature
 {
     public static class Selection
@@ -54,18 +53,20 @@ public final class ListSelectionSettingFeature extends SettingFeature
             if (currentState == null && !selections.isEmpty())
                 currentState = selections.get(index = 0);
         });
-        setOnOptionClickedListener((item, context) -> {
-            index++;
-            if (index >= selections.size() || index < 0)
-                index = 0;
-            currentState = selections.get(index);
-            Config.set(configKey, ((Selection)currentState).value);
-        });
+    }
+
+    public void select(int newIndex)
+    {
+        if (newIndex < 0 || newIndex >= selections.size())
+            return;
+        index = newIndex;
+        currentState = selections.get(index);
+        Config.set(configKey, ((Selection)currentState).getValue());
     }
 
     public List<Selection> getSelections() { return selections; }
+    public int getSelectedIndex() { return index; }
     public Selection getSelected() { return selections.get(index); }
     public String getSelectedTitle() { return getSelected().getTitle(); }
     public Object getSelectedValue() { return getSelected().getValue(); }
 }
-
