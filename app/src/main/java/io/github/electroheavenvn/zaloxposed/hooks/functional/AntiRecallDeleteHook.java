@@ -1,72 +1,47 @@
 package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
-import io.github.electroheavenvn.zaloxposed.MorpheConstants;
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.CoreUtilityHelper;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import io.github.electroheavenvn.zaloxposed.MorpheConstants;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.CoreUtilityHelper;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+
 public class AntiRecallDeleteHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
-        // Class<?> clazz = Class.forName("com.zing.zalocore.connection.socket.NativeSocket", false, classLoader);
-        // Method method = clazz.getDeclaredMethod("onReceivePackage", int.class, Object.class);
-        // Logger.i("Hooking: " + method);
-        // module.hook(method).intercept(chain ->
-        // {
-        //     if (!Config.getEnableAntiRecall() && !Config.getEnableAntiDelete())
-        //         return chain.proceed();
-        //     Object arg1 = chain.getArg(1);
-        //     Field paramsField = arg1.getClass().getDeclaredField("params");
-        //     paramsField.setAccessible(true);
-        //     String json = new String((byte[]) paramsField.get(arg1), StandardCharsets.UTF_8);
-        //     if (!json.contains(",\"msg\":[{\"text\":{\"type\":\""))
-        //         return chain.proceed();
-        //     JSONObject jsonObject = new JSONObject(json);
-        //     if (processMsgPayload(jsonObject))
-        //     {
-        //         String modifiedJson = jsonObject.toString();
-        //         paramsField.set(arg1, modifiedJson.getBytes(StandardCharsets.UTF_8));
-        //     }
-        //     return chain.proceed();
-        // });
-
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("AntiRecallDelete_ChatPacketHandler_OnPayload", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("void")
                 .paramCount(8)
                 .paramTypes("java.lang.String", "int", "int", "org.json.JSONObject", "int", "boolean", "long", null)
-                .addUsingString("currentUserUid", StringMatchType.Equals)
-                .addUsingString("jsonData", StringMatchType.Equals)
-                .addUsingString("source", StringMatchType.Equals)
                 .addUsingString("PullMessage", StringMatchType.Equals)
                 .addUsingString("ChatPacketHandler", StringMatchType.Equals)
+                .addUsingString("LAST_TIME_EVICT_GROUP_MESSAGES_OFFLINE_", StringMatchType.Equals)
                 .addUsingNumber(15000)
-            ));
+                .addUsingNumber(10209)
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method2 = methodData.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + method2);
-            module.hook(method2).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (!Config.getEnableAntiRecall() && !Config.getEnableAntiDelete())
                     return chain.proceed();
@@ -178,10 +153,7 @@ public class AntiRecallDeleteHook extends BaseHook
                 }
             }
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
         return modified;
     }
 }

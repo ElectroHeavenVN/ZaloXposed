@@ -78,13 +78,19 @@ public final class ZButtonHelper
     public static int GetBtnType(Object button) throws Exception
     {
         CheckType(button);
-        return (int) buttonClass.getMethod("getBtnType").invoke(button);
+        Integer integer = (Integer)buttonClass.getMethod("getBtnType").invoke(button);
+        if (integer == null)
+            return 0;
+        return integer;
     }
 
     public static int GetBtnTypeSize(Object button) throws Exception
     {
         CheckType(button);
-        return (int) buttonClass.getMethod("getBtnTypeSize").invoke(button);
+        Integer integer = (Integer)buttonClass.getMethod("getBtnTypeSize").invoke(button);
+        if (integer == null)
+            return 0;
+        return integer;
     }
 
     public static void SetIdTracking(Object button, String id) throws Exception
@@ -120,7 +126,10 @@ public final class ZButtonHelper
     public static boolean IsEnabled(Object button) throws Exception
     {
         CheckType(button);
-        return (boolean) buttonClass.getMethod("isEnabled").invoke(button);
+        Boolean bool = (Boolean)buttonClass.getMethod("isEnabled").invoke(button);
+        if (bool == null)
+            return false;
+        return bool;
     }
 
     private static void CheckType(Object button) throws Exception

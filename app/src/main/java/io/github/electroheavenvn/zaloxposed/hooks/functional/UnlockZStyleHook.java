@@ -1,0 +1,94 @@
+package io.github.electroheavenvn.zaloxposed.hooks.functional;
+
+import org.luckypray.dexkit.query.FindMethod;
+import org.luckypray.dexkit.query.enums.StringMatchType;
+import org.luckypray.dexkit.query.matchers.ClassMatcher;
+import org.luckypray.dexkit.query.matchers.FieldMatcher;
+import org.luckypray.dexkit.query.matchers.MethodMatcher;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.List;
+
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+
+public class UnlockZStyleHook extends BaseHook
+{
+    private static Field zStylePackageIdField = null;
+
+    @Override
+    public void installHooks() throws Throwable
+    {
+        zStylePackageIdField = DexKitCache.GetFieldRaw("UnlockZStyle_ZStylePackageId", classLoader);
+        List<Method> methods = DexKitCache.GetMethods("UnlockZStyle_1", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.STATIC)
+                .paramCount(0)
+                .declaredClass(ClassMatcher.create()
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .addUsingString("SaveLastTimeAutoLogin", StringMatchType.Equals)
+                    .addUsingString("CurrentUID(mem=", StringMatchType.Equals))
+                .addCaller(MethodMatcher.create()
+                    .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                    .returnType("boolean")
+                    .paramCount(0)
+                    .declaredClass(ClassMatcher.create()
+                        .addField(FieldMatcher.create()
+                            .modifiers(Modifier.PUBLIC)
+                            .type(ClassMatcher.create()
+                                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                                .addUsingString("SubscribePackageIdConfig(zStylePackageIds=", StringMatchType.Equals)
+                                .addUsingString(", businessAccountPackageIds=", StringMatchType.Equals)
+                                .addUsingString(", zCloudPlanIds=", StringMatchType.Equals)
+                                .addUsingString(")", StringMatchType.Equals)
+                            )
+                        )
+                    ))
+            )), classLoader);
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found");
+            return;
+        }
+        for (Method method : methods)
+        {
+            doHook(method, chain ->
+            {
+                Object result = chain.proceed();
+                if (!Config.getUnlockZStyle())
+                    return result;
+                if (zStylePackageIdField != null)
+                {
+                    zStylePackageIdField.setInt(result, 1);
+                    return result;
+                }
+                Object newInstance = ((Method)chain.getExecutable()).getReturnType().getDeclaredConstructor().newInstance();
+                for (Field field : newInstance.getClass().getDeclaredFields())
+                {
+                    if (field.getType() != int.class)
+                        continue;
+                    boolean isAccessible = field.isAccessible();
+                    field.setAccessible(true);
+                    if (field.getInt(newInstance) == 0)
+                    {
+                        field.setInt(newInstance, 6767);
+                        String toStr = newInstance.toString();
+                        if (toStr.contains("zStylePackageId=6767"))
+                        {
+                            zStylePackageIdField = field;
+                            zStylePackageIdField.setInt(result, 1);
+                            DexKitCache.SetFieldRaw("UnlockZStyle_ZStylePackageId", zStylePackageIdField);
+                            break;
+                        }
+                    }
+                    field.setAccessible(isAccessible);
+                }
+                return result;
+            });
+        }
+    }
+}

@@ -4,9 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.widget.ImageView;
 
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ResourceHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import java.lang.reflect.Method;
@@ -46,7 +48,7 @@ public class ResourceHook extends BaseHook
         {
             sDrawableMap.put(customId, moduleDrawableName);
         }
-        if (fallbackName != null && !fallbackName.isEmpty())
+        if (!TextUtils.isEmpty(fallbackName))
         {
             synchronized (sFallbackNames)
             {
@@ -65,17 +67,13 @@ public class ResourceHook extends BaseHook
 
     public static void replace(String targetDrawableName, String moduleDrawableName)
     {
-        if (targetDrawableName == null || targetDrawableName.isEmpty())
+        if (TextUtils.isEmpty(targetDrawableName))
             return;
-        int targetId = Utils.GetDrawableResourceIdByName(targetDrawableName);
+        int targetId = ResourceHelper.GetResourceIdByName(targetDrawableName);
         if (targetId != 0)
-        {
             replace(targetId, moduleDrawableName);
-        }
         else
-        {
             Logger.e("Cannot resolve target drawable ID for name: " + targetDrawableName);
-        }
     }
 
     public static void unmap(int customId)
@@ -107,7 +105,7 @@ public class ResourceHook extends BaseHook
     }
 
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         if (sInstalled)
             return;
@@ -122,8 +120,7 @@ public class ResourceHook extends BaseHook
     private void hookImageView() throws Throwable
     {
         Method method = ImageView.class.getDeclaredMethod("setImageResource", int.class);
-        Logger.i("Hooking: " + method);
-        module.hook(method).setPriority(5).intercept(chain ->
+        doHook(method, 5, chain ->
         {
             int resId = (int)chain.getArg(0);
             if (!isMapped(resId))
@@ -138,10 +135,7 @@ public class ResourceHook extends BaseHook
                     return null;
                 }
             }
-            catch (Throwable t)
-            {
-                Logger.e(t);
-            }
+            catch (Throwable t) { Logger.e(t); }
             return redirectImageViewToFallback(chain, resId);
         });
     }
@@ -158,8 +152,7 @@ public class ResourceHook extends BaseHook
             Class<?>[] params = method.getParameterTypes();
             if (params.length == 0 || params[0] != int.class)
                 continue;
-            Logger.i("Hooking: " + method);
-            module.hook(method).setPriority(5).intercept(chain ->
+            doHook(method, 5, chain ->
             {
                 int resId = (int)chain.getArg(0);
                 if (!isMapped(resId))
@@ -174,10 +167,7 @@ public class ResourceHook extends BaseHook
                     if (d != null)
                         return d;
                 }
-                catch (Throwable t)
-                {
-                    Logger.e(t);
-                }
+                catch (Throwable t) { Logger.e(t); }
                 return redirectToFallbackDrawable(chain, resId);
             });
         }
@@ -197,8 +187,7 @@ public class ResourceHook extends BaseHook
             Class<?>[] ps = method.getParameterTypes();
             if (isGetValue && (ps.length != 3 || ps[0] != int.class))
                 continue;
-            Logger.i("Hooking: " + method);
-            module.hook(method).setPriority(5).intercept(chain ->
+            doHook(method, 5, chain ->
             {
                 Object[] arr = chain.getArgs().toArray();
                 int idIndex = findCustomIdIndex(arr);
@@ -218,10 +207,7 @@ public class ResourceHook extends BaseHook
                             return d;
                     }
                 }
-                catch (Throwable t)
-                {
-                    Logger.e(t);
-                }
+                catch (Throwable t) { Logger.e(t); }
                 return redirectWithRewrittenId(chain, arr, idIndex, resId);
 
             });
@@ -237,8 +223,7 @@ public class ResourceHook extends BaseHook
             Class<?>[] ps = method.getParameterTypes();
             if (ps.length != 4 || ps[0] != int.class)
                 continue;
-            Logger.i("Hooking: " + method);
-            module.hook(method).setPriority(5).intercept(chain ->
+            doHook(method, 5, chain ->
             {
                 int resId = (int)chain.getArg(0);
                 if (!isMapped(resId))
@@ -293,10 +278,7 @@ public class ResourceHook extends BaseHook
             fixed[idIndex] = fallbackId;
             return chain.proceed(fixed);
         }
-        catch (Throwable t)
-        {
-            Logger.e(t);
-        }
+        catch (Throwable t) { Logger.e(t); }
         return chain.proceed();
     }
 
@@ -317,10 +299,7 @@ public class ResourceHook extends BaseHook
             Resources.Theme theme = findTheme(chain);
             return zaloRes.getDrawable(fallbackId, theme);
         }
-        catch (Throwable t)
-        {
-            Logger.e(t);
-        }
+        catch (Throwable t) { Logger.e(t); }
         return chain.proceed();
     }
 
@@ -336,10 +315,7 @@ public class ResourceHook extends BaseHook
                 return null;
             }
         }
-        catch (Throwable t)
-        {
-            Logger.e(t);
-        }
+        catch (Throwable t) { Logger.e(t); }
         return chain.proceed();
     }
 
@@ -356,11 +332,11 @@ public class ResourceHook extends BaseHook
         {
             name = sFallbackNames.get(customId);
         }
-        if (name != null && !name.isEmpty())
+        if (!TextUtils.isEmpty(name))
         {
             try
             {
-                int id = Utils.GetDrawableResourceIdByName(name);
+                int id = ResourceHelper.GetResourceIdByName(name);
                 if (id != 0)
                 {
                     synchronized (sFallbackIds)
@@ -370,10 +346,7 @@ public class ResourceHook extends BaseHook
                     return id;
                 }
             }
-            catch (Throwable t)
-            {
-                Logger.e(t);
-            }
+            catch (Throwable t) { Logger.e(t); }
         }
         return 0;
     }
@@ -394,7 +367,7 @@ public class ResourceHook extends BaseHook
         {
             name = sDrawableMap.get(customId);
         }
-        if (name == null || name.isEmpty())
+        if (TextUtils.isEmpty(name))
             return null;
         try
         {
@@ -414,10 +387,7 @@ public class ResourceHook extends BaseHook
                 return null;
             return modRes.getDrawable(modId, theme);
         }
-        catch (Throwable t)
-        {
-            Logger.e(t);
-            return null;
-        }
+        catch (Throwable t) { Logger.e(t); }
+        return null;
     }
 }

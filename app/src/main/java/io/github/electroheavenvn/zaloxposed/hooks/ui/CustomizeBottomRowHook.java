@@ -2,6 +2,7 @@ package io.github.electroheavenvn.zaloxposed.hooks.ui;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 import org.json.JSONObject;
@@ -17,26 +18,24 @@ import java.util.List;
 public class CustomizeBottomRowHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("CustomizeBottomRow_LoadEnabledTabs", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("int")
                 .paramCount(3)
                 .paramTypes("int", "java.lang.String", "boolean")
                 .addUsingString("get XML preference -> force to db, need clean code: %s", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found 1");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (!Config.getEnableCustomizeBottomRow())
                     return chain.proceed();
@@ -48,7 +47,7 @@ public class CustomizeBottomRowHook extends BaseHook
                 return chain.proceed();
             });
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("CustomizeBottomRow_LoadTabMoreFromJson", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("void")
@@ -56,17 +55,15 @@ public class CustomizeBottomRowHook extends BaseHook
                 .paramTypes("org.json.JSONObject")
                 .addUsingString("enable_tabmore", StringMatchType.Equals)
                 .addUsingString("CONFIG_TABMORE", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found 2");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (!Config.getEnableCustomizeBottomRow())
                     return chain.proceed();
@@ -77,7 +74,7 @@ public class CustomizeBottomRowHook extends BaseHook
                 return chain.proceed(new Object[] {jsonObject});
             });
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("CustomizeBottomRow_LoadEnabledTabsFromJson", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("void")
@@ -87,17 +84,15 @@ public class CustomizeBottomRowHook extends BaseHook
                 .addUsingString("enable_streamline", StringMatchType.Equals)
                 .addUsingString("enable_global_search", StringMatchType.Equals)
                 .addUsingString("CONFIG_TABDISCOVERY", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found 3");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (!Config.getEnableCustomizeBottomRow())
                     return chain.proceed();

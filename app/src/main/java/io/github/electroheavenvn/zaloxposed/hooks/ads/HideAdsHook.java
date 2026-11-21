@@ -2,55 +2,52 @@ package io.github.electroheavenvn.zaloxposed.hooks.ads;
 
 import android.view.View;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-import io.github.electroheavenvn.zaloxposed.utilities.Utils;
-
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.FieldMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
+
 public class HideAdsHook extends BaseHook
 { 
     @Override
-    public void hook() throws Throwable
-    { 
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+    public void installHooks() throws Throwable
+    {
+        List<Method> methods = DexKitCache.GetMethods("HideAdsHook_InflateModuleView", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .paramCount(2)
                 .paramTypes("android.view.ViewGroup", "int")
                 .addUsingString("TAB_MSG_ITEM_MINI_CHAT_KEY", StringMatchType.Equals)
                 .addUsingString("TAB_MSG_ITEM_KEY", StringMatchType.Equals)
-                .addUsingString("context", StringMatchType.Equals)
                 .addUsingField(FieldMatcher.create().name("warning_low_storage_banner"))
                 .addUsingField(FieldMatcher.create().name("latest_mention_description_footer"))
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found 1");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 Object result = chain.proceed(); 
                 int viewType = (Integer)chain.getArg(1);
                 if (
                     (Config.getHideMediaBox() && viewType == 2) || 
                     (Config.getHideBizBox() && viewType == 3) || 
-                    (Config.getHideZInstantAds() && viewType == 27)
+                    (Config.getHideZInstantAds() && viewType == 25)
                 )
                 {
                     for (Field field : Utils.GetAllFields(result.getClass()))
@@ -63,24 +60,22 @@ public class HideAdsHook extends BaseHook
                 return result;
             });
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("HideAdsHook_FeedItemZInstantAds", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass("com.zing.zalo.social.presentation.timeline.view.TimelineView")
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("void")
                 .paramCount(2)
                 .paramTypes(null, "android.view.View")
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found 2");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
                 Object result = chain.proceed();
                 if (Config.getHideFeedItemZInstantAds())
@@ -95,7 +90,7 @@ public class HideAdsHook extends BaseHook
                 return result;
             });
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("HideAdsHook_GetServiceMapPath", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("java.lang.String")
@@ -109,27 +104,27 @@ public class HideAdsHook extends BaseHook
                     .addUsingString("/api/qos/uploadv3", StringMatchType.Equals)
                     .addUsingString("/api/qos/uploadv2", StringMatchType.Equals)
                     .addUsingString("/zalocloudqos", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found 3");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            Method method = methodData.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
+                Object value = chain.proceed();
                 if (!Config.getBlockAdsEndpoints())
-                    return chain.proceed();
-                Enum<?> enumValue = (Enum<?>)chain.getArg(0);
-                int ord = enumValue.ordinal();
-                return switch (ord)
-                {
-                    case 147, 161 -> "";
-                    default -> chain.proceed();
-                };
+                    return value;
+                String endpoint = value.toString();
+                // https://ads-platform.zalo.me/zpads/inboxnative/getads
+                if (endpoint.contains("/zpads/"))
+                    return "";
+                //https://group.api.zaloapp.com/group/ads
+                if (endpoint.contains("/group/ads"))
+                    return "";
+                return value;
             });
         }
     }

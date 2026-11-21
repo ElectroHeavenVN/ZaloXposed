@@ -7,6 +7,7 @@ import org.luckypray.dexkit.query.*;
 import org.luckypray.dexkit.query.enums.*;
 import org.luckypray.dexkit.query.matchers.*;
 import org.luckypray.dexkit.result.*;
+import org.luckypray.dexkit.wrap.DexMethod;
 
 import java.io.*;
 import java.lang.reflect.*;
@@ -27,13 +28,13 @@ import io.github.libxposed.api.*;
 public class TestHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
-    { 
+    public void installHooks() throws Throwable
+    {
         // new Handler(Looper.getMainLooper()).postDelayed(() ->
         // {
         // }, 30000);
 
-        // module.hook(System.class.getDeclaredMethod("exit", int.class)).intercept(chain ->
+        // doHook(System.class.getDeclaredMethod("exit", int.class), chain ->
         // {
             // Logger.i("Exit stack trace: " + Utils.GetStackTrace());
             // return chain.proceed();
@@ -72,10 +73,10 @@ public class TestHook extends BaseHook
         // for (MethodData methodData : methods)
         // {
         //     Method method = methodData.getMethodInstance(classLoader);
-        //     module.hook(method).intercept(chain -> 3);
+        //     doHook(method, chain -> 3);
         // }
 
-        // module.hook(URL.class.getDeclaredMethod("openConnection")).intercept(chain ->
+        // doHook(URL.class.getDeclaredMethod("openConnection"), chain ->
         // {
         //     Object result = chain.proceed();
         //     Logger.i("openConnection: " + chain.getThisObject());
@@ -84,8 +85,7 @@ public class TestHook extends BaseHook
         // });
 
         // Constructor<?> ctor = JSONObject.class.getConstructor(String.class);
-        // Logger.i("Hooking: " + ctor);
-        // module.hook(ctor).intercept(chain ->
+        // doHook(ctor, chain ->
         // {
         //     Object result = chain.proceed();
         //     Logger.i("JSONObject constructor called with string: " + chain.getArg(0));
@@ -93,7 +93,7 @@ public class TestHook extends BaseHook
         //     return result;
         // });
         // Method printStackTrace = Throwable.class.getDeclaredMethod("printStackTrace");
-        // module.hook(printStackTrace).intercept(chain ->
+        // doHook(printStackTrace, chain ->
         // {
         //     Object result = chain.proceed();
         //     Logger.e("Exception:");

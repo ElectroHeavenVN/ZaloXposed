@@ -1,26 +1,26 @@
 package io.github.electroheavenvn.zaloxposed.hooks.tracking;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
-import org.luckypray.dexkit.result.UsingFieldData;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
+
 public class DisableZaloTrackingHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("DisableZaloTracking_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("java.lang.String")
@@ -30,32 +30,33 @@ public class DisableZaloTrackingHook extends BaseHook
                 .addUsingString("last_used ASC", StringMatchType.Equals)
                 .addUsingString("http://", StringMatchType.Equals)
                 .addUsingString("_id=?", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 1");
             return;
         }
-        for (MethodData md : methods)
+        for (Method method : methods)
         {
-            Logger.i("Hooking: " + md.getMethodInstance(classLoader));
-            module.hook(md.getMethodInstance(classLoader)).intercept(chain ->
+            doHook(method, chain ->
             {
-                if (Config.getDisableZaloTracking())
+                if (!Config.getDisableZaloTracking())
+                    return chain.proceed();
+                Object enumValue = chain.getArg(0);
+                if (enumValue != null)
                 {
-                    Object enumValue = chain.getArg(0);
-                    if (enumValue != null)
-                    {
-                        String enumName = ((Enum<?>)enumValue).name();
-                        if (enumName.equals("ZALO_LOG"))
-                            return "";
-                    }
+                    String enumName = ((Enum<?>)enumValue).name();
+                    if (enumName.equals("ZALO_LOG"))
+                        return "";
+                    if (enumName.equals("QOS_TRK_INSTALL_ZALO_APP_S"))
+                        return "";
+                    if (enumName.equals("QOS_TALK_S"))
+                        return "";
                 }
                 return chain.proceed();
             });
         }
-
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("DisableZaloTracking_2", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("void")
@@ -66,33 +67,31 @@ public class DisableZaloTrackingHook extends BaseHook
                 .addUsingString("multipart/form-data; boundary=ZiNgMeEmAiL", StringMatchType.Equals)
                 .addUsingString("--ZiNgMeEmAiL--\r\n", StringMatchType.Equals)
                 .addUsingString("error_message", StringMatchType.Equals)
-                .addUsingNumber(-11110000)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 2");
             return;
         }
-        for (MethodData md : methods)
+        for (Method method : methods)
         {
-            Logger.i("Hooking: " + md.getMethodInstance(classLoader));
-            module.hook(md.getMethodInstance(classLoader)).intercept(chain ->
+            doHook(method, chain ->
             {
-                if (Config.getDisableZaloTracking())
+                if (!Config.getDisableZaloTracking())
+                    return chain.proceed();
+                for (Field field : chain.getThisObject().getClass().getDeclaredFields())
                 {
-                    for (Field field : chain.getThisObject().getClass().getDeclaredFields())
-                    {
-                        if (Modifier.isStatic(field.getModifiers()))
-                            continue;
-                        String fieldValueStr = field.get(chain.getThisObject()).toString();
-                        if (fieldValueStr.contains("/tracking-v3"))
-                            return null;
-                    }
+                    if (Modifier.isStatic(field.getModifiers()))
+                        continue;
+                    Object fieldValue = field.get(chain.getThisObject());
+                    String fieldValueStr = fieldValue == null ? "" : fieldValue.toString();
+                    if (fieldValueStr.contains("/tracking-v3"))
+                        return null;
                 }
                 return chain.proceed();
             });
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("DisableZaloTracking_3", () -> bridge.findMethod(FindMethod.create()
         .matcher(MethodMatcher.create()
             .modifiers(Modifier.PUBLIC | Modifier.FINAL)
             .returnType("void")
@@ -100,23 +99,22 @@ public class DisableZaloTrackingHook extends BaseHook
             .paramTypes(int.class, byte[].class, int.class, null)
             .addUsingString("/tracking", StringMatchType.Equals)
             .addUsingString("STR_URL_UPLOAD_ZALO_TRACKING_BY_TYPE_%d", StringMatchType.Equals)
-        ));
+        )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 3");
             return;
         }
-        for (MethodData md : methods)
+        for (Method method : methods)
         {
-            Logger.i("Hooking: " + md.getMethodInstance(classLoader));
-            module.hook(md.getMethodInstance(classLoader)).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (Config.getDisableZaloTracking())
                     return null;
                 return chain.proceed();
             });
         }
-        methods = bridge.findMethod(FindMethod.create()
+        methods = DexKitCache.GetMethods("DisableZaloTracking_GetServiceMapPath", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .returnType("java.lang.String")
@@ -132,39 +130,30 @@ public class DisableZaloTrackingHook extends BaseHook
                 .addUsingString("/zalocloudqos", StringMatchType.Equals)
                 .addUsingString("/uploadservicepublic", StringMatchType.Equals)
                 .addUsingString("/tracking", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 4");
             return;
         }
-        for (MethodData methodData : methods)
+        for (Method method : methods)
         {
-            List<UsingFieldData> usedFields = methodData.getUsingFields();
-            if (usedFields.isEmpty())
-                continue;
-            UsingFieldData usedField = usedFields.get(0);
-            Field field = usedField.getField().getFieldInstance(classLoader);
-            if (!field.getType().equals(int[].class))
-                continue;
-            if (!Modifier.isPublic(field.getModifiers()) || !Modifier.isStatic(field.getModifiers()) || !Modifier.isFinal(field.getModifiers()))
-                continue;
-            Method method = methodData.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain ->
+            doHook(method, chain ->
             {
+                Object value = chain.proceed();
                 if (!Config.getBlockQoSEndpoints())
-                    return chain.proceed();
-                Enum<?> enumValue = (Enum<?>)chain.getArg(0);
-                int ord = enumValue.ordinal();
-                Object value = field.get(null);
-                if (value == null)
-                    return chain.proceed();
-                return switch (((int[])value)[ord])
-                {
-                    case 154, 110, 115, 109, 108, 107, 106, 105, 145 -> "";
-                    default -> chain.proceed();
-                };
+                    return value;
+                String endpoint = value.toString();
+                // https://qos-talk.123c.vn/api/qos/*, https://qos-talk.123c.vn/uploadservicepublic
+                if (endpoint.contains("/api/qos/") || endpoint.contains("/uploadservicepublic"))
+                    return "";
+                // https://zcld.chat.zalo.me/zalocloudqos
+                if (endpoint.contains("/zalocloudqos"))
+                    return "";
+                // https://zvoip-qos.zaloapp.com/api/qos/uploadcalllog
+                if (endpoint.contains("/qos/uploadcalllog"))
+                    return "";
+                return value;
             });
         }
     }

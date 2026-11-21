@@ -1,5 +1,7 @@
 package io.github.electroheavenvn.zaloxposed.hooks.functional;
 
+import android.text.TextUtils;
+
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.CoreUtilityHelper;
@@ -12,11 +14,10 @@ import java.lang.reflect.Constructor;
 public class FakeOwnerHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         Constructor<?> constructor = JSONObject.class.getConstructor(String.class);
-        Logger.i("Hooking: " + constructor);
-        module.hook(constructor).intercept(chain ->
+        doHook(constructor, chain ->
         {
             if (!Config.getEnableFakeGroupRole())
                 return chain.proceed();
@@ -28,7 +29,7 @@ public class FakeOwnerHook extends BaseHook
             if (!jsonString.contains(",\"ts\":"))
                 return chain.proceed();
             String userId = CoreUtilityHelper.GetCurrentUserID();
-            if (userId.isEmpty() || "0".equals(userId))
+            if (TextUtils.isEmpty(userId) || "0".equals(userId))
                 return chain.proceed();
             String modifiedJsonString = jsonString.replaceAll("\"creatorId\":\\d+", "\"creatorId\":" + userId);
             return chain.proceed(new Object[] { modifiedJsonString });

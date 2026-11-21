@@ -2,24 +2,25 @@ package io.github.electroheavenvn.zaloxposed.hooks.tracking;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
 public class DisableFirebaseLoggingHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("DisableFirebaseLogging_1", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
-                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .modifiers(Modifier.PUBLIC)
                 .returnType("void")
                 .paramCount(2)
                 .addUsingString("Null status", StringMatchType.Equals)
@@ -28,16 +29,15 @@ public class DisableFirebaseLoggingHook extends BaseHook
                 .addUsingString("GDT_CLIENT_METRICS", StringMatchType.Equals)
                 .addUsingString("sdk-version", StringMatchType.Equals)
                 .addUsingString("CctTransportBackend", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
             Logger.e("Target method not found");
             return;
         }
-        for (MethodData md : methods)
+        for (Method method : methods)
         {
-            Logger.i("Hooking: " + md.getMethodInstance(classLoader));
-            module.hook(md.getMethodInstance(classLoader)).intercept(chain ->
+            doHook(method, chain ->
             {
                 if (Config.getDisableFirebaseLogging())
                     return null;

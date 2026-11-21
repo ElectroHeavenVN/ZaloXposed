@@ -2,13 +2,14 @@ package io.github.electroheavenvn.zaloxposed.hooks.ui;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ResourceHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -20,9 +21,9 @@ public class ExtendedGroupRightMenuHook extends BaseHook
 {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
+        List<Method> methods = DexKitCache.GetMethods("ExtendedGroupRightMenu_GetItems", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("java.util.ArrayList")
@@ -35,17 +36,32 @@ public class ExtendedGroupRightMenuHook extends BaseHook
                 // Wrong subtype (for user, not group), maybe adding back disappearing messages for user?
                 // .addUsingString("E2EE_BETA", StringMatchType.Equals)
                 // .addUsingString("ENABLE_TOOL_STORAGE_RIGHT_MENU_${UserID}", StringMatchType.Equals)
-            ));
+            )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 1");
             return;
         }
-        for (MethodData methodData : methods)
+        if (methods.size() > 1)
+            Logger.w("Multiple target methods found 1");
+        List<Method> methods2 = DexKitCache.GetMethods("ExtendedGroupRightMenu_GetItemsNewVer", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .name(methods.get(0).getName()) // override the same method in the parent class
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("java.util.ArrayList")
+                .paramCount(0)
+                .usingNumbers(84, 82, 10, 0, 2)
+                .addInvoke("Landroid/text/SpannableString;-><init>(Ljava/lang/CharSequence;)V")
+            )), classLoader);
+        if (methods2.isEmpty())
         {
-            Method method = methodData.getMethodInstance(classLoader);
-            Logger.i("Hooking: " + method);
-            module.hook(method).intercept(chain ->
+            Logger.e("Target method not found 2");
+            return;
+        }
+        methods.addAll(methods2);
+        for (Method method : methods)
+        {
+            doHook(method, chain ->
             {
                 ArrayList result = (ArrayList)chain.proceed();
                 if (!Config.getEnableExtendedGroupRightMenu())
@@ -54,10 +70,10 @@ public class ExtendedGroupRightMenuHook extends BaseHook
                 Class<?> clazz = element.getClass();
                 Constructor<?> ctor = clazz.getConstructor(int.class, int.class, int.class, boolean.class, boolean.class);
                 // [id] [drawable icon] [title] [show line separator] [show blank separator]
-                result.add(ctor.newInstance(68, Utils.GetDrawableResourceIdByName("ic_countdown"), Utils.GetResourceIdByName("str_disappear_messages"), false, true));
-                result.add(ctor.newInstance(23, Utils.GetDrawableResourceIdByName("ic_group"), Utils.GetResourceIdByName("str_nickname_in_group"), true, false));
-                result.add(ctor.newInstance(75, Utils.GetDrawableResourceIdByName("ic_right_menu_chevron_double_up_line_24"), Utils.GetResourceIdByName("str_right_menu_upgrade_to_community"), true, false));
-                result.add(ctor.newInstance(40, Utils.GetDrawableResourceIdByName("ic_disband"), Utils.GetResourceIdByName("str_community_settings_delete_community"), true, false));
+                result.add(ctor.newInstance(68, ResourceHelper.GetResourceIdByName("ic_countdown"), ResourceHelper.GetResourceIdByName("str_disappear_messages"), false, true));
+                result.add(ctor.newInstance(23, ResourceHelper.GetResourceIdByName("ic_group"), ResourceHelper.GetResourceIdByName("str_nickname_in_group"), true, false));
+                result.add(ctor.newInstance(75, ResourceHelper.GetResourceIdByName("ic_right_menu_chevron_double_up_line_24"), ResourceHelper.GetResourceIdByName("str_right_menu_upgrade_to_community"), true, false));
+                result.add(ctor.newInstance(40, ResourceHelper.GetResourceIdByName("ic_disband"), ResourceHelper.GetResourceIdByName("str_community_settings_delete_community"), true, false));
                 return result;
             });
         }

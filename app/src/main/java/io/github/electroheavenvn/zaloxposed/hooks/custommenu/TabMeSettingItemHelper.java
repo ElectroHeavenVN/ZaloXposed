@@ -5,8 +5,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction;
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference;
 import com.android.tools.smali.dexlib2.iface.reference.StringReference;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 import org.luckypray.dexkit.DexKitBridge;
 import org.luckypray.dexkit.query.FindClass;
@@ -14,14 +12,18 @@ import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.ClassData;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingItemID;
+import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ResourceHelper;
+import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 @SuppressWarnings("rawtypes")
 public final class TabMeSettingItemHelper
@@ -38,12 +40,14 @@ public final class TabMeSettingItemHelper
 
     public static void Init(DexKitBridge bridge, ClassLoader classLoader) throws Exception
     {
-        List<ClassData> classes = bridge.findClass(FindClass.create()
+        trackingField = DexKitCache.GetFieldRaw("TabMeSettingItemHelper_SettingData_Tracking", classLoader);
+        titleField = DexKitCache.GetFieldRaw("TabMeSettingItemHelper_SettingData_Title", classLoader);
+        descriptionField = DexKitCache.GetFieldRaw("TabMeSettingItemHelper_SettingData_Description", classLoader);
+        iconField = DexKitCache.GetFieldRaw("TabMeSettingItemHelper_SettingData_Icon", classLoader);
+        idField = DexKitCache.GetFieldRaw("TabMeSettingItemHelper_SettingData_ID", classLoader);
+        tabMeSettingItemClass = DexKitCache.GetClass("TabMeSettingItemHelper_SettingData", () -> bridge.findClass(FindClass.create()
             .matcher(ClassMatcher.create()
                 .addUsingString("", StringMatchType.Equals)
-                .addUsingString("id", StringMatchType.Equals)
-                .addUsingString("title", StringMatchType.Equals)
-                .addUsingString("<set-?>", StringMatchType.Equals)
                 .addUsingString("SettingData(id=", StringMatchType.Equals)
                 .addUsingString(", icon=", StringMatchType.Equals)
                 .addUsingString(", title=", StringMatchType.Equals)
@@ -52,13 +56,10 @@ public final class TabMeSettingItemHelper
                 .addUsingString(")", StringMatchType.Equals)
                 .addMethod(MethodMatcher.create().name("hashCode"))
                 .addMethod(MethodMatcher.create().name("toString"))
-            ));
-        if (classes.isEmpty())
-            Logger.e("Target class not found");
-        else
-            tabMeSettingItemClass = classes.get(0).getInstance(classLoader);
-        classes = bridge.findClass(FindClass.create()
+            )), classLoader);
+        Class<?> tabMeItemIdClass = DexKitCache.GetClass("TabMeSettingItemHelper_SettingItemIDEnum", () -> bridge.findClass(FindClass.create()
             .matcher(ClassMatcher.create()
+                .superClass("java.lang.Enum")
                 .addFieldForName("UNKNOWN")
                 .addFieldForName("PROFILE")
                 .addFieldForName("QUICK_ACTION")
@@ -73,38 +74,32 @@ public final class TabMeSettingItemHelper
                 .addFieldForName("TOOL_STORAGE")
                 .addFieldForName("ZALO_CLOUD")
                 .addFieldForName("PROMOTE_BA")
-            ));
-        if (classes.isEmpty())
-            Logger.e("Target enum not found");
-        else
-            tabMeItemIdEnumClass = classes.get(0).getInstance(classLoader).asSubclass(Enum.class);
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .declaredClass("com.zing.zalo.ui.maintab.me.TabMeView")
-                .modifiers(Modifier.STATIC)
-                .returnType("java.util.ArrayList")
-                .addUsingString("tab_me_privacy", StringMatchType.Equals)
-                .addUsingString("tab_me_tool_storage", StringMatchType.Equals)
-                .addUsingString("tab_me_account_and_security", StringMatchType.Equals)
-                .addUsingString("tab_me_business_tools", StringMatchType.Equals)
-            ));
-        if (methods.isEmpty())
-            Logger.e("Target method not found 1");
-        else
-            tabMeViewGetItemList = methods.get(0).getMethodInstance(classLoader);
-        methods = bridge.findMethod(FindMethod.create()
+            )), classLoader);
+        if (tabMeItemIdClass != null)
+            tabMeItemIdEnumClass = tabMeItemIdClass.asSubclass(Enum.class);
+        List<Method> methods;
+        // only find GetItemList for disassembling when trackingField is not cached
+        if (trackingField == null)
+        {
+            tabMeViewGetItemList = DexKitCache.GetMethod("TabMeSettingItemHelper_TabMeView_GetItemList", () -> bridge.findMethod(FindMethod.create()
+                .matcher(MethodMatcher.create()
+                    .declaredClass("com.zing.zalo.ui.maintab.me.TabMeView")
+                    .modifiers(Modifier.STATIC)
+                    .returnType("java.util.ArrayList")
+                    .addUsingString("tab_me_privacy", StringMatchType.Equals)
+                    .addUsingString("tab_me_tool_storage", StringMatchType.Equals)
+                    .addUsingString("tab_me_account_and_security", StringMatchType.Equals)
+                    .addUsingString("tab_me_business_tools", StringMatchType.Equals)
+                )), classLoader);
+        }
+        setDesc = DexKitCache.GetMethod("TabMeSettingItemHelper_SettingData_SetDesc", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass(tabMeSettingItemClass)
                 .modifiers(Modifier.PUBLIC | Modifier.FINAL)
                 .returnType("void")
                 .paramCount(1)
                 .paramTypes("java.lang.String")
-                .addUsingString("<set-?>", StringMatchType.Equals)
-            ));
-        if (methods.isEmpty())
-            Logger.e("Target method not found 2");
-        else
-            setDesc = methods.get(0).getMethodInstance(classLoader);
+            )), classLoader);
     }
 
     private static void LateInit() throws Exception
@@ -136,6 +131,7 @@ public final class TabMeSettingItemHelper
                 String fieldName = field.getName();
                 trackingField = tabMeSettingItemClass.getDeclaredField(fieldName);
                 trackingField.setAccessible(true);
+                DexKitCache.SetFieldRaw("TabMeSettingItemHelper_SettingData_Tracking", trackingField);
                 break;
             }
         }
@@ -153,11 +149,13 @@ public final class TabMeSettingItemHelper
                 if ("title12345".equals(field.get(templateInstance)))
                 {
                     titleField = field;
+                    DexKitCache.SetFieldRaw("TabMeSettingItemHelper_SettingData_Title", field);
                     continue;
                 }
                 if ("desc67890".equals(field.get(templateInstance)))
                 {
                     descriptionField = field;
+                    DexKitCache.SetFieldRaw("TabMeSettingItemHelper_SettingData_Description", field);
                     continue;
                 }
             }
@@ -166,6 +164,7 @@ public final class TabMeSettingItemHelper
                 if (field.getInt(templateInstance) == 12345)
                 {
                     iconField = field;
+                    DexKitCache.SetFieldRaw("TabMeSettingItemHelper_SettingData_Icon", field);
                     continue;
                 }
             }
@@ -174,20 +173,21 @@ public final class TabMeSettingItemHelper
                 // SettingItem only has one field of this enum type
                 // if (field.get(templateInstance) == MapEnumToSettingItemID(SettingItemID.TOOL_STORAGE))
                 idField = field;
+                DexKitCache.SetFieldRaw("TabMeSettingItemHelper_SettingData_ID", field);
                 continue;
             }
             field.setAccessible(oldAccessible);
         }
         if (trackingField == null)
-            Logger.w("LateInit: trackingField not found");
+            Logger.e("Target field not found 1");
         if (titleField == null)
-            Logger.w("LateInit: titleField not found");
+            Logger.e("Target field not found 2");
         if (descriptionField == null)
-            Logger.w("LateInit: descriptionField not found");
+            Logger.e("Target field not found 3");
         if (iconField == null)
-            Logger.w("LateInit: iconField not found");
+            Logger.e("Target field not found 4");
         if (idField == null)
-            Logger.w("LateInit: idField not found");
+            Logger.e("Target field not found 5");
     }
 
     public static Object CreateNew(SettingItemID id, int icon, String title) throws Exception
@@ -200,7 +200,7 @@ public final class TabMeSettingItemHelper
     {
         return tabMeSettingItemClass
             .getDeclaredConstructor(tabMeItemIdEnumClass, int.class, String.class, int.class, int.class)
-            .newInstance(MapSettingItemIDToEnum(id), Utils.GetDrawableResourceIdByName(drawableName), title, 0, 24);
+            .newInstance(MapSettingItemIDToEnum(id), ResourceHelper.GetResourceIdByName(drawableName), title, 0, 24);
     }
 
     public static String GetTracking(Object tabMeSettingItem) throws Exception
@@ -263,7 +263,7 @@ public final class TabMeSettingItemHelper
     {
         CheckType(tabMeSettingItem);
         LateInit();
-        iconField.setInt(tabMeSettingItem, Utils.GetDrawableResourceIdByName(drawableName));
+        iconField.setInt(tabMeSettingItem, ResourceHelper.GetResourceIdByName(drawableName));
     }
 
     public static SettingItemID GetID(Object tabMeSettingItem) throws Exception
@@ -282,7 +282,7 @@ public final class TabMeSettingItemHelper
         LateInit();
         idField.set(tabMeSettingItem, MapSettingItemIDToEnum(value));
     }
- 
+
     @SuppressWarnings("unchecked")
     private static Enum<?> MapSettingItemIDToEnum(SettingItemID id)
     {

@@ -12,19 +12,17 @@ import java.lang.reflect.Field;
 public class FixProviderHook extends BaseHook
 {
     @Override
-    public void hook() throws Throwable
+    public void installHooks() throws Throwable
     {
         if (Common.getPackageName().equals("com.zing.zalo"))
             return;
-        Class<?> clazz = Class.forName("com.zing.zalo.provider.InternalProvider", false, classLoader);
-        Logger.i("Hooking <clinit>: " + clazz);
-        Class<?> finalClazz = clazz;
-        module.hookClassInitializer(clazz).setPriority(2).intercept(chain ->
+        Class<?> internalProvider = Class.forName("com.zing.zalo.provider.InternalProvider", false, classLoader);
+        doHookClInit(internalProvider, 2, chain ->
         {
             Object result = chain.proceed();
             Field uriField = null;
             Field uriMatcherField = null;
-            for (Field field : finalClazz.getDeclaredFields())
+            for (Field field : internalProvider.getDeclaredFields())
             {
                 if (field.getType().getName().equals("android.net.Uri"))
                     uriField = field;
@@ -46,16 +44,14 @@ public class FixProviderHook extends BaseHook
             }
             return result;
         });
-        clazz = Class.forName("com.zing.zalo.db.PreferencesProvider", false, classLoader);
-        Logger.i("Hooking <clinit>: " + clazz);
-        Class<?> finalClazz1 = clazz;
-        module.hookClassInitializer(clazz).setPriority(2).intercept(chain ->
+        Class<?> preferencesProvider = Class.forName("com.zing.zalo.db.PreferencesProvider", false, classLoader);
+        doHookClInit(internalProvider, 2, chain ->
         {
             Object result = chain.proceed();
             Field uriField1 = null;
             Field uriField2 = null;
             Field uriMatcherField = null;
-            for (Field field : finalClazz1.getDeclaredFields())
+            for (Field field : preferencesProvider.getDeclaredFields())
             {
                 if (field.getType().getName().equals("android.net.Uri"))
                 {

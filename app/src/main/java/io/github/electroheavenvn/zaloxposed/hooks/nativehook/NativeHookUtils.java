@@ -16,9 +16,9 @@ public final class NativeHookUtils
     {
         NativeHookHandler handler = new NativeHookHandler(nativePtr);
         Class<?>[] interfaces = new Class<?>[]
-            {
-                XposedInterface.Hooker.class,
-            };
+        {
+            XposedInterface.Hooker.class,
+        };
         return (XposedInterface.Hooker)Proxy.newProxyInstance(XposedInterface.Hooker.class.getClassLoader(), interfaces, handler);
     }
 

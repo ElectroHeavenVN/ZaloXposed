@@ -1,9 +1,14 @@
 package io.github.electroheavenvn.zaloxposed.utilities;
 
-import io.github.electroheavenvn.zaloxposed.MorpheConstants;
-
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -21,8 +26,6 @@ import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.enums.StringMatchType;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
-import org.luckypray.dexkit.result.ClassData;
-import org.luckypray.dexkit.result.MethodData;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,13 +34,15 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.github.electroheavenvn.zaloxposed.MorpheConstants;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 
 public final class Utils
 {
@@ -53,9 +58,8 @@ public final class Utils
     private static MultiDexContainer<? extends DexBackedDexFile> dexContainer;
     private static final List<DexBackedDexFile> cachedDexFiles = new ArrayList<>();
     private static final Map<String, ClassDef> classDefCache = new ConcurrentHashMap<>();
-    private static final ArrayList<Class<?>> drawableResourceClasses = new ArrayList<>();
-    private static final ArrayList<Class<?>> resourceClasses = new ArrayList<>();
     private static Method getIsVietnameseMethod;
+    private static int appVersionCode = 0;
 
     static
     {
@@ -70,35 +74,36 @@ public final class Utils
         PRIMITIVE_MAP.put(void.class, "V");
     }
 
-    public static void Init(ApplicationInfo appInfo, ClassLoader classLoader, DexKitBridge bridge) throws NoSuchMethodException, IOException
+    public static void Init(ApplicationInfo appInfo, ClassLoader classLoader, DexKitBridge bridge) throws Exception
     {
         sClassLoader = classLoader;
         packageName = appInfo.packageName;
         appDataDir = appInfo.dataDir;
+        Class<?> buildConfig = Class.forName("com.zing.zalo.BuildConfig", false, classLoader);
+        Field versionCodeField = buildConfig.getDeclaredField("VERSION_CODE");
+        appVersionCode = versionCodeField.getInt(null);
         File apkFile = new File(appInfo.sourceDir);
         dexContainer = DexFileFactory.loadDexContainer(apkFile, Opcodes.getDefault());
-        List<MethodData> methods = bridge.findMethod(FindMethod.create()
-            .matcher(MethodMatcher.create()
-                .paramCount(0)
-                .returnType("int")
-                .addUsingString("PRIVACY_SETTINGS_SETTING_VIEW_DOB_%s", StringMatchType.Equals)
-                .addUsingString("%s", StringMatchType.Equals)
-            ));
-        if (methods.isEmpty())
-        {
-            Logger.e("Config method not found");
+        cfgClass = DexKitCache.GetClass("Utils_Config", () -> bridge.findClass(FindClass.create()
+            .matcher(ClassMatcher.create()
+                .addUsingString("VERIFY_ACCOUNT_WITH_IDENTIFY_CARD_%s", StringMatchType.Equals)
+                .addUsingString("HUAWEI_TOKEN_%s", StringMatchType.Equals)
+                .addMethod(MethodMatcher.create()
+                    .paramCount(0)
+                    .returnType("int")
+                    .addUsingString("PRIVACY_SETTINGS_SETTING_VIEW_DOB_%s", StringMatchType.Equals)
+                    .addUsingString("%s", StringMatchType.Equals))
+            )), classLoader);
+        if (cfgClass == null)
             return;
-        }
-        cfgClass = methods.get(0).getMethodInstance(sClassLoader).getDeclaringClass();
-        methods = bridge.findMethod(FindMethod.create()
+        getCurrentUserInfoMethod = DexKitCache.GetMethod("Utils_Config_GetCurrentUserInfo", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .declaredClass(cfgClass)
                 .paramCount(0)
                 .returnType("java.lang.String")
                 .addUsingString("UserInfo", StringMatchType.Equals)
-            ));
-        getCurrentUserInfoMethod = methods.isEmpty() ? null : methods.get(0).getMethodInstance(sClassLoader);
-        methods = bridge.findMethod(FindMethod.create()
+            )), classLoader);
+            getIsVietnameseMethod = DexKitCache.GetMethod("Utils_Config_GetIsVietnamese", () -> bridge.findMethod(FindMethod.create()
             .matcher(MethodMatcher.create()
                 .modifiers(Modifier.PUBLIC | Modifier.STATIC)
                 .paramCount(0)
@@ -111,57 +116,8 @@ public final class Utils
                     .addUsingString("@vi", StringMatchType.Equals)
                     .addUsingString("en", StringMatchType.Equals)
                     .addUsingString("@en", StringMatchType.Equals)
-                    .addUsingString("my", StringMatchType.Equals)
                 )
-            ));
-        getIsVietnameseMethod = methods.isEmpty() ? null : methods.get(0).getMethodInstance(sClassLoader);
-        if (getIsVietnameseMethod == null)
-            Logger.e("Cannot find language check method");
-        LoadResourceClasses(bridge, classLoader);
-    }
-
-    private static void LoadResourceClasses(DexKitBridge bridge, ClassLoader classLoader)
-    {
-        List<ClassData> classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("zds_ic_storage_line_24")));
-        for (ClassData classData : classes)
-        {
-            try
-            {
-                Class<?> clazz = classData.getInstance(classLoader);
-                drawableResourceClasses.add(clazz);
-            }
-            catch (Throwable ignored) { }
-        }
-        classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("bg_btn_postfeed")));
-        for (ClassData classData : classes)
-        {
-            try
-            {
-                Class<?> clazz = classData.getInstance(classLoader);
-                drawableResourceClasses.add(clazz);
-            }
-            catch (Throwable ignored) { }
-        }
-        classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("signup_gender_female")));
-        for (ClassData classData : classes)
-        {
-            try
-            {
-                Class<?> clazz = classData.getInstance(classLoader);
-                resourceClasses.add(clazz);
-            }
-            catch (Throwable ignored) { }
-        }
-        classes = bridge.findClass(FindClass.create().matcher(ClassMatcher.create().addFieldForName("str_group_invite_link")));
-        for (ClassData classData : classes)
-        {
-            try
-            {
-                Class<?> clazz = classData.getInstance(classLoader);
-                resourceClasses.add(clazz);
-            }
-            catch (Throwable ignored) { }
-        }
+            )), classLoader);
     }
 
     public static Class<?> GetConfigClass()
@@ -201,10 +157,7 @@ public final class Utils
             if (userInfo != null)
                 return userInfo.toString();
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
         return "";
     }
 
@@ -277,7 +230,7 @@ public final class Utils
         return null;
     }
 
-    public static Field FindFieldByType(Class<?> clazz, String typeName)
+    public static Field FindFieldByType(Class<?> clazz, String typeName, boolean recursive)
     {
         List<Field> fields = new ArrayList<>();
         Class<?> c = clazz;
@@ -285,6 +238,8 @@ public final class Utils
         {
             fields.addAll(Arrays.asList(c.getDeclaredFields()));
             c = c.getSuperclass();
+            if (!recursive)
+                break;
         }
         for (Field f : fields)
         {
@@ -479,7 +434,7 @@ public final class Utils
 
     public static String DescriptorToClassName(String descriptor)
     {
-        if (descriptor == null || descriptor.isEmpty())
+        if (TextUtils.isEmpty(descriptor))
             return "";
         if (descriptor.startsWith("L"))
             descriptor = descriptor.substring(1);
@@ -495,11 +450,11 @@ public final class Utils
 
     public static String GetExternalFilesDir()
     {
-        if (externalFilesDir.isEmpty())
+        if (TextUtils.isEmpty(externalFilesDir))
         {
             try
             {
-                if (packageName.isEmpty())
+                if (TextUtils.isEmpty(packageName))
                     return "";
                 String path = "/storage/emulated/0/Android/data/" + packageName + "/files";
                 File dir = new File(path);
@@ -519,101 +474,29 @@ public final class Utils
     public static String GetZaloXposedDir()
     {
         File targetDir = null;
-        if (appDataDir != null && !appDataDir.isEmpty())
+        if (!TextUtils.isEmpty(appDataDir))
             targetDir = new File(appDataDir, "files/ZaloXposed");
         else
         {
             String externalFilesDir = GetExternalFilesDir();
-            if (!externalFilesDir.isEmpty())
+            if (!TextUtils.isEmpty(externalFilesDir))
                 targetDir = new File(externalFilesDir, "ZaloXposed");
         }
         if (targetDir == null)
             return "";
         if (!targetDir.exists())
             targetDir.mkdirs();
-        // Migrate legacy config if exists
-        try
-        {
-            File newConfigFile = new File(targetDir, "config.json");
-            if (!newConfigFile.exists() && !packageName.isEmpty())
-            {
-                File legacyConfigFile = new File("/storage/emulated/0/Android/data/" + packageName + "/files/ZaloXposed/config.json");
-                if (legacyConfigFile.exists() && legacyConfigFile.isFile())
-                {
-                    Files.copy(legacyConfigFile.toPath(), newConfigFile.toPath());
-                    Logger.i("Migrated legacy config from " + legacyConfigFile.getAbsolutePath() + " to " + newConfigFile.getAbsolutePath());
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Logger.e("Failed to migrate legacy config: " + e.getMessage());
-        }
         return targetDir.getAbsolutePath();
     }
 
-    public static int GetDrawableResourceIdByName(String resourceName)
-    {
-        try
-        { 
-            if (drawableResourceClasses.isEmpty())
-            {
-                Logger.e("Drawable resource classes not found");
-                return 0;
-            }
-            Field field = null;
-            for (Class<?> clazz : drawableResourceClasses)
-            {
-                try
-                {
-                    field = clazz.getField(resourceName);
-                }
-                catch (NoSuchFieldException ignored) { }
-            }
-            if (field == null)
-            {
-                Logger.e("Drawable resource class not found");
-                return 0;
-            }
-            return field.getInt(null);
-        }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
-        return 0;
-    }
 
-    public static int GetResourceIdByName(String resourceName)
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static String GetZaloXposedDir(String appdataDir)
     {
-        try
-        {
-            if (resourceClasses.isEmpty())
-            {
-                Logger.e("Resource classes not found");
-                return 0;
-            }
-            Field field = null;
-            for (Class<?> clazz : resourceClasses)
-            {
-                try
-                {
-                    field = clazz.getField(resourceName);
-                }
-                catch (NoSuchFieldException ignored) { }
-            }
-            if (field == null)
-            {
-                Logger.e("Resource class not found");
-                return 0;
-            }
-            return field.getInt(null);
-        }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
-        return 0;
+        File targetDir = new File(appdataDir, "files/ZaloXposed");
+        if (!targetDir.exists())
+            targetDir.mkdirs();
+        return targetDir.getAbsolutePath();
     }
 
     public static void HideView(View view) 
@@ -645,12 +528,42 @@ public final class Utils
             return true;
         try
         {
-            return !((boolean)getIsVietnameseMethod.invoke(null));
+            Boolean bool = (Boolean)getIsVietnameseMethod.invoke(null);
+            if (bool == null)
+                return false;
+            return !bool;
         }
-        catch (Exception e)
-        {
-            Logger.e(e);
-        }
+        catch (Exception e) { Logger.e(e); }
         return true;
+    }
+
+    public static int GetAppVersionCode()
+    {
+        return appVersionCode;
+    }
+
+    public static void RestartApp(Context context)
+    {
+        try
+        {
+            BaseHook.unhook(Intent.class.getMethod("setPackage", String.class));
+            Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+            if (intent == null)
+                return;
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            context.startActivity(intent);
+            if (Activity.class.isAssignableFrom(context.getClass()))
+                ((Activity)context).finish();
+        }
+        catch (Exception e) { Logger.e(e); }
+        new Handler(Looper.getMainLooper()).postDelayed(() -> Runtime.getRuntime().exit(0), 0);
+    }
+
+    public static final class DialogInterfaceOnClickListener implements DialogInterface.OnClickListener
+    {
+        private Context context;
+        private String url;
+        @Override
+        public native void onClick(DialogInterface dialog, int which);
     }
 }

@@ -23,7 +23,7 @@ android {
     namespace 'io.github.electroheavenvn.zaloxposed'
     compileSdk {
         version = release(37) {
-            minorApiLevel = 1
+            minorApiLevel = 2
         }
     }
 
@@ -32,7 +32,12 @@ android {
         minSdk 26
         targetSdk 37
         versionCode getGitCommitCount()
-        versionName project.findProperty("versionName") ?: "1.0"
+        versionName project.findProperty("versionName") ?: "dev"
+        buildConfigField "int", "MODULE_VERSION_CODE", "${getGitCommitCount()}"
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     signingConfigs {
@@ -59,7 +64,7 @@ android {
 
     sourceSets {
         main {
-            jniLibs.srcDirs = ["$rootDir/ZaloXposedNative/Output"]
+            jniLibs.srcDirs = ["$rootDir/ZaloXposedNative"]
         }
     }
 }

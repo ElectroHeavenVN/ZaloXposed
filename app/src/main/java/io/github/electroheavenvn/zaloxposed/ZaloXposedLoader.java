@@ -15,24 +15,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import io.github.electroheavenvn.zaloxposed.hooks.*;
-import io.github.electroheavenvn.zaloxposed.hooks.functional.*;
-import io.github.electroheavenvn.zaloxposed.hooks.morphe.*;
-import io.github.electroheavenvn.zaloxposed.hooks.privacy.*;
-import io.github.electroheavenvn.zaloxposed.hooks.permanent.*;
-import io.github.electroheavenvn.zaloxposed.hooks.tracking.*;
-import io.github.electroheavenvn.zaloxposed.hooks.ui.*;
-import io.github.electroheavenvn.zaloxposed.hooks.ads.*;
-import io.github.electroheavenvn.zaloxposed.hooks.custommenu.ZaloXposedSettingsMenuHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Config;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
-import io.github.electroheavenvn.zaloxposed.utilities.Utils;
-
 import org.luckypray.dexkit.DexKitBridge;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+import io.github.electroheavenvn.zaloxposed.hooks.*;
+import io.github.electroheavenvn.zaloxposed.hooks.functional.*;
+import io.github.electroheavenvn.zaloxposed.hooks.functional.minichat.*;
+import io.github.electroheavenvn.zaloxposed.hooks.microg.MicroGHook;
+import io.github.electroheavenvn.zaloxposed.hooks.morphe.*;
+import io.github.electroheavenvn.zaloxposed.hooks.nativehook.NativeHook;
+import io.github.electroheavenvn.zaloxposed.hooks.privacy.*;
+import io.github.electroheavenvn.zaloxposed.hooks.permanent.*;
+import io.github.electroheavenvn.zaloxposed.hooks.tracking.*;
+import io.github.electroheavenvn.zaloxposed.hooks.ui.*;
+import io.github.electroheavenvn.zaloxposed.hooks.ads.*;
+import io.github.electroheavenvn.zaloxposed.hooks.custommenu.*;
+import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingsMenu;
+import io.github.electroheavenvn.zaloxposed.utilities.*;
 import io.github.libxposed.api.XposedModule;
 
 public class ZaloXposedLoader extends XposedModule
@@ -46,25 +47,40 @@ public class ZaloXposedLoader extends XposedModule
     static
     {
         System.loadLibrary("dexkit");
+        hooks.add(new NativeHook());
+    }
 
+    private static void loadHooks()
+    {
         hooks.add(new ResourceHook());
-        hooks.add(new ZaloXposedSettingsMenuHook());
-        hooks.add(new CustomBackgroundHook());
-
-        hooks.add(new WatermarkHook());
         hooks.add(new EnableE2EEHook());
         hooks.add(new EnableLabelHook());
-        hooks.add(new RestoreGoogleDriveBackupHook());
-        hooks.add(new RestoreProfileMusicHook());
         hooks.add(new RestoreDevToolsMenuHook());
         hooks.add(new EnableSetNicknameInGroupHook());
         hooks.add(new DisableDohHook());
         hooks.add(new AntiRecallDeleteChatRowHook());
+        hooks.add(new ConfigImportExportHook());
+        hooks.add(new ZaloViewLauncherHook());
+        hooks.add(new AmoledThemeHook());
+        hooks.add(new MicroGHook());
+        hooks.add(new TestHook());
+        if (MorpheConstants.isPatchedByMorphe())
+            hooks.add(new FixProviderHook());
+
+        hooks.add(new TabMeViewHook());
+        hooks.add(new SettingV2ViewDefacer());
+        hooks.add(new SettingPrivateV2ViewDefacer());
+
+        hooks.add(new CustomBackgroundHook());
+        hooks.add(new EnableChatHeadHook());
+        hooks.add(new ChatHeadIMESyncHook());
+        hooks.add(new RestoreGoogleDriveBackupHook());
+        hooks.add(new RestoreProfileMusicHook());
+        hooks.add(new CustomCallRingtoneHook());
         hooks.add(new DisableFirebaseLoggingHook());
         hooks.add(new DisableZaloTrackingHook());
         hooks.add(new HideAdsHook());
         hooks.add(new CustomizeBottomRowHook());
-        hooks.add(new EnableChatHeadHook());
         hooks.add(new ExtendedGridMenuHook());
         hooks.add(new ExtendedGroupSettingMenuHook());
         hooks.add(new FakeAdminHook());
@@ -76,15 +92,9 @@ public class ZaloXposedLoader extends XposedModule
         hooks.add(new SilentTypingHook());
         hooks.add(new BlockSendSeenHook());
         hooks.add(new ExtendedGroupRightMenuHook());
-
-        hooks.add(new TestHook());
-
-        if (MorpheConstants.isPatchedByMorphe())
-        {
-            hooks.add(new SpoofAppSignatureHook());
-            hooks.add(new SpoofPackageNameHook());
-            hooks.add(new FixProviderHook());
-        }
+        hooks.add(new UnlockZStyleHook());
+        hooks.add(new HideFullscreenEffectsHook());
+        hooks.add(new DefaultOriginalQualityHook());
     }
 
     @SuppressWarnings("deprecation")
@@ -129,8 +139,7 @@ public class ZaloXposedLoader extends XposedModule
                             return modRes.getAssets();
                         }
                     };
-                    LayoutInflater inflater = activity.getLayoutInflater()
-                        .cloneInContext(modContext);
+                    LayoutInflater inflater = activity.getLayoutInflater().cloneInContext(modContext);
                     customSplash = inflater.inflate(layoutId, null, false);
                     if (customSplash == null)
                         return result;
@@ -158,7 +167,7 @@ public class ZaloXposedLoader extends XposedModule
                     }
                 }
                 catch (Throwable ignored) { }
-            }, 2100);
+            }, 1100);
             return result;
         });
     }
@@ -187,11 +196,18 @@ public class ZaloXposedLoader extends XposedModule
             Logger.e(e);
             return;
         }
+        loadHooks();
+        try
+        {
+            DexKitCache.Load(param.getClassLoader(), param.getApplicationInfo().dataDir);
+        }
+        catch (Exception e) { Logger.e(e); }
         try
         {
             if (bridge == null)
                 bridge = DexKitBridge.create(param.getApplicationInfo().sourceDir);
             Utils.Init(param.getApplicationInfo(), param.getClassLoader(), bridge);
+            ResourceHelper.Init(bridge, param.getClassLoader());
         }
         catch (Exception e)
         {
@@ -206,25 +222,28 @@ public class ZaloXposedLoader extends XposedModule
             Method addAssetPath = AssetManager.class.getMethod("addAssetPath", String.class);
             addAssetPath.invoke(assetManager, getModuleApplicationInfo().sourceDir);
             hookDisplayCustomSplash(param.getClassLoader(), assetManager);
+            SettingsMenu.Init(bridge, param.getClassLoader());
+            BaseHook.setModule(this);
             for (BaseHook hook : hooks)
             {
                 try
                 {
                     long startHookTime = System.currentTimeMillis();
-                    hook.init(this, bridge, param, assetManager);
-                    hook.hook();
-                    Logger.d(hook.getClass().getSimpleName() + " finished in " + (System.currentTimeMillis() - startHookTime) + "ms");
+                    hook.Init(bridge, param, assetManager);
+                    hook.installHooks();
+                    long time = System.currentTimeMillis() - startHookTime;
+                    if (time > 10)
+                        Logger.d(hook.getClass().getSimpleName() + " finished in " + time + "ms");
                 }
-                catch (Throwable e)
-                {
-                    Logger.e(e);
-                }
+                catch (Throwable t) { Logger.e(t); }
             }
         }
-        catch (Exception e)
+        catch (Exception e) { Logger.e(e); }
+        try
         {
-            Logger.e(e);
+            DexKitCache.Save();
         }
+        catch (Exception e) { Logger.e(e); }
         new Handler(Looper.getMainLooper()).postDelayed(()->
         {
             try
@@ -236,7 +255,8 @@ public class ZaloXposedLoader extends XposedModule
                 }
             }
             catch (Throwable ignored) { }
-        }, 2000);
+        }, 1000);
         Logger.d("ZaloXposed loaded in " + (System.currentTimeMillis() - startTime) + "ms");
+        DexKitCache.AutoSave();
     }
 }
