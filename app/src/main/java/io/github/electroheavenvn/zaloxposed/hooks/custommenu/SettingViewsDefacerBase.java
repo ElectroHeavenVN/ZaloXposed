@@ -12,12 +12,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.ListSelectionSettingFeature;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingFeature;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.TextLabel;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
-public abstract class SettingViewsDefacerBase extends BaseHook
+public abstract class SettingViewsDefacerBase extends BaseJavaHook
 {
     public abstract void installHooks() throws Throwable;
 

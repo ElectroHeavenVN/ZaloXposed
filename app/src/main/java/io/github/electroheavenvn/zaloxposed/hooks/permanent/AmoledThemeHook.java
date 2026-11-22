@@ -37,12 +37,13 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.CoreUtilityHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.S;
 import io.github.libxposed.api.XposedInterface;
 
-public class AmoledThemeHook extends BaseHook
+public class AmoledThemeHook extends BaseJavaHook
 {
     private static final int AMOLED_BLACK = 0xFF000000;
     private static final int AMOLED_RAISED = 0xFF0A0A0A;

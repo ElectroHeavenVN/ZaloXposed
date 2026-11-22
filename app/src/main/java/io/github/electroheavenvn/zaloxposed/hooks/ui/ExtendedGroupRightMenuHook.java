@@ -1,6 +1,7 @@
 package io.github.electroheavenvn.zaloxposed.hooks.ui;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
@@ -17,7 +18,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExtendedGroupRightMenuHook extends BaseHook
+public class ExtendedGroupRightMenuHook extends BaseJavaHook
 {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override

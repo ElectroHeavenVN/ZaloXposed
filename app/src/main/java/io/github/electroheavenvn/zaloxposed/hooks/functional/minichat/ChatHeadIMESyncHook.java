@@ -37,11 +37,12 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
-public class ChatHeadIMESyncHook extends BaseHook
+public class ChatHeadIMESyncHook extends BaseJavaHook
 {
     private static Class<?> hostFrameLayout;
     private static Class<?> chatFrameLayout;

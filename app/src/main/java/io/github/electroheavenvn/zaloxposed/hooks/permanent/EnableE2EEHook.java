@@ -9,11 +9,12 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 @SuppressWarnings("unused")
-public class EnableE2EEHook extends BaseHook
+public class EnableE2EEHook extends BaseJavaHook
 {
     @Override
     public void installHooks() throws Throwable

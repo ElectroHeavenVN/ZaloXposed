@@ -43,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.github.electroheavenvn.zaloxposed.MorpheConstants;
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 
 public final class Utils
 {
@@ -546,7 +547,7 @@ public final class Utils
     {
         try
         {
-            BaseHook.unhook(Intent.class.getMethod("setPackage", String.class));
+            BaseJavaHook.unhook(Intent.class.getMethod("setPackage", String.class));
             Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
             if (intent == null)
                 return;

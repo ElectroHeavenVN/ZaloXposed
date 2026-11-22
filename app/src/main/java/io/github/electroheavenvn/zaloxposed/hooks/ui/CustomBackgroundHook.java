@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.ChecksumFileHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
@@ -37,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class CustomBackgroundHook extends BaseHook
+public class CustomBackgroundHook extends BaseJavaHook
 {
     private static final String BG_TAG = "zalo_bg_msg_root";
     private static final int REQUEST_CODE_PICK_BACKGROUND = 6767;

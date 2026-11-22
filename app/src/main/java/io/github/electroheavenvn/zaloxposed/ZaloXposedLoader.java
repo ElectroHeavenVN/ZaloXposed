@@ -25,6 +25,7 @@ import io.github.electroheavenvn.zaloxposed.hooks.functional.*;
 import io.github.electroheavenvn.zaloxposed.hooks.functional.minichat.*;
 import io.github.electroheavenvn.zaloxposed.hooks.microg.MicroGHook;
 import io.github.electroheavenvn.zaloxposed.hooks.morphe.*;
+import io.github.electroheavenvn.zaloxposed.hooks.nativehook.BaseNativeHook;
 import io.github.electroheavenvn.zaloxposed.hooks.nativehook.NativeHook;
 import io.github.electroheavenvn.zaloxposed.hooks.privacy.*;
 import io.github.electroheavenvn.zaloxposed.hooks.permanent.*;
@@ -218,7 +219,8 @@ public class ZaloXposedLoader extends XposedModule
             addAssetPath.invoke(assetManager, getModuleApplicationInfo().sourceDir);
             hookDisplayCustomSplash(param.getClassLoader(), assetManager);
             SettingsMenu.Init(bridge, param.getClassLoader());
-            BaseHook.setModule(this);
+            BaseJavaHook.setModule(this);
+            BaseNativeHook.setModule(this);
             for (BaseHook hook : hooks)
             {
                 try

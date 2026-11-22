@@ -9,11 +9,12 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
-public class BlockSendSeenHook extends BaseHook
+public class BlockSendSeenHook extends BaseJavaHook
 {
     @Override
     public void installHooks() throws Throwable

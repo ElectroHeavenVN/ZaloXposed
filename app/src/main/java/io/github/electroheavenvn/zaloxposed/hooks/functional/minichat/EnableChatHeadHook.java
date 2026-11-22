@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
@@ -40,7 +41,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 import io.github.libxposed.api.XposedInterface;
 
 // It would be great if we can patch dex...
-public class EnableChatHeadHook extends BaseHook
+public class EnableChatHeadHook extends BaseJavaHook
 {
     private static Field isAdr10OrOld = null;
     private static Field isAdr11OrNew = null;

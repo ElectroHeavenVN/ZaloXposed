@@ -25,7 +25,7 @@ import android.widget.*;
 
 import io.github.libxposed.api.*;
 
-public class TestHook extends BaseHook
+public class TestHook extends BaseJavaHook
 {
     @Override
     public void installHooks() throws Throwable

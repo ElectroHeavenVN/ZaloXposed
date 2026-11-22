@@ -1,6 +1,7 @@
 package io.github.electroheavenvn.zaloxposed.hooks.tracking;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
@@ -13,7 +14,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-public class DisableFirebaseLoggingHook extends BaseHook
+public class DisableFirebaseLoggingHook extends BaseJavaHook
 {
     @Override
     public void installHooks() throws Throwable

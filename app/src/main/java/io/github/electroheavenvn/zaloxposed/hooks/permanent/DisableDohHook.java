@@ -3,9 +3,10 @@ package io.github.electroheavenvn.zaloxposed.hooks.permanent;
 import java.lang.reflect.Method;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
-public class DisableDohHook extends BaseHook
+public class DisableDohHook extends BaseJavaHook
 {
     @Override
     public void installHooks() throws Throwable

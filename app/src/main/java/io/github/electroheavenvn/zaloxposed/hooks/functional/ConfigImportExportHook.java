@@ -16,12 +16,13 @@ import java.io.File;
 import java.lang.reflect.Method;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 import io.github.electroheavenvn.zaloxposed.utilities.S;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
-public class ConfigImportExportHook extends BaseHook
+public class ConfigImportExportHook extends BaseJavaHook
 {
     private static final int REQUEST_CODE_IMPORT_CONFIG = 3636;
 

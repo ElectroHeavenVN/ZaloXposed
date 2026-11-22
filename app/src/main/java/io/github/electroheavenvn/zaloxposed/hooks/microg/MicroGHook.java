@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.github.electroheavenvn.zaloxposed.MorpheConstants;
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.microg.MicroGUtils;
 import io.github.electroheavenvn.zaloxposed.microg.MicroGVariant;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
@@ -32,7 +33,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.CoreUtilityHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
-public class MicroGHook extends BaseHook
+public class MicroGHook extends BaseJavaHook
 {
     private static final int MAX_ACCOUNTS_PERMISSION_ATTEMPTS = 5;
     private static final int REQUEST_ACCOUNTS_PERMISSION = 0x676767;

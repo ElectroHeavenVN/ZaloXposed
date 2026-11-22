@@ -22,10 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
-public class AntiRecallDeleteChatRowHook extends BaseHook
+public class AntiRecallDeleteChatRowHook extends BaseJavaHook
 {
     List<Field> msgFields = new ArrayList<>();
     Field msgTypeField = null;

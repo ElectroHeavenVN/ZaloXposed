@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Random;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.ChecksumFileHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
@@ -32,7 +33,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 import io.github.electroheavenvn.zaloxposed.utilities.S;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
-public class CustomCallRingtoneHook extends BaseHook
+public class CustomCallRingtoneHook extends BaseJavaHook
 {
     private static final int REQUEST_CODE_PICK_RINGTONE = 1109;
     private static final String[] EXT = {"mp3", "wav", "ogg", "m4a", "aac", "flac"};

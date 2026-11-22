@@ -17,7 +17,7 @@ import java.util.Map;
 
 import io.github.libxposed.api.XposedInterface;
 
-public class ResourceHook extends BaseHook
+public class ResourceHook extends BaseJavaHook
 {
     private static final Map<Integer, String> sDrawableMap = new HashMap<>();
     private static final Map<Integer, Integer> sResolvedIds = new HashMap<>();

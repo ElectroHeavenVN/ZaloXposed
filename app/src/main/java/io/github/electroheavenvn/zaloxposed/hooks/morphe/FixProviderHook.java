@@ -5,11 +5,12 @@ import android.net.Uri;
 
 import io.github.electroheavenvn.zaloxposed.Common;
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 import java.lang.reflect.Field;
 
-public class FixProviderHook extends BaseHook
+public class FixProviderHook extends BaseJavaHook
 {
     @Override
     public void installHooks() throws Throwable

@@ -18,6 +18,7 @@ import java.util.List;
 
 import io.github.electroheavenvn.zaloxposed.MorpheConstants;
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.hooks.ResourceHook;
 import io.github.electroheavenvn.zaloxposed.settingsmenu.SettingItemID;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
@@ -25,7 +26,7 @@ import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 import io.github.electroheavenvn.zaloxposed.utilities.S;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
-public class TabMeViewHook extends BaseHook
+public class TabMeViewHook extends BaseJavaHook
 {
     private static final String CUSTOM_ITEM_MARKER = "zalo_xposed_settings";
     private static final int CUSTOM_DRAWABLE_ID = -239491;

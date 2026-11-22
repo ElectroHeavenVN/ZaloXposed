@@ -9,10 +9,11 @@ import org.luckypray.dexkit.query.matchers.MethodMatcher;
 import java.lang.reflect.Method;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.ZaloViewLauncher;
 
-public class ZaloViewLauncherHook extends BaseHook
+public class ZaloViewLauncherHook extends BaseJavaHook
 {
     @Override
     public void installHooks() throws Throwable

@@ -21,12 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
-public class EnableShareHiddenStickerPackHook extends BaseHook
+public class EnableShareHiddenStickerPackHook extends BaseJavaHook
 {
     static Field isHiddenField = null;
     Object stickerInstance = null;

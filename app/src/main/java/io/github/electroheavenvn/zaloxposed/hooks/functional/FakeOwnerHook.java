@@ -3,6 +3,7 @@ package io.github.electroheavenvn.zaloxposed.hooks.functional;
 import android.text.TextUtils;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.CoreUtilityHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
@@ -11,7 +12,7 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
 
-public class FakeOwnerHook extends BaseHook
+public class FakeOwnerHook extends BaseJavaHook
 {
     @Override
     public void installHooks() throws Throwable

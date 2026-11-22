@@ -14,11 +14,12 @@ import java.util.List;
 import java.util.Set;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
 @SuppressWarnings("unused")
-public class RestoreDevToolsMenuHook extends BaseHook
+public class RestoreDevToolsMenuHook extends BaseJavaHook
 {
     private static final Set<String> FORCE_VISIBLE_IDS = new HashSet<>();
     private static final Set<String> FORCE_CLICKABLE_IDS = new HashSet<>();

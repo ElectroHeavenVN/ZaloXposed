@@ -1,6 +1,7 @@
 package io.github.electroheavenvn.zaloxposed.hooks.ui;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
@@ -15,7 +16,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-public class CustomizeBottomRowHook extends BaseHook
+public class CustomizeBottomRowHook extends BaseJavaHook
 {
     @Override
     public void installHooks() throws Throwable

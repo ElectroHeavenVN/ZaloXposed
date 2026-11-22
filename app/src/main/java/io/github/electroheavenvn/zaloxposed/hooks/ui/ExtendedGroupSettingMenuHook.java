@@ -9,11 +9,12 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
+import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.Config;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 
-public class ExtendedGroupSettingMenuHook extends BaseHook
+public class ExtendedGroupSettingMenuHook extends BaseJavaHook
 {
     Method runMethod = null;
 
