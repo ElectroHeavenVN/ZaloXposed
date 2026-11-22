@@ -48,6 +48,9 @@ public class ZaloXposedLoader extends XposedModule
     {
         System.loadLibrary("dexkit");
         hooks.add(new NativeHook());
+        System.loadLibrary("ZaloXposedNative");
+        MorpheConstants.isPatchedByMorphe();    // dummy call to invoke JNI_OnLoad
+        loadHooks();
     }
 
     private static void loadHooks()
@@ -175,6 +178,8 @@ public class ZaloXposedLoader extends XposedModule
     @Override
     public void onModuleLoaded(ModuleLoadedParam param)
     {
+        if (!param.getProcessName().startsWith("com.zing.zalo"))
+            return;
         log(Log.INFO, MorpheConstants.getModuleName(), "Loaded");
         Logger.Init(this);
     }
@@ -187,16 +192,6 @@ public class ZaloXposedLoader extends XposedModule
             return;
         long startTime = System.currentTimeMillis();
         Logger.i("Loading ZaloXposed");
-        try
-        {
-            System.loadLibrary("ZaloXposedNative");
-        }
-        catch (Exception e)
-        {
-            Logger.e(e);
-            return;
-        }
-        loadHooks();
         try
         {
             DexKitCache.Load(param.getClassLoader(), param.getApplicationInfo().dataDir);

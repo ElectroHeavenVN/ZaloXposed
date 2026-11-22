@@ -1,5 +1,5 @@
 [versions]
-agp = "9.5.1"
+agp = "9.5.2"
 dexkit = "2.3.0"
 smaliDexlib2 = "3.0.10"
 

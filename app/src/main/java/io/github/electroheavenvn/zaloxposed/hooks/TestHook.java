@@ -36,10 +36,9 @@ public class TestHook extends BaseHook
 
         // doHook(System.class.getDeclaredMethod("exit", int.class), chain ->
         // {
-            // Logger.i("Exit stack trace: " + Utils.GetStackTrace());
-            // return chain.proceed();
+        //     Logger.i("Exit stack trace: " + Utils.GetStackTrace());
+        //     return chain.proceed();
         // });
-
         // Fake zBusiness plan
         // List<ClassData> classes = bridge.findClass(FindClass.create()
         //     .matcher(ClassMatcher.create()
