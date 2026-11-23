@@ -1,14 +1,9 @@
 package io.github.electroheavenvn.zaloxposed.hooks.nativehook;
 
-import android.util.Log;
-
 import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 
 import java.lang.reflect.Executable;
-import java.util.ArrayList;
 
-import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
-import io.github.electroheavenvn.zaloxposed.utilities.Logger;
 import io.github.libxposed.api.XposedInterface;
 import io.github.libxposed.api.XposedModule;
 
@@ -24,38 +19,47 @@ public abstract class BaseNativeHook extends BaseHook
     {
         if (!(hooker instanceof XposedInterface.Hooker xHooker))
             throw new IllegalArgumentException("hooker must be an instance of XposedInterface.Hooker");
-        return doHook(origin, xHooker);
+        return module.hook(origin).intercept(xHooker);
     }
 
     protected Object doHook(Executable origin, int priority, Object hooker)
     {
         if (!(hooker instanceof XposedInterface.Hooker xHooker))
             throw new IllegalArgumentException("hooker must be an instance of XposedInterface.Hooker");
-        return doHook(origin, priority, xHooker);
+        return module.hook(origin).setPriority(priority).intercept(xHooker);
     }
 
-    protected Object doHook(Executable origin, long nativePtr) { return doHook(origin, NativeHookUtils.CreateXHookerProxy(nativePtr)); }
-
-    protected Object doHook(Executable origin, int priority, long nativePtr) { return doHook(origin, priority, NativeHookUtils.CreateXHookerProxy(nativePtr)); }
-
-    protected XposedInterface.HookHandle doHook(Executable origin, XposedInterface.Hooker hooker)
+    protected Object doHook(Executable origin, long nativePtr)
     {
-        Integer.class.getDeclaredMethods();
-        return module.hook(origin).intercept(hooker);
+        return doHook(origin, NativeHookUtils.CreateXHookerProxy(nativePtr));
     }
 
-    protected XposedInterface.HookHandle doHook(Executable origin, int priority, XposedInterface.Hooker hooker)
+    protected Object doHook(Executable origin, int priority, long nativePtr)
     {
-        return module.hook(origin).setPriority(priority).intercept(hooker);
+        return doHook(origin, priority, NativeHookUtils.CreateXHookerProxy(nativePtr));
     }
 
-    protected XposedInterface.HookHandle doHookClInit(Class<?> origin, XposedInterface.Hooker hooker)
+    protected Object doHookClInit(Class<?> origin, Object hooker)
     {
-        return module.hookClassInitializer(origin).intercept(hooker);
+        if (!(hooker instanceof XposedInterface.Hooker xHooker))
+            throw new IllegalArgumentException("hooker must be an instance of XposedInterface.Hooker");
+        return module.hookClassInitializer(origin).intercept(xHooker);
     }
 
-    protected XposedInterface.HookHandle doHookClInit(Class<?> origin, int priority, XposedInterface.Hooker hooker)
+    protected Object doHookClInit(Class<?> origin, int priority, Object hooker)
     {
-        return module.hookClassInitializer(origin).setPriority(priority).intercept(hooker);
+        if (!(hooker instanceof XposedInterface.Hooker xHooker))
+            throw new IllegalArgumentException("hooker must be an instance of XposedInterface.Hooker");
+        return module.hookClassInitializer(origin).setPriority(priority).intercept(xHooker);
+    }
+
+    protected Object doHookClInit(Class<?> origin, long nativePtr)
+    {
+        return doHookClInit(origin, NativeHookUtils.CreateXHookerProxy(nativePtr));
+    }
+
+    protected Object doHookClInit(Class<?> origin, int priority, long nativePtr)
+    {
+        return doHookClInit(origin, priority, NativeHookUtils.CreateXHookerProxy(nativePtr));
     }
 }

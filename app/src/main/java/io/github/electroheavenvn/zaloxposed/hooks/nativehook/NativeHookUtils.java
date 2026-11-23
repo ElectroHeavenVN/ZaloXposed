@@ -8,10 +8,6 @@ public final class NativeHookUtils
 {
     private NativeHookUtils() { }
 
-    // We cannot cast the return value to XposedInterface.Hooker
-    // as it would defeat the purpose of creating a Java proxy 
-    // for calling libxposed code.
-    // Maybe keep 1 hooker proxy for multiple similar hooks?
     public static XposedInterface.Hooker CreateXHookerProxy(long nativePtr)
     {
         NativeHookHandler handler = new NativeHookHandler(nativePtr);
