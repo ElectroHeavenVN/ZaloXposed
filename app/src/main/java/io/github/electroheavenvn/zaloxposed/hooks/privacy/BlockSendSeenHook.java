@@ -33,7 +33,7 @@ public class BlockSendSeenHook extends BaseJavaHook
             )), classLoader);
         if (methods.isEmpty())
         {
-            Logger.e("Target method not found");
+            Logger.e("Target method not found 1");
             return;
         }
         for (Method method : methods)
@@ -42,6 +42,34 @@ public class BlockSendSeenHook extends BaseJavaHook
             {
                 if (Config.getBlockSendSeen())
                     return null;
+                return chain.proceed();
+            });
+        }
+        methods = DexKitCache.GetMethods("BlockSendSeen_2", () -> bridge.findMethod(FindMethod.create()
+            .matcher(MethodMatcher.create()
+                .modifiers(Modifier.PUBLIC | Modifier.FINAL)
+                .returnType("void")
+                .paramCount(4)
+                .paramTypes("java.util.List", "boolean", "boolean", "boolean")
+                .addUsingString("MessageRepository", StringMatchType.Equals)
+                .addUsingNumber(202)
+                .addUsingNumber(102)
+            )), classLoader);
+        if (methods.isEmpty())
+        {
+            Logger.e("Target method not found 2");
+            return;
+        }
+        for (Method method : methods)
+        {
+            doHook(method, chain ->
+            {
+                if (Config.getBlockSendSeen())
+                {
+                    Object[] args = chain.getArgs().toArray();
+                    args[3] = false;
+                    return chain.proceed(args);
+                }
                 return chain.proceed();
             });
         }
