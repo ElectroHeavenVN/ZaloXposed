@@ -88,7 +88,7 @@ public final class SettingsMenu
             )),
             new SettingSubCategory("disappearingMessagesSubCategoryTitle", List.of(
                 new SwitchSettingFeature("ttlOverrideTitle", "ttlOverrideDesc", Config.KEY_ENABLE_TTL_OVERRIDE),
-                new NumberSettingFeature("ttlTimeTitle", "ttlTimeDesc", Config.KEY_MSG_TTL)
+                new NumberSettingFeature("ttlTimeTitle", "ttlTimeDesc", Config.KEY_MSG_TTL, 0)
             )),
             new SettingSubCategory("antiRecallDeleteSubCategoryTitle", List.of(
                 new SwitchSettingFeature("antiRecallTitle", "", Config.KEY_ENABLE_ANTI_RECALL),

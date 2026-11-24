@@ -200,7 +200,7 @@ public final class TabMeSettingItemHelper
     {
         return tabMeSettingItemClass
             .getDeclaredConstructor(tabMeItemIdEnumClass, int.class, String.class, int.class, int.class)
-            .newInstance(MapSettingItemIDToEnum(id), ResourceHelper.GetResourceIdByName(drawableName), title, 0, 24);
+            .newInstance(MapSettingItemIDToEnum(id), ResourceHelper.GetDrawable(drawableName), title, 0, 24);
     }
 
     public static String GetTracking(Object tabMeSettingItem) throws Exception
@@ -263,7 +263,7 @@ public final class TabMeSettingItemHelper
     {
         CheckType(tabMeSettingItem);
         LateInit();
-        iconField.setInt(tabMeSettingItem, ResourceHelper.GetResourceIdByName(drawableName));
+        iconField.setInt(tabMeSettingItem, ResourceHelper.GetDrawable(drawableName));
     }
 
     public static SettingItemID GetID(Object tabMeSettingItem) throws Exception

@@ -40,6 +40,8 @@ import io.github.electroheavenvn.zaloxposed.hooks.BaseHook;
 import io.github.electroheavenvn.zaloxposed.hooks.BaseJavaHook;
 import io.github.electroheavenvn.zaloxposed.utilities.CoreUtilityHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.DexKitCache;
+import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ResourceHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.S;
 import io.github.libxposed.api.XposedInterface;
 
@@ -350,17 +352,18 @@ public class AmoledThemeHook extends BaseJavaHook
         }
     }
 
-    private static void addToggleRow(LinearLayout root) throws Exception
+    private static void addToggleRow(View root) throws Exception
     {
         if (root == null || root.findViewWithTag(TOGGLE_TAG) != null)
             return;
-        Resources res = root.getResources();
-        int anchorId = res.getIdentifier("itemChangeFont", "id", "com.zing.zalo");
+        int anchorId = ResourceHelper.GetId("itemChangeFont");
         View anchor = anchorId == 0 ? null : root.findViewById(anchorId);
-        if (anchor == null || !(anchor.getParent() instanceof ViewGroup parent))
+        if (anchor == null)
+            return;
+        if (!(anchor.getParent() instanceof ViewGroup parent))
             return;
         Context context = root.getContext();
-        int layoutId = res.getIdentifier("setting_theme_v2_view", "layout", "com.zing.zalo");
+        int layoutId = ResourceHelper.GetLayout("setting_theme_v2_view");
         if (layoutId == 0)
             return;
         LinearLayout temp = new LinearLayout(context);
@@ -619,7 +622,8 @@ public class AmoledThemeHook extends BaseJavaHook
             Object result = chain.proceed();
             try
             {
-                addToggleRow((LinearLayout)chain.getArg(1));
+                if (result instanceof View view)
+                    addToggleRow(view);
             }
             catch (Throwable ignored) { }
             return result;

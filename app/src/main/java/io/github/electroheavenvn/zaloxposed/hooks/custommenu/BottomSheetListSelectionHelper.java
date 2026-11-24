@@ -21,6 +21,7 @@ import java.util.List;
 
 import io.github.electroheavenvn.zaloxposed.settingsmenu.ListSelectionSettingFeature;
 import io.github.electroheavenvn.zaloxposed.utilities.Logger;
+import io.github.electroheavenvn.zaloxposed.utilities.ResourceHelper;
 import io.github.electroheavenvn.zaloxposed.utilities.Utils;
 
 public final class BottomSheetListSelectionHelper
@@ -76,10 +77,10 @@ public final class BottomSheetListSelectionHelper
         final int wrapContent = LinearLayout.LayoutParams.WRAP_CONTENT;
         Constructor<?> constructor = sheetClass.getConstructor(Context.class);
         ViewGroup sheet = (ViewGroup)constructor.newInstance(activity);
-        int layoutId = activity.getResources().getIdentifier("bottom_sheet_layout", "layout", "com.zing.zalo");
+        int layoutId = ResourceHelper.GetLayout("bottom_sheet_layout");
         if (layoutId != 0)
             LayoutInflater.from(activity).inflate(layoutId, sheet, true);
-        int containerId = activity.getResources().getIdentifier("bottom_sheet_container", "id", "com.zing.zalo");
+        int containerId = ResourceHelper.GetId("bottom_sheet_container");
         container = containerId != 0 ? sheet.findViewById(containerId) : null;
         if (container == null)
         {

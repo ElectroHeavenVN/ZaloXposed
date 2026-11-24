@@ -69,7 +69,7 @@ public class ResourceHook extends BaseJavaHook
     {
         if (TextUtils.isEmpty(targetDrawableName))
             return;
-        int targetId = ResourceHelper.GetResourceIdByName(targetDrawableName);
+        int targetId = ResourceHelper.GetDrawable(targetDrawableName);
         if (targetId != 0)
             replace(targetId, moduleDrawableName);
         else

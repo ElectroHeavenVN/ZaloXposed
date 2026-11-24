@@ -8,10 +8,11 @@ public final class NumberSettingFeature extends SettingFeature
     public NumberSettingFeature(String keyTitle, String keyDesc, String configKey)
     {
         super(keyTitle, keyDesc, FeatureConfigType.NUMBER);
+        currentState = 0;
         this.configKey = configKey;
         setOnLoadListener((item, context) -> {
             Object value = Config.get(configKey, false);
-            if (value == null || value instanceof Number)
+            if (value instanceof Number)
                 currentState = value;
         });
         setOnFieldValueChangedListener(((item, context, fieldValue) -> {
@@ -19,4 +20,11 @@ public final class NumberSettingFeature extends SettingFeature
             currentState = fieldValue;
         }));
     }
+
+    public NumberSettingFeature(String keyTitle, String keyDesc, String configKey, Number defaultValue)
+    {
+        this(keyTitle, keyDesc, configKey);
+        currentState = defaultValue;
+    }
+
 }

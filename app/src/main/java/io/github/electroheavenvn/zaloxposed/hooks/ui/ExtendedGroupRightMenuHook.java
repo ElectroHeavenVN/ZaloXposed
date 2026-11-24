@@ -71,10 +71,10 @@ public class ExtendedGroupRightMenuHook extends BaseJavaHook
                 Class<?> clazz = element.getClass();
                 Constructor<?> ctor = clazz.getConstructor(int.class, int.class, int.class, boolean.class, boolean.class);
                 // [id] [drawable icon] [title] [show line separator] [show blank separator]
-                result.add(ctor.newInstance(68, ResourceHelper.GetResourceIdByName("ic_countdown"), ResourceHelper.GetResourceIdByName("str_disappear_messages"), false, true));
-                result.add(ctor.newInstance(23, ResourceHelper.GetResourceIdByName("ic_group"), ResourceHelper.GetResourceIdByName("str_nickname_in_group"), true, false));
-                result.add(ctor.newInstance(75, ResourceHelper.GetResourceIdByName("ic_right_menu_chevron_double_up_line_24"), ResourceHelper.GetResourceIdByName("str_right_menu_upgrade_to_community"), true, false));
-                result.add(ctor.newInstance(40, ResourceHelper.GetResourceIdByName("ic_disband"), ResourceHelper.GetResourceIdByName("str_community_settings_delete_community"), true, false));
+                result.add(ctor.newInstance(68, ResourceHelper.GetDrawable("ic_countdown"), ResourceHelper.GetResourceIdByName("str_disappear_messages"), false, true));
+                result.add(ctor.newInstance(23, ResourceHelper.GetDrawable("ic_group"), ResourceHelper.GetResourceIdByName("str_nickname_in_group"), true, false));
+                result.add(ctor.newInstance(75, ResourceHelper.GetDrawable("ic_right_menu_chevron_double_up_line_24"), ResourceHelper.GetResourceIdByName("str_right_menu_upgrade_to_community"), true, false));
+                result.add(ctor.newInstance(40, ResourceHelper.GetDrawable("ic_disband"), ResourceHelper.GetResourceIdByName("str_community_settings_delete_community"), true, false));
                 return result;
             });
         }

@@ -46,7 +46,7 @@ public class SettingPrivateV2ViewDefacer extends SettingViewsDefacerBase
     private static boolean deface = false;
     private static int categoryIndex = -1;
 
-    private static void createCustomMenu() throws Exception
+    private static void createCustomMenu()
     {
         Context context = rootLayout.getContext();
         TextView subCategoryTitle;
@@ -99,7 +99,9 @@ public class SettingPrivateV2ViewDefacer extends SettingViewsDefacerBase
                     input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                     input.setHint(feature.getDescription());
                     styleEditText(input, context, item);
-                    input.setText(feature.getCurrentState().toString());
+                    Object state = feature.getCurrentState();
+                    if (state != null)
+                        input.setText(state.toString());
                     input.setOnEditorActionListener((textView, actionId, keyEvent) ->
                     {
                         if (actionId == EditorInfo.IME_ACTION_DONE)
