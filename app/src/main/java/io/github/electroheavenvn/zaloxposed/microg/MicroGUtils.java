@@ -147,7 +147,7 @@ public final class MicroGUtils
                 return null;
             Parcelable[] parcelables;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                parcelables = result.getParcelableArray("accounts", Bundle.class);
+                parcelables = result.getParcelableArray("accounts", Account.class);
             else
                 parcelables = result.getParcelableArray("accounts");
             if (parcelables == null)
