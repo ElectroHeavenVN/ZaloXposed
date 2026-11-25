@@ -187,9 +187,18 @@ jobs:
         run: |
           cd morphe-patches
           SHORT_SHA="${SHORT_SHA::7}"
+          SOURCE_MESSAGE="$(git -C .. log -1 --format=%s)"
+          if [[ "$SOURCE_MESSAGE" =~ ^(feat|fix|chore):\ (.+)$ ]]; then
+            COMMIT_TYPE="${BASH_REMATCH[1]}"
+            COMMIT_BODY="${BASH_REMATCH[2]}"
+          else
+            COMMIT_TYPE="chore"
+            COMMIT_BODY="$SOURCE_MESSAGE"
+          fi
+          COMMIT_MESSAGE="${COMMIT_TYPE}(ZaloXposed): ${COMMIT_BODY} [ZaloXposed nightly-${SHORT_SHA}]"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit --allow-empty \
-            -m "feat: Update ZaloXposed nightly-${SHORT_SHA}" \
+            -m "$COMMIT_MESSAGE" \
             -m "Automated empty commit for triggering CI/CD pipelines"
           git push origin HEAD:dev
